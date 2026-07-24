@@ -1,0 +1,13 @@
+{
+  "$schema": "https://www.schemastore.org/package.json",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bmad:refresh": "bmad-method install -f -i claude-code -i codex",
+    "bmad:list": "node -e \"const fs=require('node:fs'); fs.readdirSync('.bmad-core/agents').filter(f=>f.endsWith('.md')).sort().forEach(f=>console.log(f.slice(0,-3)))\"",
+    "bmad:validate": "bmad-method status"
+  },
+  "devDependencies": {
+    "bmad-method": "4.44.3"
+  }
+}

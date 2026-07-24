@@ -1,0 +1,64 @@
+# Lexique numérique zarma — source de vérité versionnée.
+#
+# Cohérent avec docs/numeration-zarma-v1.md (story 1.2).
+# Tant que la validation locuteurs natifs n'a pas eu lieu, chaque entrée est
+# `unresolved`. Les trois grandes échelles (10 000 / 100 000 / 1 000 000)
+# restent `unresolved` (bloquantes).
+#
+# IMPORTANT : `variants` = variantes LINGUISTIQUES légitimes.
+#             `asr_confusions` = corrections d'ERREURS ACOUSTIQUES de l'ASR.
+#             Ces deux structures sont SÉPARÉES et ne doivent JAMAIS être fusionnées.
+
+version: "1.1.0" # = grammar_version (source unique) — 1.1.0 : dala + million (story 1.7)
+language: dje_Latn
+status: draft
+
+zero:
+  value: 0
+  canonical: yaamo
+  variants: [yaamo]
+  status: unresolved
+
+units:
+  1: { isolated: afo, combined: fo, variants: [afo, fo], status: unresolved }
+  2: { isolated: ihinka, combined: hinka, variants: [ihinka, hinka], status: unresolved }
+  3: { isolated: ihinza, combined: hinza, variants: [ihinza, hinza], status: unresolved }
+  4: { isolated: itaci, combined: taci, variants: [itaci, taci], status: unresolved }
+  5: { isolated: igou, combined: gou, variants: [igou, gou], status: unresolved }
+  6: { isolated: iddou, combined: iddu, variants: [iddou, iddu], status: unresolved }
+  7: { isolated: iyye, combined: iyye, variants: [iyye], status: unresolved }
+  8: { isolated: ahakou, combined: hakou, variants: [ahakou, hakou], status: unresolved }
+  9: { isolated: iyega, combined: yega, variants: [iyega, yega], status: unresolved }
+
+tens:
+  10: { canonical: iwey, variants: [iwey], status: unresolved }
+  20: { canonical: waranka, variants: [waranka], status: unresolved }
+  30: { canonical: waranza, variants: [waranza], status: unresolved }
+  40: { canonical: waytaci, variants: [waytaci], status: unresolved }
+  50: { canonical: waygou, variants: [waygou], status: unresolved }
+  60: { canonical: wayiddu, variants: [wayiddu], status: unresolved }
+  70: { canonical: wayiyye, variants: [wayiyye], status: unresolved }
+  80: { canonical: wayhakkou, variants: [wayhakkou], status: unresolved }
+  90: { canonical: wayyegga, variants: [wayyegga], status: unresolved }
+
+connectors:
+  tens_unit: { canonical: cindi, variants: [cindi], status: unresolved }
+  # 'di' ajouté — variante du connecteur « et » confirmée par locuteur (Session 1,
+  # cf. docs/numeration-zarma-v1.md §7bis). nda / da / di = même connecteur.
+  groups: { canonical: nda, variants: [nda, da, di], status: unresolved }
+  # Marqueur de reste-unité (« dala » = « une unité ») — désambiguïse les restes
+  # à grande échelle (ex. 100 005 = zambar zangou nda dala gou). Story 1.7.
+  remainder: { canonical: dala, variants: [dala], status: unresolved }
+
+scales:
+  hundred: { value: 100, canonical: zangou, variants: [zangou], status: unresolved }
+  thousand: { value: 1000, canonical: zambar, variants: [zambar], status: unresolved }
+  ten_thousand: { value: 10000, canonical: null, variants: [], status: unresolved }
+  hundred_thousand: { value: 100000, canonical: null, variants: [], status: unresolved }
+  # Forme million résolue (emprunt) — Session 1. Reste `unresolved` (gate ≥3 locuteurs).
+  million: { value: 1000000, canonical: million, variants: [million, millio], status: unresolved }
+
+# STRUCTURE DISTINCTE — corrections d'erreurs acoustiques, JAMAIS mélangée aux variants linguistiques.
+# clé = forme erronée produite par l'ASR, valeur = forme canonique correcte.
+asr_confusions:
+  zangu: zangou

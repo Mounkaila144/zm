@@ -1,0 +1,45 @@
+[project]
+name = "zarma-workspace"
+version = "0.1.0"
+description = "Monorepo Zarma — workspace Python (uv)."
+requires-python = ">=3.11"
+# Racine de workspace non-packageable : sert uniquement à coordonner les membres.
+dependencies = []
+
+[dependency-groups]
+# Outillage transverse + cœur linguistique installé en editable dans le workspace.
+dev = [
+    "ruff>=0.6",
+    "black>=24.0",
+    "pytest>=8.0",
+    "hypothesis>=6.0",
+    "zarma_numbers",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+# services/api et le client ASR rejoindront le workspace quand ils auront du code.
+members = ["packages/zarma_numbers"]
+
+[tool.uv.sources]
+zarma_numbers = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["node_modules", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+extend-exclude = "node_modules|\\.venv"
+
+[tool.pytest.ini_options]
+testpaths = ["packages/zarma_numbers/tests"]
+pythonpath = ["packages/zarma_numbers/src"]
+addopts = "-ra"

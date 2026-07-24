@@ -1,0 +1,44 @@
+# --- Node / outillage BMAD ---
+node_modules/
+.ai/
+AGENTS.md.full.bak
+
+# --- Éditeurs ---
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+
+# --- Flutter / Dart ---
+.dart_tool/
+apps/mobile/build/
+apps/mobile/.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# --- Environnement / secrets ---
+.env
+*.env
+!.env.example
+
+# --- Base locale ---
+*.db
+zarma.db
+
+# --- Dataset audio (données consenties, hors Git) ---
+dataset/raw/
+
+# --- Stockage runtime ---
+storage/

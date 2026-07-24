@@ -1,0 +1,25 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest # aucun GPU : moteur linguistique déterministe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - name: Sync workspace
+        run: uv sync
+      - name: Lint (ruff)
+        run: uv run ruff check .
+      - name: Format check (black)
+        run: uv run black --check .
+      - name: Tests zarma_numbers
+        run: uv run pytest packages/zarma_numbers
+        # (services/api ajouté dans l'Epic 2)
+      - name: Invariant exhaustif parse(generate(n))==n
+        run: make invariant
+
+  # mobile: job Flutter ajouté quand apps/mobile aura du code (Epic 3).
