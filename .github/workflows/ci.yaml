@@ -16,10 +16,28 @@ jobs:
         run: uv run ruff check .
       - name: Format check (black)
         run: uv run black --check .
-      - name: Tests zarma_numbers
-        run: uv run pytest packages/zarma_numbers
-        # (services/api ajouté dans l'Epic 2)
+      - name: Tests backend (moteur linguistique + API)
+        run: uv run pytest packages/zarma_numbers services/api
       - name: Invariant exhaustif parse(generate(n))==n
         run: make invariant
 
-  # mobile: job Flutter ajouté quand apps/mobile aura du code (Epic 3).
+  mobile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.5"
+          channel: stable
+          cache: true
+      - name: Install mobile dependencies
+        run: flutter pub get
+      - name: Analyze mobile
+        run: flutter analyze
+      - name: Test mobile
+        run: flutter test
+      - name: Build Android debug APK
+        run: flutter build apk --debug

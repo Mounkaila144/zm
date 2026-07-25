@@ -1,0 +1,54 @@
+schema: 1
+story: "2.2"
+story_title: "Interface SpeechRecognizer et MockRecognizer"
+gate: PASS
+status_reason: >-
+  Les quatre critères d'acceptation sont satisfaits ; l'injection FastAPI,
+  les tests du contrat et tous les contrôles qualité ciblés passent.
+reviewer: "Quinn (Test Architect)"
+updated: "2026-07-24T09:44:21Z"
+
+waiver: { active: false }
+top_issues: []
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 0 }
+  recommendations:
+    must_fix: []
+    monitor: []
+
+quality_score: 100
+expires: "2026-08-07T09:44:21Z"
+
+evidence:
+  tests_reviewed: 183
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Mock sans accès réseau, GPU, secret ou dépendance externe."
+  performance:
+    status: PASS
+    notes: "Traitement déterministe en mémoire et sans I/O."
+  reliability:
+    status: PASS
+    notes: "Factory injectée, surcharge FastAPI testée et sélection par configuration validée."
+  maintainability:
+    status: PASS
+    notes: "Ruff et Black passent ; Protocol et modèles Pydantic nettoyés."
+
+history:
+  - at: "2026-07-24T09:40:27Z"
+    gate: CONCERNS
+    note: "Injection FastAPI absente et contrôles Ruff/Black en échec."
+  - at: "2026-07-24T09:44:21Z"
+    gate: PASS
+    note: "Écarts corrigés ; 183 tests de régression pertinents passent."
+
+recommendations:
+  immediate: []
+  future: []

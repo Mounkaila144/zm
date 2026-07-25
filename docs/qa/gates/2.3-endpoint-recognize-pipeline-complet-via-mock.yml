@@ -1,0 +1,49 @@
+schema: 1
+story: "2.3"
+story_title: "Endpoint /recognize (pipeline complet via Mock)"
+gate: PASS
+status_reason: >-
+  Les cinq critères d'acceptation sont couverts ; les 28 tests du pipeline et
+  les 211 tests globaux passent avec Ruff et Black.
+reviewer: "Quinn (Test Architect)"
+updated: "2026-07-24T09:49:40Z"
+
+waiver: { active: false }
+top_issues: []
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 0 }
+  recommendations:
+    must_fix: []
+    monitor: []
+
+quality_score: 100
+expires: "2026-08-07T09:49:41Z"
+
+evidence:
+  tests_reviewed: 211
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Entrées bornées et validées ; erreurs sans audio, exception ou stack trace."
+  performance:
+    status: PASS
+    notes: "ASR synchrone hors event loop et pipeline borné à 30 secondes."
+  reliability:
+    status: PASS
+    notes: "Timeout et erreurs internes testés ; aucun nombre inventé."
+  maintainability:
+    status: PASS
+    notes: "Pipeline découpé, modèles typés, tests isolés ; Ruff et Black passent."
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Ajouter un timeout au transport HTTP des recognizers distants en Epic 5."
+      refs:
+        - "services/api/app/api/v1/recognize.py"

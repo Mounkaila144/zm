@@ -14,22 +14,28 @@ dev = [
     "pytest>=8.0",
     "hypothesis>=6.0",
     "zarma_numbers",
+    # Service API installé en editable dans le workspace (fournit fastapi, uvicorn…).
+    "zarma-api",
+    # Outillage de test du service API (client TestClient/httpx + support async).
+    "httpx>=0.27",
+    "pytest-asyncio>=0.23",
 ]
 
 [tool.uv]
 package = false
 
 [tool.uv.workspace]
-# services/api et le client ASR rejoindront le workspace quand ils auront du code.
-members = ["packages/zarma_numbers"]
+# Le client ASR (services/asr) rejoindra le workspace quand il aura du code (Epic 5).
+members = ["packages/zarma_numbers", "services/api"]
 
 [tool.uv.sources]
 zarma_numbers = { workspace = true }
+zarma-api = { workspace = true }
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-extend-exclude = ["node_modules", ".venv"]
+extend-exclude = ["node_modules", ".venv", "*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP", "B"]
@@ -40,6 +46,10 @@ target-version = ["py311"]
 extend-exclude = "node_modules|\\.venv"
 
 [tool.pytest.ini_options]
-testpaths = ["packages/zarma_numbers/tests"]
-pythonpath = ["packages/zarma_numbers/src"]
+testpaths = [
+    "packages/zarma_numbers/tests",
+    "services/api/tests",
+    "scripts/bench/tests",
+]
+pythonpath = ["packages/zarma_numbers/src", "services/api", "scripts/bench"]
 addopts = "-ra"

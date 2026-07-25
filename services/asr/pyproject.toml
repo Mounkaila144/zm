@@ -1,0 +1,21 @@
+[project]
+name = "zarma-asr"
+version = "0.1.0"
+description = "Service ASR serverless GPU (Modal) — modèles Omnilingual CTC/LLM derrière /transcribe."
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+license = { text = "Proprietary" }
+# Dépendances **lourdes** (GPU) — volontairement HORS du workspace uv racine pour
+# garder la CI sans GPU. La source de vérité du déploiement est l'image Modal
+# définie dans app/main.py ; ce fichier documente les dépendances runtime.
+dependencies = [
+    "modal>=0.64",
+    "torch",
+    "torchaudio",
+    "numpy>=1.26",
+    "soundfile>=0.12",
+    "omnilingual-asr",
+]
+
+# Ce paquet n'est PAS un membre du workspace uv racine (voir pyproject.toml racine) :
+# il se déploie via `modal deploy services/asr/app/main.py`, indépendamment de l'API.

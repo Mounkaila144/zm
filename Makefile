@@ -22,13 +22,13 @@ test: ## Exécute les tests du paquet cœur zarma_numbers
 demo: ## Lance le CLI interactif zarma <-> nombre
 	uv run python scripts/zarma.py
 
-# --- Cibles placeholder (implémentées dans des stories ultérieures) ---
+# --- Cibles infrastructure ---
 
 up: ## [placeholder] Démarre la stack locale (docker compose) — Epic 2+
 	@echo "TODO(story ultérieure): docker compose up (services/api, db, etc.)"
 
-migrate: ## [placeholder] Applique les migrations DB — Epic 2
-	@echo "TODO(story ultérieure): migrations Alembic pour services/api"
+migrate: ## Applique les migrations Alembic de l'API
+	uv run alembic -c services/api/alembic.ini upgrade head
 
 invariant: ## Vérifie l'invariant exhaustif parse(generate(n))==n sur 0..1 000 000
 	uv run python -c "import sys; from zarma_numbers.validator import main; sys.exit(main())"

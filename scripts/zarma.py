@@ -22,7 +22,6 @@ from zarma_numbers import (
     UnresolvedFormError,
     generate,
     normalize,
-    parse,
     parse_detailed,
 )
 

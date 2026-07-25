@@ -1,0 +1,182 @@
+"""Endpoint POST /api/v1/recognize — pipeline complet via SpeechRecognizer."""
+
+import asyncio
+from time import perf_counter
+from typing import Annotated, Literal
+from uuid import UUID, uuid4
+
+import zarma_numbers
+from fastapi import APIRouter, Depends, File, Form, Request, UploadFile, status
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+
+from app.asr.base import AsrResult, AudioInput, SpeechRecognizer
+from app.asr.factory import get_recognizer
+from app.config import Settings, get_settings
+from app.core.errors import ApiError, api_error_response, request_id_from
+from app.core.rate_limit import limiter, recognize_limit
+from app.db.repositories import RecognitionRepo, get_recognition_repo
+from app.pipeline.audio import (
+    MAX_AUDIO_SIZE,
+    AudioValidationError,
+    DecodedAudio,
+    validate_and_decode,
+)
+from app.pipeline.recognition import run_recognition_pipeline
+
+router = APIRouter(tags=["recognize"])
+
+TIMEOUT_SECONDS = 30.0
+
+
+class RecognizeRequest(BaseModel):
+    """Champs de formulaire validés pour une requête de reconnaissance."""
+
+    anon_id: UUID
+
+
+class RecognitionAlternative(BaseModel):
+    """Candidat alternatif retourné par le moteur ASR."""
+
+    number: int | None
+    zarma_text: str
+    score: float = Field(ge=0.0, le=1.0)
+
+
+class RecognitionResponse(BaseModel):
+    """Réponse versionnée du pipeline de reconnaissance."""
+
+    id: UUID
+    recognized_number: int | None
+    zarma_text: str
+    normalized_text: str
+    confidence: float = Field(ge=0.0, le=1.0)
+    decision: Literal["accept", "confirm", "repeat"]
+    alternatives: list[RecognitionAlternative] = Field(default_factory=list)
+    model_version: str
+    grammar_version: str
+    latency_total_ms: int = Field(ge=0)
+    latency_asr_ms: int = Field(ge=0)
+
+    model_config = {"protected_namespaces": (), "from_attributes": True}
+
+
+async def _run_pipeline(
+    *,
+    audio: DecodedAudio,
+    recognizer: SpeechRecognizer,
+    repo: RecognitionRepo,
+    anon_id: UUID,
+    settings: Settings,
+    request_start: float,
+) -> RecognitionResponse:
+    asr_result: AsrResult = await asyncio.to_thread(
+        recognizer.transcribe,
+        AudioInput(data=audio.pcm, format="pcm_s16le"),
+    )
+    outcome = run_recognition_pipeline(asr_result, settings)
+
+    sorted_candidates = sorted(
+        asr_result.candidates,
+        key=lambda candidate: candidate.score,
+        reverse=True,
+    )
+    alternatives = [
+        RecognitionAlternative(
+            number=(candidate_number := zarma_numbers.parse(candidate.text)),
+            zarma_text=(
+                zarma_numbers.generate(candidate_number)
+                if candidate_number is not None
+                else candidate.text
+            ),
+            score=candidate.score,
+        )
+        for candidate in sorted_candidates
+    ]
+    latency_total_ms = max(
+        int((perf_counter() - request_start) * 1000),
+        asr_result.latency_ms,
+    )
+
+    response = RecognitionResponse(
+        id=uuid4(),
+        recognized_number=outcome.number,
+        zarma_text=outcome.zarma_text,
+        normalized_text=outcome.normalized_text,
+        confidence=outcome.confidence.score,
+        decision=outcome.decision,
+        alternatives=alternatives,
+        model_version=asr_result.model_version,
+        grammar_version=zarma_numbers.load_lexicon().grammar_version,
+        latency_total_ms=latency_total_ms,
+        latency_asr_ms=asr_result.latency_ms,
+    )
+    await repo.save(response, anon_id, asr_result.text)
+    return response
+
+
+@router.post(
+    "/recognize",
+    response_model=RecognitionResponse,
+    summary="Reconnaissance vocale complète",
+    responses={
+        200: {"description": "Recognition successful"},
+        400: {"model": ApiError, "description": "Invalid audio"},
+        413: {"model": ApiError, "description": "File too large"},
+        422: {"model": ApiError, "description": "Invalid input"},
+        500: {"model": ApiError, "description": "Internal server error"},
+        504: {"model": ApiError, "description": "Recognition timeout"},
+    },
+)
+@limiter.limit(recognize_limit)
+async def recognize(
+    request: Request,
+    audio: Annotated[
+        UploadFile,
+        File(description=f"WAV audio, maximum {MAX_AUDIO_SIZE // 1_000_000} MB"),
+    ],
+    anon_id: Annotated[UUID, Form(description="Anonymous device UUID")],
+    recognizer: Annotated[SpeechRecognizer, Depends(get_recognizer)],
+    repo: Annotated[RecognitionRepo, Depends(get_recognition_repo)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> RecognitionResponse | JSONResponse:
+    """Valide puis exécute ASR → normalisation → parsing sous timeout."""
+
+    request_start = perf_counter()
+    request_id = request_id_from(request)
+    _request = RecognizeRequest(anon_id=anon_id)
+
+    try:
+        async with asyncio.timeout(TIMEOUT_SECONDS):
+            decoded_audio = await validate_and_decode(audio)
+            return await _run_pipeline(
+                audio=decoded_audio,
+                recognizer=recognizer,
+                repo=repo,
+                anon_id=anon_id,
+                settings=settings,
+                request_start=request_start,
+            )
+    except AudioValidationError as exc:
+        return api_error_response(
+            status_code=exc.status_code,
+            code=exc.code,
+            message=exc.message,
+            request_id=request_id,
+        )
+    except TimeoutError:
+        return api_error_response(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            code="TIMEOUT",
+            message="Recognition processing timed out",
+            request_id=request_id,
+        )
+    except Exception:
+        return api_error_response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            code="INTERNAL",
+            message="Internal recognition error",
+            request_id=request_id,
+        )
+    finally:
+        await audio.close()

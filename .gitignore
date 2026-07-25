@@ -39,6 +39,12 @@ zarma.db
 
 # --- Dataset audio (données consenties, hors Git) ---
 dataset/raw/
+# Audio du benchmark hors Git (consentement/FR20) ; seuls manifest + README versionnés.
+dataset/benchmark/*.wav
+dataset/benchmark/**/*.wav
+dataset/benchmark/*.jsonl
+# Dumps d'hypothèses ASR (données brutes, rejouables) — y compris sous-répertoires.
+dataset/benchmark/**/*.jsonl
 
 # --- Stockage runtime ---
 storage/
