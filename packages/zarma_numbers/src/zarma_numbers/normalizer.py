@@ -13,10 +13,35 @@ Principes stricts :
   token-à-token sont appliqués. ``hinka`` (2) et ``hinza`` (3) restent distincts.
 - **Variantes ≠ corrections ASR** : les ``asr_confusions`` ne sont **pas**
   appliquées ici (séparation stricte, FR8).
-- **Formes canoniques protégées** : une forme canonique produite par le
-  générateur (unité isolée *ou* combinée, dizaine, connecteur, échelle) n'est
+- **Formes canoniques protégées** : une forme canonique **déclarée dans le
+  lexique** (unité isolée *ou* combinée, dizaine, connecteur, échelle) n'est
   **jamais** réécrite. Cela évite de corrompre le sens (ex. ``fo`` ≠ ``afo``
-  sont deux formes canoniques contextuelles) et garantit l'idempotence.
+  sont deux formes canoniques contextuelles) et garantit l'idempotence
+  (``normalize(normalize(x)) == normalize(x)``).
+
+Portée exacte de cette protection (depuis le lexique 1.2.0)
+-----------------------------------------------------------
+
+La protection couvre les formes **déclarées** au lexique, pas les formes de
+surface que le générateur construit par **élision**. Concrètement, après le
+connecteur ``di`` le générateur élide le ``i`` initial (``iwey`` → ``wey``,
+comme « de le » → « du » en français) ; or ``wey`` n'est déclaré au lexique que
+comme *variante* de ``iwey``. Le normaliseur le remappe donc :
+
+    normalize("zangou di wey") == "zangou di iwey"     # 110 dans les deux cas
+
+**C'est un choix assumé, pas un oubli** : les deux graphies sont linguistiquement
+valables et désignent la même valeur, et l'invariant
+``parse(normalize(generate(n))) == n`` tient sur toute la plage. Conséquence à
+connaître pour qui écrit un nouveau composant :
+
+- ``normalize(generate(n)) != generate(n)`` pour les formes élidées
+  (~180 900 nombres sur 1 000 001) ;
+- ``grammar.accepts()`` attend la sortie du **générateur**, pas celle du
+  normaliseur : la grammaire n'admet qu'**une** forme de surface par nombre
+  (c'est ce qui rend le décodage contraint déterministe), donc elle refuse
+  ``zangou di iwey``. Ne jamais enchaîner ``normalize()`` puis
+  ``grammar.accepts()`` — aucun composant actuel ne le fait.
 """
 
 from __future__ import annotations

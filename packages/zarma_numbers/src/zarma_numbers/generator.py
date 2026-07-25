@@ -67,6 +67,51 @@ def generate(n: int) -> str:
     return _compose_below_million(n, lex)
 
 
+#: Valeurs de tête qui appellent le connecteur élidé ``di`` (correction locuteur
+#: 2026-07-25). Partout ailleurs le connecteur est ``da``. Table explicite : aucune
+#: règle phonétique n'a été devinée — `da hakou` et `di hinka` commencent tous deux
+#: par « h », la sélection ne se déduit donc pas du son.
+_ELIDED_CONNECTOR_HEADS = frozenset({2, 3, 4, 5, 10})
+
+
+def _leading_value(value: int) -> int:
+    """Valeur du **premier mot** du groupe ``value`` (1..999).
+
+    C'est elle qui gouverne le choix du connecteur : dans 115 = ``wey cindi gou``
+    le groupe commence par 10, donc ``di`` ; dans 199 = ``wayyegga cindi yega``
+    il commence par 90, donc ``da``.
+    """
+
+    if value < 10:
+        return value
+    if value < 100:
+        return (value // 10) * 10
+    return 100
+
+
+def _elide_initial_i(form: str) -> str:
+    """Supprime le ``i`` initial du premier mot — élision après ``di``.
+
+    Règle énoncée par le locuteur : « lorsqu'on utilise le *di*, si le mot suivant
+    commence par un *i*, on retire le *i* » (``iwey`` → ``wey``). Les formes
+    combinées des unités sont déjà élidées (``hinka``, ``gou``) et restent inchangées.
+    """
+
+    head, separator, tail = form.partition(" ")
+    if head.startswith("i") and len(head) > 1:
+        head = head[1:]
+    return f"{head}{separator}{tail}"
+
+
+def _join_group(lex: Lexicon, remainder: int, rendered: str) -> str:
+    """Assemble ``<connecteur> <groupe>`` en appliquant la règle da/di + élision."""
+
+    if _leading_value(remainder) in _ELIDED_CONNECTOR_HEADS:
+        connector = lex.connectors["groups_elided"].canonical
+        return f"{connector} {_elide_initial_i(rendered)}"
+    return f"{lex.connectors['groups'].canonical} {rendered}"
+
+
 def _unit(lex: Lexicon, digit: int, *, combined: bool) -> str:
     unit = lex.units[digit]
     return unit.combined if combined else unit.isolated
@@ -96,13 +141,11 @@ def _below_1000(n: int, lex: Lexicon) -> str:
         )
     hundreds_digit = n // 100
     remainder = n % 100
-    nda = lex.connectors["groups"].canonical
     parts = [hundred.canonical]
     if hundreds_digit > 1:
         parts.append(_unit(lex, hundreds_digit, combined=True))
     if remainder > 0:
-        parts.append(nda)
-        parts.append(_below_100(remainder, lex))
+        parts.append(_join_group(lex, remainder, _below_100(remainder, lex)))
     return " ".join(parts)
 
 
@@ -118,18 +161,23 @@ def _compose_below_million(n: int, lex: Lexicon) -> str:
         )
     thousands = n // 1000
     remainder = n % 1000
-    nda = lex.connectors["groups"].canonical
     parts = [thousand.canonical, _below_1000(thousands, lex)]
     if remainder > 0:
-        parts.append(nda)
         # Désambiguïsation « dala » : quand le multiplicateur des milliers est un
         # multiple de 100 (≥ 100), le reste peut être absorbé par le multiplicateur
         # (ex. 100 005 vs 105 000). Le marqueur `dala` lève l'ambiguïté.
+        marker = None
         if thousands % 100 == 0 and thousands >= 100:
             remainder_marker = lex.connectors.get("remainder")
             if remainder_marker is not None and remainder_marker.canonical is not None:
-                parts.append(remainder_marker.canonical)
-        parts.append(_below_1000(remainder, lex))
+                marker = remainder_marker.canonical
+        rendered = _below_1000(remainder, lex)
+        if marker is not None:
+            # `dala` s'intercale : le connecteur porte sur lui, jamais sur le reste,
+            # donc ni sélection `di` ni élision ne s'appliquent ici.
+            parts.append(f"{lex.connectors['groups'].canonical} {marker} {rendered}")
+        else:
+            parts.append(_join_group(lex, remainder, rendered))
     return " ".join(parts)
 
 

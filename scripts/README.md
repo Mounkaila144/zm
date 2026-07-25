@@ -112,6 +112,72 @@ uv run python scripts/bench/run_benchmark.py \
 - **Fail-closed** : manifest introuvable/invalide, split vide ou entrées
   inexploitables sans `--allow-partial` → code de sortie non nul.
 
+## Décodage contraint à la grammaire (story 5.6)
+
+Le décodage CTC est restreint à la **grammaire des nombres zarma** : la sortie est
+valide par construction (`0`–`1 000 000`), ou le décodeur s'abstient. L'algorithme
+et ses paramètres sont documentés dans `services/asr/README.md` ; les outils de
+mesure et de calibration vivent ici.
+
+### Chaîne complète
+
+```bash
+# 1) Passe de décodage contraint sur le corpus (SEUL script exigeant l'env ASR
+#    lourd : torch + omnilingual-asr, cf. scripts/bench/README-local-asr.md).
+#    Produit en une fois : hypothèses contraintes, hypothèses gloutonnes,
+#    observations de rejet et fixtures de logits réels pour la CI.
+export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH
+asrenv/bin/python scripts/bench/decode_constrained.py \
+    --manifest dataset/manifests/benchmark.jsonl \
+    --audio-root dataset/benchmark \
+    --out dataset/benchmark/hypotheses/ctc-constrained.jsonl \
+    --dump-greedy dataset/benchmark/hypotheses/ctc-greedy.jsonl \
+    --dump-observations dataset/benchmark/rejection/dev-observations.jsonl \
+    --dump-logits services/asr/tests/fixtures
+
+# 2) Comparaison glouton vs contraint via le harnais 5.2 (sans GPU).
+#    Aucune métrique n'est réimplémentée : le harnais 5.2 est appelé deux fois.
+uv run python scripts/bench/compare_decoding.py \
+    --manifest dataset/manifests/benchmark.jsonl \
+    --greedy dataset/benchmark/hypotheses/ctc-greedy.jsonl \
+    --constrained dataset/benchmark/hypotheses/ctc-constrained.jsonl \
+    --split test --out docs/qa/benchmarks/decoding-greedy-vs-constrained-v1
+
+# 3) Calibration du seuil de rejet (JAMAIS sur le split de test — NFR10).
+uv run python scripts/bench/calibrate_rejection.py \
+    --observations dataset/benchmark/rejection/dev-observations.jsonl \
+    --split dev --max-false-acceptance 0.02 \
+    --out docs/qa/benchmarks/rejection-calibration-v1
+```
+
+### Protocole de calibration du seuil de rejet
+
+- **Signal** : `confidence = exp(-(nll_contraint − nll_libre) / nb_tokens)` —
+  coût acoustique moyen, par symbole émis, payé pour rester dans la grammaire.
+  Normaliser par le nombre de **tokens** et non par la durée est délibéré :
+  par trame, une courte insertion dans un long silence paraît anodine (mesuré :
+  `afo` dans 40 trames de silence obtenait 0,59 par trame contre 0,001 par token).
+- **Jeu de calibration** : `dev` / `calibration` uniquement. Le script est
+  **fail-closed** — une seule ligne du split `test` fait échouer la calibration.
+- **Observations** : chaque ligne porte `is_numeric`, vérité terrain distinguant
+  les énoncés de nombres des entrées de contrôle (parole quelconque, bruit,
+  silence, musique).
+- **Sélection** : le plus petit seuil dont la fausse acceptation reste sous
+  `--max-false-acceptance`, à rappel maximal. Si **aucun** seuil ne tient la
+  contrainte, le script le dit et sort en erreur — le seuil reste à `0.0`.
+  La courbe complète est publiée pour que le compromis soit lisible.
+- **Application** : `DECODE_REJECT_THRESHOLD` côté service ASR, jamais en dur.
+
+### Ce que le rapport de comparaison contient
+
+Ventilation par **condition** (calme/bruit), **tranche de nombres** (tags
+`short`/`long`/`confusion`) et **split** ; taux de décision et latences des deux
+côtés ; rappel de la **référence du prototype** (Annexe A §4 de la story 5.6 :
+73 % global, 79 % sur locuteur non vu) ; et l'**écart aux objectifs NFR2**
+(≥ 95 % calme, ≥ 90 % bruit) calculé par condition — jamais masqué.
+
+Les chiffres de décision se lisent sur le split `test` (locuteurs jamais vus).
+
 ## Démo moteur linguistique
 
 ```bash

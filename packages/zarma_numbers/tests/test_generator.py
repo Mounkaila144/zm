@@ -26,24 +26,37 @@ from zarma_numbers.generator import generate
         (99, "wayyegga cindi yega"),
         # centaines (zangou + reste)
         (100, "zangou"),
-        (101, "zangou nda fo"),
-        (156, "zangou nda waygou cindi iddu"),
+        # connecteur `da` (cas général) / `di` (devant 2, 3, 4, 5, 10, avec
+        # élision `iwey` → `wey`) — distribution complémentaire, correction
+        # locuteur 2026-07-25.
+        (101, "zangou da fo"),
+        (102, "zangou di hinka"),
+        (105, "zangou di gou"),
+        (106, "zangou da iddu"),
+        (110, "zangou di wey"),
+        (115, "zangou di wey cindi gou"),
+        (120, "zangou da waranka"),
+        (156, "zangou da waygou cindi iddu"),
         (200, "zangou hinka"),
-        (250, "zangou hinka nda waygou"),
-        (372, "zangou hinza nda wayiyye cindi hinka"),
-        (999, "zangou yega nda wayyegga cindi yega"),
+        (250, "zangou hinka da waygou"),
+        (372, "zangou hinza da wayiyye cindi hinka"),
+        (999, "zangou yega da wayyegga cindi yega"),
         # milliers (zambar + multiplicateur + reste)
         (1000, "zambar fo"),
+        (1001, "zambar fo da fo"),
+        (1002, "zambar fo di hinka"),
+        (1010, "zambar fo di wey"),
+        (1100, "zambar fo da zangou"),
         (2000, "zambar hinka"),
-        (12345, "zambar iwey cindi hinka nda zangou hinza nda waytaci cindi gou"),
-        (45678, "zambar waytaci cindi gou nda zangou iddu nda wayiyye cindi hakou"),
+        (12345, "zambar iwey cindi hinka da zangou hinza da waytaci cindi gou"),
+        (45678, "zambar waytaci cindi gou da zangou iddu da wayiyye cindi hakou"),
         (
             888888,
-            "zambar zangou hakou nda wayhakkou cindi hakou nda zangou hakou nda wayhakkou cindi hakou",  # noqa: E501
+            "zambar zangou hakou da wayhakkou cindi hakou da zangou hakou da wayhakkou cindi hakou",  # noqa: E501
         ),
         (
             999999,
-            "zambar zangou yega nda wayyegga cindi yega nda zangou yega nda wayyegga cindi yega",  # noqa: E501
+            "zambar zangou yega da wayyegga cindi yega da zangou yega da wayyegga cindi yega",
         ),
     ],
 )
@@ -75,8 +88,8 @@ def test_million_is_resolved():
 
 def test_dala_disambiguates_large_scale():
     # Story 1.7 : reste-unité après multiplicateur multiple de 100 marqué `dala`.
-    assert generate(100_005) == "zambar zangou nda dala gou"
-    assert generate(105_000) == "zambar zangou nda gou"
+    assert generate(100_005) == "zambar zangou da dala gou"
+    assert generate(105_000) == "zambar zangou di gou"
     assert generate(100_005) != generate(105_000)
 
 

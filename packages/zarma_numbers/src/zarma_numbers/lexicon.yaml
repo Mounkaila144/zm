@@ -9,7 +9,7 @@
 #             `asr_confusions` = corrections d'ERREURS ACOUSTIQUES de l'ASR.
 #             Ces deux structures sont SÉPARÉES et ne doivent JAMAIS être fusionnées.
 
-version: "1.1.0" # = grammar_version (source unique) — 1.1.0 : dala + million (story 1.7)
+version: "1.2.0" # = grammar_version (source unique) — 1.2.0 : connecteur da/di + élision
 language: dje_Latn
 status: draft
 
@@ -31,7 +31,8 @@ units:
   9: { isolated: iyega, combined: yega, variants: [iyega, yega], status: unresolved }
 
 tens:
-  10: { canonical: iwey, variants: [iwey], status: unresolved }
+  # 'wey' = forme élidée de 'iwey' après le connecteur `di` (ex. 110 = zongou di wey).
+  10: { canonical: iwey, variants: [iwey, wey], status: unresolved }
   20: { canonical: waranka, variants: [waranka], status: unresolved }
   30: { canonical: waranza, variants: [waranza], status: unresolved }
   40: { canonical: waytaci, variants: [waytaci], status: unresolved }
@@ -43,9 +44,15 @@ tens:
 
 connectors:
   tens_unit: { canonical: cindi, variants: [cindi], status: unresolved }
-  # 'di' ajouté — variante du connecteur « et » confirmée par locuteur (Session 1,
-  # cf. docs/numeration-zarma-v1.md §7bis). nda / da / di = même connecteur.
-  groups: { canonical: nda, variants: [nda, da, di], status: unresolved }
+  # Connecteur de groupes — DEUX formes en distribution complémentaire, ce ne sont
+  # PAS des variantes libres (correction locuteur, session 2026-07-25) :
+  #   `di` devant 2, 3, 4, 5 et 10  → et le `i` initial du mot suivant s'élide
+  #   `da` partout ailleurs          (1, 6, 7, 8, 9, dizaines 20-90, centaines)
+  # Exemples validés : zongou da fo (101) · zongou di hinka (102) ·
+  #                    zongou di wey (110) · zongou da waranka (120)
+  # La sélection est implémentée dans generator.py (règle grammaticale, pas lexicale).
+  groups: { canonical: da, variants: [da, nda], status: unresolved }
+  groups_elided: { canonical: di, variants: [di], status: unresolved }
   # Marqueur de reste-unité (« dala » = « une unité ») — désambiguïse les restes
   # à grande échelle (ex. 100 005 = zambar zangou nda dala gou). Story 1.7.
   remainder: { canonical: dala, variants: [dala], status: unresolved }

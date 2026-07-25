@@ -410,7 +410,9 @@ def build_report(
     }
 
 
-def _atomic_write_text(path: Path, text: str) -> None:
+def atomic_write_text(path: Path, text: str) -> None:
+    """Écrit ``text`` dans ``path`` de façon atomique (temporaire + renommage)."""
+
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.parent / f".{path.name}.{uuid4().hex}.tmp"
     try:
@@ -422,6 +424,10 @@ def _atomic_write_text(path: Path, text: str) -> None:
     except Exception:
         temporary.unlink(missing_ok=True)
         raise
+
+
+#: Alias interne rétro-compatible (comportement identique).
+_atomic_write_text = atomic_write_text
 
 
 def report_to_json(report: dict[str, object]) -> str:
@@ -529,6 +535,7 @@ __all__ = [
     "EvaluationResult",
     "GroupAccuracy",
     "asr_result_to_dict",
+    "atomic_write_text",
     "build_report",
     "evaluate",
     "load_hypotheses",

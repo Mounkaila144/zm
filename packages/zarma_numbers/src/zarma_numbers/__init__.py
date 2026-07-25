@@ -9,6 +9,7 @@ linguistique). Il expose le pipeline complet : ``load_lexicon``, ``generate``
 
 from .exceptions import (
     GenerationError,
+    GrammarDerivationError,
     LexiconError,
     LexiconValidationError,
     OutOfRangeError,
@@ -16,6 +17,7 @@ from .exceptions import (
     UnresolvedFormError,
 )
 from .generator import generate
+from .grammar import NumberGrammar, build_grammar, load_grammar
 from .loader import Lexicon, load_lexicon
 from .normalizer import NormalizationResult, normalize, normalize_with_trace
 from .parser import ParseCandidate, ParseResult, parse, parse_detailed
@@ -37,10 +39,14 @@ __all__ = [
     "ParseCandidate",
     "validate_invariant",
     "InvariantReport",
+    "NumberGrammar",
+    "build_grammar",
+    "load_grammar",
     "LexiconError",
     "LexiconValidationError",
     "GenerationError",
     "OutOfRangeError",
     "UnresolvedFormError",
+    "GrammarDerivationError",
     "ParseError",
 ]

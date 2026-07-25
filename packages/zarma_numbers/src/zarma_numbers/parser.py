@@ -76,7 +76,15 @@ def _tables() -> _Tables:
     tens = {term.canonical: value for value, term in lex.tens.items()}
     cindi = lex.connectors["tens_unit"].canonical
     groups = lex.connectors["groups"]
-    nda = frozenset({groups.canonical, *groups.variants})
+    # Le connecteur de groupes a deux formes en distribution complémentaire :
+    # `da` (général) et `di` (devant 2, 3, 4, 5, 10, avec élision). Les deux sont
+    # acceptés indifféremment à l'analyse — la distribution est une contrainte de
+    # *génération*, pas de reconnaissance.
+    groups_elided = lex.connectors.get("groups_elided")
+    nda = frozenset(
+        {groups.canonical, *groups.variants}
+        | ({groups_elided.canonical, *groups_elided.variants} if groups_elided else set())
+    )
     remainder = lex.connectors.get("remainder")
     dala = frozenset({remainder.canonical, *remainder.variants}) if remainder else frozenset()
     hundred = lex.scales["hundred"].canonical

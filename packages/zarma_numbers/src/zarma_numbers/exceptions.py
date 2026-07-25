@@ -45,6 +45,15 @@ class UnresolvedFormError(GenerationError):
     default_code = "UNRESOLVED_FORM"
 
 
+class GrammarDerivationError(Exception):
+    """La grammaire des formes valides n'a pas pu être dérivée du générateur.
+
+    Levée par ``grammar.py`` quand une observation du générateur contredit la
+    structure attendue (préfixe inattendu, langues incohérentes, prononciation
+    ambiguë). On **échoue proprement** plutôt que de coder une règle en dur.
+    """
+
+
 class ParseError(Exception):
     """Échec d'analyse d'un texte zarma vers un nombre.
 
@@ -67,5 +76,6 @@ __all__ = [
     "GenerationError",
     "OutOfRangeError",
     "UnresolvedFormError",
+    "GrammarDerivationError",
     "ParseError",
 ]

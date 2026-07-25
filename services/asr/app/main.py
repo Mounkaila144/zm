@@ -13,10 +13,19 @@ Deux modèles chargés **dans** ce service (poids Apache 2.0), pas comme API tie
 - CTC ``omniASR_CTC_300M_v2`` — **sans** ``lang`` ;
 - LLM ``omniASR_LLM_300M_v2`` — ``lang=["dje_Latn"]``.
 
+**Décodage contraint (story 5.6)** — le chemin CTC ne fait plus d'``argmax``
+trame par trame : les logits alimentent une recherche en faisceau restreinte à
+la grammaire des nombres zarma (``services/asr/app/decoding.py``). Le décodage
+a lieu **ici**, là où les logits existent : ils ne traversent jamais le réseau
+(``T × 10 288`` flottants, cf. Annexe D §4) et le contrat ci-dessus est
+inchangé (NFR9). Seule évolution : ``acoustic_score`` et ``candidates`` portent
+désormais de **vrais** scores (auparavant ``1.0`` en dur).
+
 ⚠️ Ce module s'exécute sur la ressource **GPU** (Modal) — il n'est ni importé ni
-testé par la CI standard (sans GPU). Le point d'inférence réel est marqué
-``_transcribe_array`` : c'est le seul endroit à adapter à l'API exacte du paquet
-``omnilingual_asr`` retenu, sans changer le contrat ci-dessus.
+testé par la CI standard (sans GPU). Les deux briques qu'il orchestre sont, elles,
+testées sans GPU : ``decoding.py`` et ``transcription.py``. Le point d'inférence
+réel est marqué ``_logits`` / ``_transcribe_array`` : c'est le seul endroit à
+adapter à l'API exacte du paquet ``omnilingual_asr`` retenu.
 """
 
 from __future__ import annotations
@@ -25,6 +34,7 @@ import io
 import json
 import time
 import wave
+from pathlib import Path
 
 import modal
 
@@ -32,7 +42,12 @@ CTC_MODEL = "omniASR_CTC_300M_v2"
 LLM_MODEL = "omniASR_LLM_300M_v2"
 TARGET_SAMPLE_RATE = 16_000
 
+_APP_DIR = str(Path(__file__).resolve().parent)
+
 # Image lourde et **séparée** de l'API : torch + Omnilingual ASR + soundfile.
+# ``zarma_numbers`` (paquet pur Python, sans dépendance lourde) est ajouté pour
+# que la **grammaire** soit disponible là où le décodage a lieu — source unique,
+# jamais réécrite côté service (story 5.6).
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .apt_install("libsndfile1", "ffmpeg")
@@ -41,8 +56,11 @@ image = (
         "torchaudio",
         "numpy",
         "soundfile",
+        "pydantic-settings",
         "omnilingual-asr",  # paquet Meta (fairseq2) — poids Apache 2.0
     )
+    .add_local_python_source("zarma_numbers")
+    .add_local_dir(_APP_DIR, remote_path="/root/app")
 )
 
 app = modal.App("zarma-asr")
@@ -77,6 +95,51 @@ class OmnilingualAsr:
             LLM_MODEL: ASRInferencePipeline(model_card=LLM_MODEL),
         }
 
+        # --- Décodage contraint (story 5.6) : compilé une fois par conteneur ---
+        from zarma_numbers.grammar import load_grammar
+
+        from app.config import AsrSettings
+        from app.decoding import ConstrainedCtcDecoder, build_token_lexicon
+
+        self._settings = AsrSettings()
+        self._decoder = None
+        if self._settings.DECODE_CONSTRAINED:
+            encoder = self._pipelines[CTC_MODEL].tokenizer.create_encoder()
+
+            def encode(text: str) -> list[int]:
+                # Annexe A §2 : les ids spéciaux bas (<= 3) ne sont pas des
+                # étiquettes CTC — on ne garde que les tokens réels.
+                ids = encoder(text)
+                ids = ids.tolist() if hasattr(ids, "tolist") else list(ids)
+                return [int(i) for i in ids if int(i) > 3]
+
+            grammar = load_grammar()
+            lexicon = build_token_lexicon(
+                grammar,
+                encode,
+                separator=self._settings.separator_ids(),
+                blank_id=self._settings.DECODE_BLANK_ID,
+            )
+            self._decoder = ConstrainedCtcDecoder(grammar, lexicon, self._settings.decoder_config())
+
+    def _logits(self, samples, sample_rate: int):
+        """Logits CTC ``(T, V)`` en numpy — **jamais** exposés hors du service.
+
+        Le pipeline officiel calcule les logits puis les jette
+        (``pred_ids = torch.argmax(logits, dim=-1)``). On appelle donc le modèle
+        directement, sans passer par ``transcribe`` — pas de *monkeypatch*,
+        contrairement au prototype (Annexe A §1).
+        """
+
+        import torch
+
+        pipeline = self._pipelines[CTC_MODEL]
+        batch = pipeline.build_batch(samples, sample_rate=sample_rate)
+        with torch.inference_mode():
+            logits, layout = pipeline.model(batch.source_seqs, batch.layout)
+        length = int(list(layout.seq_lens)[0])
+        return logits[0, :length].detach().float().cpu().numpy()
+
     def _transcribe_array(self, samples, sample_rate: int, model: str, lang: list[str] | None):
         """Point d'inférence réel — seul endroit dépendant de l'API du modèle.
 
@@ -106,6 +169,18 @@ class OmnilingualAsr:
         upload = form["audio"]
         raw = await upload.read()
         samples, sample_rate = _decode_wav(raw)
+
+        # Chemin CTC + décodage contraint : la sortie appartient par construction
+        # à la grammaire des nombres, ou le service s'abstient (texte vide).
+        if model == CTC_MODEL and self._decoder is not None:
+            from app.transcription import build_transcribe_payload
+
+            result = self._decoder.decode(self._logits(samples, sample_rate))
+            latency_ms = int((time.perf_counter() - started) * 1000)
+            return JSONResponse(
+                build_transcribe_payload(result, model_version=model, latency_ms=latency_ms)
+            )
+
         text, acoustic_score, candidates = self._transcribe_array(samples, sample_rate, model, lang)
         latency_ms = int((time.perf_counter() - started) * 1000)
         return JSONResponse(

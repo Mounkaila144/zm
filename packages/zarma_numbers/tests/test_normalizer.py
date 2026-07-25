@@ -9,13 +9,15 @@ from zarma_numbers.normalizer import normalize, normalize_with_trace
 # --- AC1/AC2 : variantes orthographiques → forme canonique ---
 
 
-def test_connector_variant_da_to_nda():
-    assert normalize("da") == "nda"
+def test_connector_variant_nda_to_da():
+    # Depuis le lexique 1.2.0, la forme canonique du connecteur général est
+    # `da` ; `nda` en est la variante linguistique.
+    assert normalize("nda") == "da"
 
 
 def test_connector_variant_in_expression():
-    assert normalize("zangou hinka da waygou") == "zangou hinka nda waygou"
-    assert normalize("zambar fo da zangou") == "zambar fo nda zangou"
+    assert normalize("zangou hinka nda waygou") == "zangou hinka da waygou"
+    assert normalize("zambar fo nda zangou") == "zambar fo da zangou"
 
 
 # --- AC1 : casse et espaces ---
@@ -33,7 +35,8 @@ def test_canonical_forms_are_preserved():
     # Les formes canoniques (isolée ET combinée) ne sont jamais réécrites.
     assert normalize("fo") == "fo"  # combinée de 1, PAS remappée vers "afo"
     assert normalize("afo") == "afo"
-    assert normalize("nda") == "nda"
+    assert normalize("da") == "da"
+    assert normalize("di") == "di"  # connecteur élidé : canonique, jamais réécrit
 
 
 # --- AC3 : idempotence ---
@@ -94,13 +97,13 @@ def test_confusion_pair_hinka_hinza_preserved():
 
 
 def test_trace_records_linguistic_variant():
-    result = normalize_with_trace("Zambar fo da zangou")
-    assert result.raw == "Zambar fo da zangou"
-    assert result.normalized == "zambar fo nda zangou"
+    result = normalize_with_trace("Zambar fo nda zangou")
+    assert result.raw == "Zambar fo nda zangou"
+    assert result.normalized == "zambar fo da zangou"
     assert len(result.transformations) == 1
     tr = result.transformations[0]
-    assert (tr.source, tr.target, tr.kind) == ("da", "nda", "linguistic_variant")
-    assert tr.as_dict() == {"from": "da", "to": "nda", "type": "linguistic_variant"}
+    assert (tr.source, tr.target, tr.kind) == ("nda", "da", "linguistic_variant")
+    assert tr.as_dict() == {"from": "nda", "to": "da", "type": "linguistic_variant"}
 
 
 def test_asr_confusion_not_applied_by_normalizer():
@@ -122,3 +125,43 @@ def test_non_string_input_raises():
 def test_empty_string():
     assert normalize("") == ""
     assert normalize("   ") == ""
+
+
+# --- Formes élidées : comportement assumé (lexique 1.2.0) ---
+
+
+def test_elided_form_is_remapped_to_the_declared_canonical():
+    """``wey`` (élision de ``iwey`` après ``di``) est remappé — choix assumé.
+
+    Les deux graphies sont linguistiquement valables et désignent la même valeur
+    (10) ; la protection ne couvre que les formes **déclarées** au lexique, et
+    ``wey`` n'y figure que comme variante. Ce test épingle le comportement pour
+    qu'il reste un choix explicite.
+    """
+    assert normalize("zangou di wey") == "zangou di iwey"
+    assert normalize("wey") == "iwey"
+
+
+def test_elided_form_keeps_the_invariant_intact():
+    # Ce qui compte est préservé : la valeur analysée reste la bonne.
+    import zarma_numbers
+
+    for n in (110, 115, 1110, 100_010):
+        assert zarma_numbers.parse(normalize(zarma_numbers.generate(n))) == n
+
+
+def test_normalize_output_is_not_meant_for_the_grammar_automaton():
+    """Garde-fou : la grammaire attend la sortie du **générateur**.
+
+    Elle n'admet qu'une forme de surface par nombre — c'est ce qui rend le
+    décodage contraint déterministe. Enchaîner ``normalize()`` puis
+    ``grammar.accepts()`` est donc une erreur d'usage, épinglée ici pour que le
+    couplage soit visible plutôt que découvert en production.
+    """
+    from zarma_numbers.generator import generate
+    from zarma_numbers.grammar import load_grammar
+
+    grammar = load_grammar()
+    canonical = generate(110)
+    assert grammar.accepts(canonical)
+    assert not grammar.accepts(normalize(canonical))

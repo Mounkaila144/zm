@@ -1,0 +1,23 @@
+1001 zambar fo da fo 
+1002 zambar fo di ihinka 
+1003 zambar fo di ihinza 
+1004 zambar fo di taci
+1005 zambar fo di igou 
+1006 zambar fo da iddou 
+1007 zambar fo da iyye 
+1008 zambar fo da hakou 
+1009 zambar fo da yega 
+1010 zambar fo di iyye 
+1011 zambar fo di iyye cindi fo 
+
+101 zongou da fo
+102 zongou di ihinka
+103 zongou di ihinza
+104 zongou di itaci
+105 zongou di igou
+106 zongou da iddou
+107 zongou da iyye
+108 zongou da hakou
+109 zongou da yega
+110 zongou di iyye
+111 zongou di iyye cindi fo

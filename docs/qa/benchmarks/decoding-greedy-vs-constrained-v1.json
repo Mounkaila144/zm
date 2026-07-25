@@ -1,0 +1,152 @@
+{
+  "asr_latency_ms": {
+    "constrained": {
+      "avg_ms": 538.89,
+      "count": 96,
+      "max_ms": 1272,
+      "min_ms": 318,
+      "p50_ms": 491,
+      "p95_ms": 870
+    },
+    "greedy": {
+      "avg_ms": 514.7,
+      "count": 96,
+      "max_ms": 2472,
+      "min_ms": 286,
+      "p50_ms": 389,
+      "p95_ms": 1059
+    }
+  },
+  "breakdown": {
+    "by_condition": {
+      "calme": {
+        "constrained": 0.8958,
+        "constrained_correct": "86/96",
+        "delta": 0.875,
+        "greedy": 0.0208,
+        "greedy_correct": "2/96"
+      }
+    },
+    "by_split": {
+      "test": {
+        "constrained": 0.8958,
+        "constrained_correct": "86/96",
+        "delta": 0.875,
+        "greedy": 0.0208,
+        "greedy_correct": "2/96"
+      }
+    },
+    "by_tag": {
+      "confusion": {
+        "constrained": 0.8125,
+        "constrained_correct": "13/16",
+        "delta": 0.8125,
+        "greedy": 0.0,
+        "greedy_correct": "0/16"
+      },
+      "long": {
+        "constrained": 0.8696,
+        "constrained_correct": "20/23",
+        "delta": 0.8696,
+        "greedy": 0.0,
+        "greedy_correct": "0/23"
+      },
+      "short": {
+        "constrained": 0.9041,
+        "constrained_correct": "66/73",
+        "delta": 0.8767,
+        "greedy": 0.0274,
+        "greedy_correct": "2/73"
+      }
+    }
+  },
+  "comparison_version": "5.6.0",
+  "decision_rates": {
+    "constrained": {
+      "confirmation_rate": 0.875,
+      "correct_acceptance_rate": 0.125,
+      "counts": {
+        "accept": 12,
+        "confirm": 84,
+        "repeat": 0
+      },
+      "false_acceptance_rate": 0.0,
+      "rejection_rate": 0.0,
+      "total": 96
+    },
+    "greedy": {
+      "confirmation_rate": 0.0,
+      "correct_acceptance_rate": 0.0208,
+      "counts": {
+        "accept": 2,
+        "confirm": 0,
+        "repeat": 94
+      },
+      "false_acceptance_rate": 0.0,
+      "rejection_rate": 0.9792,
+      "total": 96
+    }
+  },
+  "grammar_version": "1.1.0",
+  "harness_version": "5.2.0",
+  "manifest": {
+    "entries": 96,
+    "name": "benchmark.jsonl",
+    "sha256": "f652a788534046a68108281d6a630df27253ea81a46ee458cdc536005e09ff65"
+  },
+  "nfr2": {
+    "constrained_gap": [
+      {
+        "condition": "bruit",
+        "gap": null,
+        "measured": null,
+        "target": 0.9
+      },
+      {
+        "condition": "calme",
+        "correct": 86,
+        "gap": -0.0542,
+        "measured": 0.8958,
+        "meets_target": false,
+        "target": 0.95,
+        "total": 96
+      }
+    ],
+    "targets": {
+      "bruit": 0.9,
+      "calme": 0.95
+    }
+  },
+  "overall": {
+    "constrained": 0.8958,
+    "constrained_correct": "86/96",
+    "delta": 0.875,
+    "greedy": 0.0208,
+    "greedy_correct": "2/96"
+  },
+  "prototype_reference": {
+    "constrained_accuracy": 0.73,
+    "constrained_accuracy_unseen_speaker": 0.79,
+    "corpus": "3 locuteurs, 99 fichiers, 52 nombres distincts (0→10 000), condition calme",
+    "greedy_accuracy": 0.02,
+    "note": "espace de recherche 1010 candidats énumérés ; le décodeur 5.6 couvre 0–1 000 000",
+    "source": "docs/stories/5.6.story.md — Annexe A §4"
+  },
+  "reports": {
+    "constrained": {
+      "hypotheses": "ctc-constrained.jsonl",
+      "mode": "replay",
+      "model_versions": [
+        "omniASR_CTC_300M_v2"
+      ]
+    },
+    "greedy": {
+      "hypotheses": "ctc-greedy.jsonl",
+      "mode": "replay",
+      "model_versions": [
+        "omniASR_CTC_300M_v2"
+      ]
+    }
+  },
+  "split_evaluated": "test"
+}

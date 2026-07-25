@@ -57,13 +57,13 @@ def test_remainder_marker_dala_loaded(lexicon):
 
 
 def test_grammar_version_is_exposed(lexicon):
-    assert lexicon.grammar_version == "1.1.0"
+    assert lexicon.grammar_version == "1.2.0"
 
 
 def test_grammar_version_accessible_from_package():
     import zarma_numbers
 
-    assert zarma_numbers.load_lexicon().grammar_version == "1.1.0"
+    assert zarma_numbers.load_lexicon().grammar_version == "1.2.0"
 
 
 # --- AC4 : variantes linguistiques et corrections ASR séparées ---
@@ -73,8 +73,9 @@ def test_variants_and_asr_confusions_are_separate(lexicon):
     variant_map = lexicon.linguistic_variant_map()
 
     # Variante linguistique légitime : présente dans la map linguistique.
-    assert variant_map.get("da") == "nda"
+    assert variant_map.get("nda") == "da"
     assert variant_map.get("iddu") == "iddou"
+    assert variant_map.get("wey") == "iwey"
 
     # Correction ASR : présente UNIQUEMENT dans asr_confusions, jamais dans la
     # map linguistique.
