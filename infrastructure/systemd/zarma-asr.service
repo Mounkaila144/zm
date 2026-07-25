@@ -1,0 +1,59 @@
+# Service ASR — le modèle acoustique et le décodage contraint.
+#
+# Écoute sur 127.0.0.1 UNIQUEMENT : il n'est jamais exposé à Internet, seule
+# l'API le contacte. Le jeton partagé est une défense en profondeur, pas la
+# protection principale.
+#
+# Installation :
+#   sudo cp infrastructure/systemd/zarma-asr.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now zarma-asr
+
+[Unit]
+Description=Zarma ASR (Omnilingual CTC + décodage contraint)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=zarma
+Group=zarma
+WorkingDirectory=/opt/zarma
+
+# Le jeton et les réglages vivent dans un fichier hors Git, lisible du seul
+# utilisateur `zarma` (chmod 600). Jamais d'argument en ligne de commande :
+# `ps` l'exposerait à tous les utilisateurs de la machine.
+EnvironmentFile=/opt/zarma/.env.asr
+
+# Fixe le parallélisme interne de PyTorch. Laissé libre, il ouvre autant de fils
+# que de cœurs et les workers se disputent le CPU au lieu de se compléter.
+Environment=OMP_NUM_THREADS=2
+Environment=MKL_NUM_THREADS=2
+
+# Cache des poids du modèle : hors du home, pour survivre à un redéploiement.
+Environment=HF_HOME=/opt/zarma/models
+
+ExecStart=/opt/zarma/asrenv/bin/python /opt/zarma/services/asr/local_server.py \
+    --host 127.0.0.1 \
+    --port 8001 \
+    --device cpu \
+    --grammar expressions \
+    --workers 2 \
+    --queue-seconds 20
+
+# Le chargement du modèle prend quelques secondes ; ne pas déclarer l'échec trop tôt.
+TimeoutStartSec=180
+Restart=on-failure
+RestartSec=5
+
+# Durcissement : le service n'a besoin d'écrire que dans son cache de modèles.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/zarma/models
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

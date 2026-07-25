@@ -68,6 +68,7 @@ l'environnement / les secrets Modal :
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `DECODE_CONSTRAINED` | `true` | Active le décodage contraint (sinon glouton) |
+| `DECODE_GRAMMAR` | `numbers` | Langue contrainte : `numbers` (epics 1–5) ou `expressions` (calculatrice vocale, story 6.1) |
 | `DECODE_BEAM_WIDTH` | `64` | Largeur du faisceau |
 | `DECODE_NBEST` | `5` | Hypothèses exposées dans `candidates[]` |
 | `DECODE_BLANK_ID` | `0` | Id du blank CTC — **0**, surtout pas 1 (Annexe D §1) |
@@ -87,6 +88,53 @@ sur un corpus dédié : un seuil non calibré serait pire que pas de rejet. Voir
 `decoding.py`, `transcription.py` et `config.py` sont **sans torch ni modal** et
 couverts par `services/asr/tests/` en CI (logits en fixtures). Seul `main.py`
 (runtime Modal) reste hors CI.
+
+## Serveur local (`local_server.py`) — développement uniquement
+
+Sert le **même** contrat `/transcribe`, avec le vrai modèle, sur la machine de
+dev. C'est ce qui permet de vérifier sur un téléphone que l'application entend
+réellement ce qu'on lui dit.
+
+```bash
+export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH
+asrenv/bin/python services/asr/local_server.py --port 8001
+```
+
+### ⚠️ Le piège de performance : bfloat16 sur CPU
+
+Le modèle est livré en **bfloat16**, format taillé pour les GPU récents. Le CPU
+d'un Mac n'a **aucune instruction bfloat16** : PyTorch émule chaque opération,
+et l'inférence devient ~20× plus lente. Mesuré sur cette machine :
+
+| Placement | 10 s d'audio | Facteur temps-réel |
+|---|---|---|
+| `cpu` / bfloat16 (avant) | **33 s** | ×3,3 |
+| `cpu` / float32 | 1,5 s | ×0,15 |
+| `mps` / float32 (**défaut**) | **0,8 s** | ×0,08 |
+
+Les sorties sont **identiques** (12/12 transcriptions inchangées sur les
+enregistrements réels) : seul le format de calcul change, pas les poids.
+
+C'était la cause des « Le traitement a pris trop de temps » : un énoncé de 10 s
+dépassait le délai de 30 s de l'API. Le placement est désormais automatique
+(`--device auto|mps|cpu`).
+
+> Ne concerne **que** ce serveur. Sur Modal (A10G) le bfloat16 est natif et
+> reste le bon choix : `app/main.py` est inchangé.
+
+### Lire les temps
+
+Chaque requête journalise sa ventilation — sans elle, diagnostiquer une lenteur
+revient à deviner :
+
+```
+→ « waranka cindi hinza tonton iwey cindi gou » (confiance 0.87)
+  · audio 3.7s · modèle 1101 ms · décodage 1074 ms · total 2179 ms
+```
+
+Une fois le placement corrigé, modèle et décodage pèsent du même ordre. Le levier
+restant côté décodage est `--beam-width` (défaut 256, choisi sur un critère de
+latence en story 5.6) — à ne réduire que sur mesure.
 
 ## Déploiement
 

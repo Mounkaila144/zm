@@ -1,209 +1,167 @@
 #!/usr/bin/env python
-"""PROTOTYPE — restitution vocale d'un nombre zarma par concaténation (story 6.1, task 6).
+"""Restitution vocale zarma par concaténation — ligne de commande (story 6.1, task 6).
 
-Le vocabulaire des nombres est **fermé (33 mots)** : dire n'importe quel nombre de
-0 à 1 000 000 ne demande donc pas de synthèse vocale entraînée, seulement une
-**banque de mots enregistrés** assemblés dans l'ordre.
+Le vocabulaire des nombres est **fermé (33 mots)** : dire n'importe quel nombre
+de 0 à 1 000 000, ou n'importe quel résultat d'opération, ne demande donc pas de
+synthèse vocale entraînée — seulement une **banque de mots enregistrés**
+assemblés dans l'ordre. C'est la modalité retenue en décision D3, la seule
+utilisable par un utilisateur qui ne lit pas.
 
-Principe
---------
-1. ``zarma_numbers.generate(n)`` donne la forme canonique — **source unique**,
-   jamais réécrite ici.
-2. Chaque mot de cette forme est cherché dans la banque vocale.
-3. Les extraits sont concaténés, séparés d'un court silence, et écrits en WAV.
+Toute la logique vit dans ``voice_bank.py`` (testée sans audio réel) ; ce
+fichier n'est que son interface.
 
-**Fail-closed** (FR21) : si un seul mot manque, **rien n'est produit**. Prononcer
-un nombre à moitié serait pire que se taire — l'utilisateur cible ne lit pas et
-n'aurait aucun moyen de détecter la troncature.
+**Fail-closed** (FR21) : s'il manque un seul segment, **rien** n'est produit.
+Prononcer un résultat à moitié serait indétectable pour la cible — donc pire
+que le silence.
 
 Banque vocale
 -------------
-Construite automatiquement depuis les enregistrements existants : tout fichier
-``v<N>-<nombre>.wav`` dont la forme canonique tient en **un seul mot** devient
-une entrée de banque (ex. ``v1-20.wav`` → ``waranka``).
-
-Les mots restants (formes combinées, connecteurs, échelles) doivent être
-enregistrés séparément et déposés dans le répertoire de banque sous le nom
-``<mot>.wav`` — voir ``--list-missing``.
+- les nombres déjà enregistrés (``v<N>-<nombre>.wav``) dont la forme tient en un
+  mot alimentent la banque automatiquement ;
+- les mots restants sont déposés en ``<mot>.wav`` dans ``--bank-dir`` ;
+- les **consignes** entières (« c'est bien … ? », « je ne peux pas répondre »)
+  sont déposées en ``confirm.wav`` / ``cannot_answer.wav`` dans ``--prompt-dir``.
+  Elles ne sont pas composables : un locuteur natif les enregistre.
 
 Usage
 -----
-    # Que manque-t-il pour couvrir 0–1 000 000 ?
+    # Que manque-t-il pour couvrir 0–1 000 000 et les consignes ?
     uv run python scripts/speech/say_number.py --voice v1 --list-missing
 
-    # Prononcer un nombre
+    # Prononcer un nombre, un résultat, une confirmation
     uv run python scripts/speech/say_number.py --voice v1 --number 20 --out /tmp/20.wav
+    uv run python scripts/speech/say_number.py --voice v1 --expression "103 / 5" --out /tmp/r.wav
+    uv run python scripts/speech/say_number.py --voice v1 --number 42 --confirm --out /tmp/c.wav
 """
 
 from __future__ import annotations
 
 import argparse
-import glob
-import os
-import re
-import wave
+import sys
 from pathlib import Path
 
-import zarma_numbers
+# Rend le cœur importable quel que soit le répertoire d'appel.
+_SPEECH_DIR = Path(__file__).resolve().parent
+if str(_SPEECH_DIR) not in sys.path:
+    sys.path.insert(0, str(_SPEECH_DIR))
 
-#: Répertoires fouillés pour construire la banque à partir des nombres enregistrés.
-DEFAULT_SOURCES = ("~/Music/v1", "~/Music/v2", "~/Music/v3")
+from voice_bank import (  # noqa: E402
+    VoiceBankError,
+    build_bank,
+    confirmation_utterance,
+    duration_seconds,
+    expression_utterance,
+    missing_prompts,
+    missing_vocabulary,
+    number_coverage,
+    number_utterance,
+    refusal_utterance,
+    result_utterance,
+    synthesize,
+    write_wav,
+)
+from zarma_numbers.exceptions import DomainError  # noqa: E402
+from zarma_numbers.expressions import (  # noqa: E402
+    Expression,
+    evaluate,
+    render_expression,
+    render_result,
+)
+from zarma_numbers.generator import generate  # noqa: E402
 
-#: Silence inséré entre deux mots (secondes) — respiration naturelle.
-WORD_GAP_SECONDS = 0.06
-
-TARGET_RATE = 16_000
-TARGET_CHANNELS = 1
-TARGET_WIDTH = 2
-
-
-class VoiceBankError(Exception):
-    """Erreur contrôlée de la banque vocale (mot manquant, audio illisible)."""
-
-
-def target_vocabulary() -> set[str]:
-    """Ensemble des mots distincts nécessaires pour dire n'importe quel nombre.
-
-    Balaie 0–1000 puis des valeurs sentinelles couvrant les échelles supérieures
-    (milliers, ``dala``, million) — la grammaire étant compositionnelle, cela
-    suffit à énumérer le vocabulaire complet.
-    """
-
-    probes = list(range(0, 1001)) + [
-        2_000,
-        5_000,
-        10_000,
-        12_345,
-        100_000,
-        100_005,
-        500_000,
-        999_999,
-        1_000_000,
-    ]
-    words: set[str] = set()
-    for value in probes:
-        try:
-            words.update(zarma_numbers.generate(value).split())
-        except Exception:  # forme non résolue dans le lexique — ignorée ici
-            continue
-    return words
+#: Séparateur accepté dans ``--expression`` (ex. « 103 / 5 »).
+_SYMBOLS = ("+", "-", "*", "/")
 
 
-def build_bank(voice: str, sources: tuple[str, ...], extra_dir: Path | None) -> dict[str, Path]:
-    """Construit la banque ``mot -> fichier`` pour une voix donnée.
-
-    Deux origines, la seconde primant : les nombres déjà enregistrés dont la
-    forme tient en un mot, puis les fichiers ``<mot>.wav`` du répertoire dédié.
-    """
-
-    bank: dict[str, Path] = {}
-    for source in sources:
-        directory = Path(os.path.expanduser(source))
-        if directory.name != voice or not directory.is_dir():
-            continue
-        for path in glob.glob(str(directory / "*.wav")):
-            match = re.fullmatch(rf"{voice}-(\d+)\.wav", os.path.basename(path))
-            if not match:
-                continue
-            try:
-                form = zarma_numbers.generate(int(match.group(1)))
-            except Exception:
-                continue
-            if len(form.split()) == 1:  # un fichier = exactement un mot
-                bank[form] = Path(path)
-
-    if extra_dir is not None and extra_dir.is_dir():
-        for path in glob.glob(str(extra_dir / "*.wav")):
-            bank[Path(path).stem] = Path(path)
-    return bank
+def parse_cli_expression(text: str) -> Expression:
+    """Lit ``"<gauche> <symbole> <droite>"`` — saisie de test, pas une entrée utilisateur."""
+    for symbol in _SYMBOLS:
+        left, found, right = text.partition(symbol)
+        if found:
+            return Expression(int(left.strip()), symbol, int(right.strip()))
+    raise ValueError(f"Expression illisible : {text!r} (attendu « 103 / 5 »).")
 
 
-def _read_pcm(path: Path) -> bytes:
-    """Lit un WAV canonique (mono 16 kHz PCM16) et retourne ses échantillons."""
-
-    try:
-        with wave.open(str(path), "rb") as reader:
-            if (
-                reader.getnchannels() != TARGET_CHANNELS
-                or reader.getframerate() != TARGET_RATE
-                or reader.getsampwidth() != TARGET_WIDTH
-            ):
-                raise VoiceBankError(f"format non canonique : {path.name}")
-            return reader.readframes(reader.getnframes())
-    except wave.Error as exc:
-        raise VoiceBankError(f"audio illisible : {path.name}") from exc
+def _cmd_list_missing(bank) -> int:
+    words = missing_vocabulary(bank)
+    prompts = missing_prompts(bank)
+    print(f"\n{len(words)} mot(s) à enregistrer (déposer en <mot>.wav dans --bank-dir) :")
+    for word in words:
+        print(f"  - {word}")
+    print(f"\n{len(prompts)} consigne(s) à enregistrer (<nom>.wav dans --prompt-dir) :")
+    for name in prompts:
+        print(f"  - {name}")
+    return 0
 
 
-def say(number: int, bank: dict[str, Path]) -> tuple[bytes, str]:
-    """Assemble l'audio prononçant ``number``. Lève si un mot manque (fail-closed)."""
-
-    form = zarma_numbers.generate(number)
-    words = form.split()
-    missing = [word for word in words if word not in bank]
-    if missing:
-        raise VoiceBankError(
-            f"mots absents de la banque : {', '.join(sorted(set(missing)))} "
-            f"(forme demandée : « {form} »)"
-        )
-
-    silence = b"\x00" * int(WORD_GAP_SECONDS * TARGET_RATE) * TARGET_WIDTH
-    chunks: list[bytes] = []
-    for index, word in enumerate(words):
-        if index:
-            chunks.append(silence)
-        chunks.append(_read_pcm(bank[word]))
-    return b"".join(chunks), form
-
-
-def write_wav(path: Path, pcm: bytes) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with wave.open(str(path), "wb") as writer:
-        writer.setnchannels(TARGET_CHANNELS)
-        writer.setsampwidth(TARGET_WIDTH)
-        writer.setframerate(TARGET_RATE)
-        writer.writeframes(pcm)
+def _utterance_for(args):
+    """Construit l'énoncé demandé, et le texte à afficher pour la traçabilité."""
+    if args.expression is not None:
+        expression = parse_cli_expression(args.expression)
+        if args.echo:
+            return expression_utterance(expression), render_expression(expression)
+        result = evaluate(expression)  # DomainError remonte : traité par l'appelant
+        return result_utterance(result), render_result(result)
+    return number_utterance(args.number), generate(args.number)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Prononce un nombre zarma par concaténation.")
+    parser = argparse.ArgumentParser(description="Prononce un nombre ou un résultat zarma.")
     parser.add_argument("--voice", default="v1", help="Locuteur (v1, v2, v3…).")
     parser.add_argument("--number", type=int, default=None)
+    parser.add_argument("--expression", default=None, help='Opération, ex. "103 / 5".')
+    parser.add_argument(
+        "--echo",
+        action="store_true",
+        help="Avec --expression : relire l'opération au lieu d'en dire le résultat.",
+    )
+    parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="Préfixer de la consigne de confirmation (« c'est bien … ? »).",
+    )
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--bank-dir", type=Path, default=None, help="Mots enregistrés à l'unité.")
+    parser.add_argument("--prompt-dir", type=Path, default=None, help="Consignes enregistrées.")
     parser.add_argument("--list-missing", action="store_true")
     parser.add_argument("--coverage", action="store_true", help="Combien de nombres 0–1000 ?")
     args = parser.parse_args(argv)
 
-    bank = build_bank(args.voice, DEFAULT_SOURCES, args.bank_dir)
-    print(f"Banque « {args.voice} » : {len(bank)} mot(s) disponible(s).")
+    bank = build_bank(args.voice, word_dir=args.bank_dir, prompt_dir=args.prompt_dir)
+    print(
+        f"Banque « {args.voice} » : {len(bank.words)} mot(s), "
+        f"{len(bank.prompts)} consigne(s) disponible(s)."
+    )
 
     if args.list_missing:
-        missing = sorted(target_vocabulary() - set(bank))
-        print(f"\n{len(missing)} mot(s) à enregistrer (déposer en <mot>.wav dans --bank-dir) :")
-        for word in missing:
-            print(f"  - {word}")
-        return 0
+        return _cmd_list_missing(bank)
 
     if args.coverage:
-        ok = sum(
-            1
-            for value in range(0, 1001)
-            if all(w in bank for w in zarma_numbers.generate(value).split())
-        )
-        print(f"Couverture : {ok}/1001 nombres de 0 à 1000 prononçables.")
+        ok, total = number_coverage(bank)
+        print(f"Couverture : {ok}/{total} nombres de 0 à 1000 prononçables.")
         return 0
 
-    if args.number is None:
-        parser.error("--number est requis (ou --list-missing / --coverage)")
+    if args.number is None and args.expression is None:
+        parser.error("--number ou --expression est requis (ou --list-missing / --coverage)")
 
     try:
-        pcm, form = say(args.number, bank)
+        utterance, form = _utterance_for(args)
+    except DomainError as exc:
+        # Hors domaine : on ANNONCE le refus, on ne se tait pas — se taire serait
+        # indistinguable d'une panne pour un utilisateur qui ne lit pas (AC4).
+        print(f"hors domaine ({exc.code}) → consigne de refus")
+        utterance, form = refusal_utterance(), f"[refus : {exc.code}]"
+
+    if args.confirm:
+        utterance = confirmation_utterance(utterance)
+
+    try:
+        pcm = synthesize(utterance, bank)
     except VoiceBankError as exc:
         print(f"⛔ {exc}", flush=True)
         return 1
 
-    duration = len(pcm) / (TARGET_RATE * TARGET_WIDTH)
-    print(f"{args.number} → « {form} »  ({duration:.2f}s)")
+    print(f"« {form} »  ({duration_seconds(pcm):.2f}s)")
     if args.out:
         write_wav(args.out, pcm)
         print(f"écrit : {args.out}")

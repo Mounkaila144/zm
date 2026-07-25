@@ -102,7 +102,6 @@ void main() {
     );
     await _pumpRecordingScreen(tester, harness);
 
-    await tester.tap(find.byKey(const Key('begin-recording-button')));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.mic_off_outlined), findsOneWidget);
     expect(find.textContaining('micro est nécessaire'), findsOneWidget);
@@ -133,7 +132,6 @@ void main() {
     final RecordingWidgetHarness harness = RecordingWidgetHarness();
     await _pumpRecordingScreen(tester, harness);
 
-    await tester.tap(find.byKey(const Key('begin-recording-button')));
     await tester.pumpAndSettle();
 
     harness.ticker.emit(const Duration(milliseconds: 2500));
@@ -166,7 +164,7 @@ void main() {
     await _disposeHarness(tester);
   });
 
-  testWidgets('navigue vers Traitement uniquement avec un handoff valide', (
+  testWidgets('un handoff valide passe automatiquement au Traitement', (
     WidgetTester tester,
   ) async {
     final RecordingWidgetHarness harness = RecordingWidgetHarness();
@@ -185,10 +183,9 @@ void main() {
     );
     await _pumpRecordingScreen(tester, harness);
 
-    expect(find.byKey(const Key('continue-processing-button')), findsOneWidget);
-    await tester.tap(find.byKey(const Key('continue-processing-button')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byKey(const Key('continue-processing-button')), findsNothing);
     expect(find.byKey(const Key('processing-screen')), findsOneWidget);
     await _disposeHarness(tester);
   });

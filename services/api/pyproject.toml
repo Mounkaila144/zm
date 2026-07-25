@@ -31,6 +31,12 @@ dev = [
     "httpx>=0.27",
     "pytest-asyncio>=0.23",
 ]
+# Pilote MySQL/MariaDB asynchrone — installé seulement si l'on déploie sur MySQL
+# (`uv sync --extra mysql`). PostgreSQL reste le moteur de référence, testé en CI ;
+# MySQL est un déploiement pris en charge mais non couvert par les tests.
+mysql = [
+    "asyncmy>=0.2.9",
+]
 
 [build-system]
 requires = ["hatchling"]

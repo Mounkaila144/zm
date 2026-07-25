@@ -39,6 +39,12 @@ class Settings(BaseSettings):
     ASR_ENDPOINT_TOKEN: str = ""
     # Timeout d'un appel ASR distant (cold start compris) avant repli ``repeat``.
     ASR_TIMEOUT_SECONDS: float = Field(default=30.0, gt=0.0)
+    # Transcription forcée du MockRecognizer — **développement/démo uniquement**.
+    # Vide (défaut) = comportement historique : le mock ne transcrit rien, donc
+    # le pipeline conclut ``repeat``. Renseignée, elle permet d'exercer le flux
+    # complet sur un appareil sans GPU ni endpoint ASR. Sans effet dès que
+    # ``ASR_MODE`` vaut ``ctc`` ou ``llm`` : aucun risque de fuite en production.
+    ASR_MOCK_TEXT: str = ""
     # Informatif uniquement — la vérité vient du lexique (voir /grammar/version).
     GRAMMAR_VERSION: str = "1.0.0"
     LOG_LEVEL: str = "INFO"

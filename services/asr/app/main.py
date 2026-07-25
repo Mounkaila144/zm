@@ -15,7 +15,9 @@ Deux modèles chargés **dans** ce service (poids Apache 2.0), pas comme API tie
 
 **Décodage contraint (story 5.6)** — le chemin CTC ne fait plus d'``argmax``
 trame par trame : les logits alimentent une recherche en faisceau restreinte à
-la grammaire des nombres zarma (``services/asr/app/decoding.py``). Le décodage
+la grammaire zarma (``services/asr/app/decoding.py``) — celle des **nombres**
+par défaut, celle des **expressions arithmétiques** si ``DECODE_GRAMMAR`` vaut
+``expressions`` (calculatrice vocale, story 6.1). Le décodage
 a lieu **ici**, là où les logits existent : ils ne traversent jamais le réseau
 (``T × 10 288`` flottants, cf. Annexe D §4) et le contrat ci-dessus est
 inchangé (NFR9). Seule évolution : ``acoustic_score`` et ``candidates`` portent
@@ -96,8 +98,6 @@ class OmnilingualAsr:
         }
 
         # --- Décodage contraint (story 5.6) : compilé une fois par conteneur ---
-        from zarma_numbers.grammar import load_grammar
-
         from app.config import AsrSettings
         from app.decoding import ConstrainedCtcDecoder, build_token_lexicon
 
@@ -113,7 +113,10 @@ class OmnilingualAsr:
                 ids = ids.tolist() if hasattr(ids, "tolist") else list(ids)
                 return [int(i) for i in ids if int(i) > 3]
 
-            grammar = load_grammar()
+            # Nombres seuls (epics 1–5) ou expressions arithmétiques (story 6.1)
+            # selon DECODE_GRAMMAR : le décodeur change de langue, pas
+            # d'algorithme, et le contrat /transcribe reste identique.
+            grammar = self._settings.load_grammar()
             lexicon = build_token_lexicon(
                 grammar,
                 encode,

@@ -118,6 +118,19 @@ def _run(args: argparse.Namespace) -> int:
         f"Exact Number Accuracy = {result.accuracy:.4f} ({result.correct}/{result.total}) "
         f"[split={args.split}] → {json_path.name}, {md_path.name}"
     )
+    if result.expression_total:
+        print(
+            f"Exact Expression Accuracy = {result.exact_expression_accuracy:.4f} "
+            f"({result.expression_correct}/{result.expression_total})"
+        )
+    if result.refusals.total:
+        # Un résultat inventé sur un cas impossible est la pire défaillance
+        # possible : il est affiché même quand tout le reste va bien.
+        print(
+            f"Refus correct = {result.refusals.correct_rate:.4f} "
+            f"({result.refusals.correct}/{result.refusals.total}) · "
+            f"résultat inventé = {result.refusals.invented_rate:.4f}"
+        )
     return 0
 
 

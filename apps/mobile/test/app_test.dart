@@ -42,6 +42,8 @@ void main() {
 
     expect(find.text('Accueil'), findsOneWidget);
     expect(find.byIcon(Icons.mic), findsOneWidget);
+    expect(find.byKey(const Key('open-history-button')), findsNothing);
+    expect(find.byKey(const Key('open-contribution-button')), findsNothing);
     expect(
       find.bySemanticsLabel('Démarrer un enregistrement audio'),
       findsOneWidget,
@@ -57,7 +59,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('les sept destinations sont navigables avec un retour cohérent', (
+  testWidgets('les destinations restent navigables avec un accueil simplifié', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -72,14 +74,7 @@ void main() {
     );
 
     expect(find.byKey(const Key('home-screen')), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('start-recording-button')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('recording-screen')), findsOneWidget);
-
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('home-screen')), findsOneWidget);
+    expect(AppRoutes.routes.containsKey(AppRoutes.recording), isTrue);
 
     final NavigatorState navigator = tester.state(find.byType(Navigator));
     navigator.pushNamed(
@@ -126,7 +121,7 @@ void main() {
     }
     expect(find.byKey(const Key('home-screen')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('open-history-button')));
+    navigator.pushNamed(AppRoutes.history);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('history-screen')), findsOneWidget);
 

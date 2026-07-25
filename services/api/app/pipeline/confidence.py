@@ -55,6 +55,39 @@ def numeric_candidates_from_asr(asr: AsrResult) -> list[NumericCandidate]:
     return sorted(by_number.values(), key=lambda candidate: candidate.score, reverse=True)
 
 
+def expression_candidates_from_asr(asr: AsrResult) -> list[NumericCandidate]:
+    """Idem, pour les transcriptions qui sont des **expressions** (story 6.1).
+
+    Chaque candidat est indexé par la valeur de son résultat : c'est elle qui
+    porte le désaccord entre hypothèses, donc le signal de marge. Les
+    expressions dont le résultat sort du domaine sont écartées — un refus n'est
+    pas un candidat.
+
+    Fonction **distincte** de ``numeric_candidates_from_asr`` : le chemin
+    « nombre seul » des epics 1–5 ne passe jamais ici et reste inchangé.
+    """
+
+    transcriptions = [(asr.text, asr.acoustic_score)]
+    transcriptions.extend((candidate.text, candidate.score) for candidate in asr.candidates)
+
+    by_value: dict[int, NumericCandidate] = {}
+    for text, score in transcriptions:
+        normalized = zarma_numbers.normalize(text)
+        expression = zarma_numbers.parse_expression(normalized)
+        if expression is None:
+            continue
+        try:
+            result = zarma_numbers.evaluate(expression)
+        except zarma_numbers.DomainError:
+            continue
+        candidate = NumericCandidate(number=result.value, text=normalized, score=_clamp(score))
+        previous = by_value.get(result.value)
+        if previous is None or candidate.score > previous.score:
+            by_value[result.value] = candidate
+
+    return sorted(by_value.values(), key=lambda candidate: candidate.score, reverse=True)
+
+
 def _variant_signal(text: str) -> float:
     trace = zarma_numbers.normalize_with_trace(text)
     tokens = trace.normalized.split()
@@ -132,15 +165,23 @@ def composite_confidence(
     number: int | None,
     numeric_candidates: list[NumericCandidate],
     settings: Settings,
+    expression_recognized: bool = False,
 ) -> ConfidenceResult:
-    """Combine les cinq signaux configurables en une moyenne pondérée normalisée."""
+    """Combine les cinq signaux configurables en une moyenne pondérée normalisée.
+
+    ``expression_recognized`` (story 6.1) signale qu'une **expression** valide a
+    été reconnue là où aucun nombre seul ne l'a été : le signal grammatical vaut
+    alors 1, comme pour un nombre. Par défaut ``False``, de sorte que le chemin
+    des epics 1–5 est strictement inchangé.
+    """
 
     parsed = zarma_numbers.parse_detailed(normalized_text)
+    grammatical = (number is not None and parsed.accepted) or expression_recognized
     signals = {
         "acoustic": _clamp(
             max([asr.acoustic_score, *(candidate.score for candidate in asr.candidates)])
         ),
-        "grammatical": 1.0 if number is not None and parsed.accepted else 0.0,
+        "grammatical": 1.0 if grammatical else 0.0,
         "variant": _clamp(_variant_signal(asr.text)),
         "margin": _margin_signal(numeric_candidates),
         "confusion": _confusion_signal(asr),
@@ -162,6 +203,7 @@ __all__ = [
     "ConfidenceResult",
     "NumericCandidate",
     "composite_confidence",
+    "expression_candidates_from_asr",
     "is_known_asr_confusion",
     "numeric_candidates_from_asr",
 ]

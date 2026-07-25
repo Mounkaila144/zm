@@ -1,0 +1,49 @@
+# API Zarma — FastAPI derrière nginx.
+#
+# N'écoute que sur 127.0.0.1 : nginx assure le TLS et l'exposition publique
+# (NFR3 — HTTPS obligatoire, aucun accès direct en clair).
+#
+# Installation :
+#   sudo cp infrastructure/systemd/zarma-api.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now zarma-api
+
+[Unit]
+Description=Zarma API (FastAPI)
+After=network-online.target postgresql.service zarma-asr.service
+Wants=network-online.target
+# L'API démarre même si l'ASR est en panne : le pipeline retombe alors
+# proprement sur « repeat » plutôt que d'inventer un nombre (FR21).
+
+[Service]
+Type=simple
+User=zarma
+Group=zarma
+WorkingDirectory=/opt/zarma/services/api
+
+# DATABASE_URL, ASR_ENDPOINT_TOKEN, seuils de confiance… hors Git, chmod 600.
+EnvironmentFile=/opt/zarma/.env.api
+
+# 2 workers : l'API est légère (I/O), c'est l'ASR qui consomme le CPU. En mettre
+# plus ne ferait que disputer les cœurs au modèle.
+ExecStart=/opt/zarma/.venv/bin/uvicorn app.main:app \
+    --host 127.0.0.1 \
+    --port 8000 \
+    --workers 2 \
+    --proxy-headers \
+    --forwarded-allow-ips 127.0.0.1
+
+Restart=on-failure
+RestartSec=3
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+# Seul l'audio consenti est écrit sur disque (FR20/FR22).
+ReadWritePaths=/opt/zarma/storage
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,9 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zarma_mobile/calculation/calculation_view.dart';
 import 'package:zarma_mobile/feedback/feedback_controller.dart';
 import 'package:zarma_mobile/feedback/feedback_models.dart';
 import 'package:zarma_mobile/models/recognition_result.dart';
 import 'package:zarma_mobile/navigation/app_routes.dart';
+import 'package:zarma_mobile/speech/voice_bank.dart';
+import 'package:zarma_mobile/speech/zarma_speaker.dart';
+
+const Duration confirmationRepeatDelay = Duration(seconds: 3);
 
 /// Écran d'ambiguïté. `confirm` présente les propositions du serveur et attend
 /// un choix explicite ; `repeat` (ou un `confirm` sans candidat exploitable)
@@ -20,6 +27,57 @@ class ConfirmationScreen extends ConsumerStatefulWidget {
 
 class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
   Future<void> Function()? _lastAction;
+  bool _speechLoopStarted = false;
+  bool _speechLoopEnabled = true;
+  int _speechLoopVersion = 0;
+  Timer? _speechRepeatTimer;
+  Completer<void>? _speechDelayCompleter;
+
+  /// Relit l'opération, attend trois secondes, puis recommence jusqu'à ce que
+  /// la personne confirme ou demande un nouvel enregistrement.
+  Future<void> _repeatExpression(
+    RecognizedExpression expression,
+    ZarmaSpeaker speaker,
+    int version,
+  ) async {
+    final List<VoiceSegment> utterance = confirmationUtterance(
+      utteranceFromZarma(expression.zarmaText),
+    );
+    while (mounted && version == _speechLoopVersion) {
+      final SpeechOutcome outcome = await speaker.speak(utterance);
+      if (!mounted || version != _speechLoopVersion) {
+        return;
+      }
+      if (outcome == SpeechOutcome.incomplete) {
+        return;
+      }
+      await _waitBeforeRepeating();
+    }
+  }
+
+  Future<void> _waitBeforeRepeating() {
+    final Completer<void> completer = Completer<void>();
+    _speechDelayCompleter = completer;
+    _speechRepeatTimer = Timer(confirmationRepeatDelay, () {
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    });
+    return completer.future;
+  }
+
+  void _stopSpeechLoop() {
+    _speechLoopVersion++;
+    _speechLoopStarted = false;
+    _speechLoopEnabled = false;
+    _speechRepeatTimer?.cancel();
+    _speechRepeatTimer = null;
+    final Completer<void>? completer = _speechDelayCompleter;
+    _speechDelayCompleter = null;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
+    }
+  }
 
   /// Propositions sélectionnables : proposition principale puis alternatives
   /// dans l'ordre serveur, dédupliquées par nombre, sans null ni forme vide.
@@ -62,7 +120,7 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
     if (response == null || !mounted) {
       return;
     }
-    Navigator.of(context).pushReplacementNamed(
+    await Navigator.of(context).pushNamed(
       AppRoutes.result,
       arguments: ConfirmedResult(
         recognition: widget.result,
@@ -70,9 +128,46 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
         zarmaText: candidate.zarmaText,
       ),
     );
+    if (mounted) {
+      Navigator.of(context).popUntil(
+        (Route<dynamic> route) =>
+            route.settings.name == AppRoutes.recording || route.isFirst,
+      );
+    }
+  }
+
+  /// Confirmation d'une **opération** (story 6.1).
+  ///
+  /// Une seule proposition est présentée, volontairement : choisir entre
+  /// plusieurs opérations écrites suppose de savoir lire, ce que l'utilisateur
+  /// cible ne sait pas. La modalité utilisable est la relecture vocale de
+  /// l'opération entendue — accepter ou réenregistrer.
+  Future<void> _confirmExpression(RecognizedExpression expression) async {
+    _stopSpeechLoop();
+    _lastAction = () => _confirmExpression(expression);
+    final FeedbackResponse? response =
+        await ref.read(feedbackControllerProvider.notifier).submit(
+              recognition: widget.result,
+              feedbackType: FeedbackType.confirmed,
+              proposedNumber: expression.result,
+            );
+    if (response == null || !mounted) {
+      return;
+    }
+    await Navigator.of(context).pushNamed(
+      AppRoutes.calculation,
+      arguments: widget.result,
+    );
+    if (mounted) {
+      Navigator.of(context).popUntil(
+        (Route<dynamic> route) =>
+            route.settings.name == AppRoutes.recording || route.isFirst,
+      );
+    }
   }
 
   Future<void> _requestRepeat() async {
+    _stopSpeechLoop();
     _lastAction = _requestRepeat;
     final FeedbackResponse? response =
         await ref.read(feedbackControllerProvider.notifier).submit(
@@ -105,12 +200,54 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
   }
 
   @override
+  void dispose() {
+    _stopSpeechLoop();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final FeedbackState feedback = ref.watch(feedbackControllerProvider);
     final bool busy = feedback.isBusy;
+    final RecognizedExpression? expression = widget.result.expression;
     final List<_Candidate> candidates = _candidates();
-    final bool repeatOnly =
-        widget.result.decision == Decision.repeat || candidates.isEmpty;
+    final bool repeatOnly = widget.result.decision == Decision.repeat ||
+        (expression == null && candidates.isEmpty);
+
+    if (!repeatOnly && expression != null) {
+      final ZarmaSpeaker? speaker = ref.watch(zarmaSpeakerProvider);
+      if (_speechLoopEnabled &&
+          !_speechLoopStarted &&
+          speaker != null &&
+          !busy) {
+        _speechLoopStarted = true;
+        final int version = ++_speechLoopVersion;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && version == _speechLoopVersion) {
+            unawaited(_repeatExpression(expression, speaker, version));
+          }
+        });
+      }
+      return Scaffold(
+        key: const Key('confirmation-screen'),
+        appBar: AppBar(
+          title: const Text('Confirmation'),
+          automaticallyImplyLeading: false,
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: _ConfirmExpressionBody(
+              expression: expression,
+              busy: busy,
+              onConfirm: busy ? null : () => _confirmExpression(expression),
+              onRepeat: busy ? null : () => _requestRepeat(),
+              error: _errorSection(feedback, busy),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       key: const Key('confirmation-screen'),
@@ -175,6 +312,110 @@ class _Candidate {
 
   final int number;
   final String zarmaText;
+}
+
+/// Confirmation d'une opération : une seule proposition, relue telle quelle.
+class _ConfirmExpressionBody extends StatelessWidget {
+  const _ConfirmExpressionBody({
+    required this.expression,
+    required this.busy,
+    required this.onConfirm,
+    required this.onRepeat,
+    required this.error,
+  });
+
+  final RecognizedExpression expression;
+  final bool busy;
+  final VoidCallback? onConfirm;
+  final VoidCallback? onRepeat;
+  final Widget error;
+
+  @override
+  Widget build(BuildContext context) {
+    final CalculationView view = CalculationView(expression);
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Text(
+          'Avez-vous dit cette opération ?',
+          textAlign: TextAlign.center,
+          style: textTheme.titleLarge,
+        ),
+        if (busy) ...<Widget>[
+          const SizedBox(height: 16),
+          const LinearProgressIndicator(
+            key: Key('feedback-progress-indicator'),
+          ),
+        ],
+        Expanded(
+          child: Center(
+            child: Semantics(
+              liveRegion: true,
+              label: view.semanticsLabel,
+              child: ExcludeSemantics(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      view.operationLabel,
+                      key: const Key('confirm-expression-operation'),
+                      style: textTheme.displaySmall,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      expression.zarmaText,
+                      key: const Key('confirm-expression-zarma'),
+                      style: textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Semantics(
+          liveRegion: true,
+          label: 'L’opération est répétée automatiquement toutes les '
+              'trois secondes.',
+          child: const ExcludeSemantics(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(Icons.volume_up),
+                SizedBox(width: 8),
+                Text('Répétition automatique'),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 72,
+          child: FilledButton.icon(
+            key: const Key('confirm-expression-button'),
+            onPressed: onConfirm,
+            icon: const Icon(Icons.check, size: 32),
+            label: const Text('Oui'),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 72,
+          child: OutlinedButton.icon(
+            key: const Key('request-repeat-button'),
+            onPressed: onRepeat,
+            icon: const Icon(Icons.mic, size: 32),
+            label: const Text('Non'),
+          ),
+        ),
+        error,
+      ],
+    );
+  }
 }
 
 class _ConfirmBody extends StatelessWidget {

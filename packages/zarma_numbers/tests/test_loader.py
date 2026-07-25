@@ -57,13 +57,13 @@ def test_remainder_marker_dala_loaded(lexicon):
 
 
 def test_grammar_version_is_exposed(lexicon):
-    assert lexicon.grammar_version == "1.2.0"
+    assert lexicon.grammar_version == "1.4.0"
 
 
 def test_grammar_version_accessible_from_package():
     import zarma_numbers
 
-    assert zarma_numbers.load_lexicon().grammar_version == "1.2.0"
+    assert zarma_numbers.load_lexicon().grammar_version == "1.4.0"
 
 
 # --- AC4 : variantes linguistiques et corrections ASR séparées ---
@@ -150,3 +150,77 @@ def test_invalid_status_raises(tmp_path):
 def test_missing_file_raises(tmp_path):
     with pytest.raises(LexiconValidationError, match="introuvable"):
         load_lexicon(tmp_path / "does_not_exist.yaml")
+
+
+# --- Section `operators` (story 6.1) : validée, jamais devinée ---
+
+
+def _with_operators(tmp_path, operators: str):
+    """Lexique minimal valide, dont seule la section `operators` varie."""
+    units = [
+        f"  {d}: {{ isolated: u{d}, combined: c{d}, variants: [], status: unresolved }}"
+        for d in range(1, 10)
+    ]
+    tens = [
+        f"  {t}: {{ canonical: t{t}, variants: [], status: unresolved }}"
+        for t in range(10, 100, 10)
+    ]
+    lines = [
+        'version: "1.0.0"',
+        "language: dje_Latn",
+        "status: draft",
+        "zero: { value: 0, canonical: yaamo, variants: [yaamo], status: unresolved }",
+        "units:",
+        *units,
+        "tens:",
+        *tens,
+        "connectors:",
+        "  tens_unit: { canonical: cindi, variants: [], status: unresolved }",
+        "  groups: { canonical: da, variants: [], status: unresolved }",
+        "scales:",
+        "  hundred: { value: 100, canonical: zangou, variants: [], status: unresolved }",
+        "  thousand: { value: 1000, canonical: zambar, variants: [], status: unresolved }",
+        "  million: { value: 1000000, canonical: null, variants: [], status: unresolved }",
+        "operators:",
+        operators,
+    ]
+    path = tmp_path / "lexicon.yaml"
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return path
+
+
+def test_operator_with_unknown_symbol_raises(tmp_path):
+    path = _with_operators(
+        tmp_path,
+        '          add: { symbol: "%", canonical: tonton, variants: [], status: unresolved }\n',
+    )
+    with pytest.raises(LexiconValidationError, match="Symbole invalide"):
+        load_lexicon(path)
+
+
+def test_duplicate_operator_symbol_raises(tmp_path):
+    path = _with_operators(
+        tmp_path,
+        '          add: { symbol: "+", canonical: tonton, variants: [], status: unresolved }\n'
+        '          plus: { symbol: "+", canonical: autre, variants: [], status: unresolved }\n',
+    )
+    with pytest.raises(LexiconValidationError, match="déclaré deux fois"):
+        load_lexicon(path)
+
+
+def test_two_operators_sharing_a_spoken_form_raises(tmp_path):
+    """Deux opérateurs homophones rendraient l'expression entendue indécidable."""
+    path = _with_operators(
+        tmp_path,
+        '          add: { symbol: "+", canonical: tonton, variants: [], status: unresolved }\n'
+        '          subtract: { symbol: "-", canonical: zabou, variants: [tonton], '
+        "status: unresolved }\n",
+    )
+    with pytest.raises(LexiconValidationError, match="Forme d'opérateur ambiguë"):
+        load_lexicon(path)
+
+
+def test_lexicon_without_operators_section_still_loads(tmp_path):
+    """Rétro-compatibilité : un lexique 1.2.x reste lisible (opérateurs vides)."""
+    path = _with_operators(tmp_path, "          {}\n")
+    assert load_lexicon(path).operators == {}

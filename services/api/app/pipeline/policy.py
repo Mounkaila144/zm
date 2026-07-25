@@ -16,10 +16,17 @@ def decide(
     number: int | None,
     numeric_candidates: list[NumericCandidate],
     settings: Settings,
+    expression_recognized: bool = False,
 ) -> Decision:
-    """Applique l'ordre de décision FR13/FR15/FR21 sans inventer de nombre."""
+    """Applique l'ordre de décision FR13/FR15/FR21 sans inventer de nombre.
 
-    if number is None:
+    ``expression_recognized`` (story 6.1) traite une **expression** reconnue
+    comme un énoncé compris : la politique elle-même est inchangée — c'est la
+    même échelle accept/confirm/repeat, appliquée à un énoncé d'une autre forme.
+    Par défaut ``False`` : le comportement « nombre seul » ne bouge pas.
+    """
+
+    if number is None and not expression_recognized:
         return "repeat"
     if (
         len(numeric_candidates) >= 2

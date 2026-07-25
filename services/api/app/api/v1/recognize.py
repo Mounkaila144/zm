@@ -43,6 +43,31 @@ class RecognitionAlternative(BaseModel):
     score: float = Field(ge=0.0, le=1.0)
 
 
+class RecognizedExpression(BaseModel):
+    """Opération reconnue et son résultat exact (story 6.1).
+
+    Champ **additif** : il vaut ``None`` pour un énoncé « nombre seul », de sorte
+    que le contrat des epics 1–5 est inchangé pour les clients existants.
+
+    ``result`` porte le résultat entier (le quotient si ``remainder`` est non
+    nul). Quand l'opération est comprise mais que sa réponse sort du domaine
+    (résultat négatif, dépassement, division par zéro), ``result`` vaut ``None``
+    et ``refusal_code`` dit pourquoi — jamais un résultat approché (FR21/NFR14).
+    """
+
+    left: int
+    operator: Literal["+", "-", "*", "/"]
+    right: int
+    #: Forme zarma canonique de l'opération entendue (relisible à voix haute).
+    zarma_text: str
+    result: int | None = None
+    #: Reste d'une division non entière ; ``0`` quand le résultat est exact.
+    remainder: int = 0
+    #: Forme zarma du résultat (``« waranka ga cindi hinza »`` = « 20 reste 3 »).
+    result_zarma_text: str = ""
+    refusal_code: str | None = None
+
+
 class RecognitionResponse(BaseModel):
     """Réponse versionnée du pipeline de reconnaissance."""
 
@@ -53,12 +78,41 @@ class RecognitionResponse(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     decision: Literal["accept", "confirm", "repeat"]
     alternatives: list[RecognitionAlternative] = Field(default_factory=list)
+    #: Présent uniquement si l'énoncé était une opération (story 6.1).
+    expression: RecognizedExpression | None = None
     model_version: str
     grammar_version: str
     latency_total_ms: int = Field(ge=0)
     latency_asr_ms: int = Field(ge=0)
 
     model_config = {"protected_namespaces": (), "from_attributes": True}
+
+
+def _alternative_from(text: str, score: float) -> RecognitionAlternative:
+    """Alternative ASR résolue en nombre **ou** en opération (story 6.1).
+
+    Un nombre reste rendu comme avant. Une alternative qui est une opération
+    porte la valeur de son résultat et la forme canonique de l'opération, de
+    sorte que l'écran de confirmation présente quelque chose de comparable
+    plutôt qu'une transcription brute. Une opération hors domaine n'a pas de
+    valeur : elle garde son texte, sans nombre inventé (FR21).
+    """
+    number = zarma_numbers.parse(text)
+    if number is not None:
+        return RecognitionAlternative(
+            number=number, zarma_text=zarma_numbers.generate(number), score=score
+        )
+
+    expression = zarma_numbers.parse_expression(text)
+    if expression is not None:
+        zarma_text = zarma_numbers.render_expression(expression)
+        try:
+            value = zarma_numbers.evaluate(expression).value
+        except zarma_numbers.DomainError:
+            value = None
+        return RecognitionAlternative(number=value, zarma_text=zarma_text, score=score)
+
+    return RecognitionAlternative(number=None, zarma_text=text, score=score)
 
 
 async def _run_pipeline(
@@ -76,22 +130,27 @@ async def _run_pipeline(
     )
     outcome = run_recognition_pipeline(asr_result, settings)
 
+    expression = None
+    if outcome.expression is not None:
+        result = outcome.expression_result
+        expression = RecognizedExpression(
+            left=outcome.expression.left,
+            operator=outcome.expression.symbol,
+            right=outcome.expression.right,
+            zarma_text=outcome.zarma_text,
+            result=result.value if result is not None else None,
+            remainder=result.remainder if result is not None else 0,
+            result_zarma_text=outcome.result_zarma_text,
+            refusal_code=outcome.refusal_code,
+        )
+
     sorted_candidates = sorted(
         asr_result.candidates,
         key=lambda candidate: candidate.score,
         reverse=True,
     )
     alternatives = [
-        RecognitionAlternative(
-            number=(candidate_number := zarma_numbers.parse(candidate.text)),
-            zarma_text=(
-                zarma_numbers.generate(candidate_number)
-                if candidate_number is not None
-                else candidate.text
-            ),
-            score=candidate.score,
-        )
-        for candidate in sorted_candidates
+        _alternative_from(candidate.text, candidate.score) for candidate in sorted_candidates
     ]
     latency_total_ms = max(
         int((perf_counter() - request_start) * 1000),
@@ -106,6 +165,7 @@ async def _run_pipeline(
         confidence=outcome.confidence.score,
         decision=outcome.decision,
         alternatives=alternatives,
+        expression=expression,
         model_version=asr_result.model_version,
         grammar_version=zarma_numbers.load_lexicon().grammar_version,
         latency_total_ms=latency_total_ms,

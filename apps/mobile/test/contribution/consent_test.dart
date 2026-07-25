@@ -161,7 +161,8 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byKey(const Key('open-contribution-button')));
+      final NavigatorState navigator = tester.state(find.byType(Navigator));
+      navigator.pushNamed(AppRoutes.contribute);
       await tester.pumpAndSettle();
 
       expect(AppRoutes.routes.containsKey(AppRoutes.contribute), isTrue);

@@ -9,7 +9,7 @@
 #             `asr_confusions` = corrections d'ERREURS ACOUSTIQUES de l'ASR.
 #             Ces deux structures sont SÉPARÉES et ne doivent JAMAIS être fusionnées.
 
-version: "1.2.0" # = grammar_version (source unique) — 1.2.0 : connecteur da/di + élision
+version: "1.4.0" # = grammar_version (source unique) — 1.4.0 : × et ÷ résolus, variante zongou
 language: dje_Latn
 status: draft
 
@@ -56,14 +56,44 @@ connectors:
   # Marqueur de reste-unité (« dala » = « une unité ») — désambiguïse les restes
   # à grande échelle (ex. 100 005 = zambar zangou nda dala gou). Story 1.7.
   remainder: { canonical: dala, variants: [dala], status: unresolved }
+  # Marqueur du reste de DIVISION (story 6.1, décision D2). Le marqueur complet
+  # est « ga cindi » : `ga` + le connecteur `cindi` déjà présent ci-dessus.
+  #   waranka cindi hinza     = 23              (le nombre)
+  #   waranka ga cindi hinza  = « 20 reste 3 »  (résultat de division)
+  # `ga` n'appartient PAS au lexique des nombres : les deux formes sont donc
+  # distinguables sans ambiguïté. À ne JAMAIS fusionner avec `dala` ci-dessus,
+  # qui désambiguïse tout autre chose (restes d'unités aux grandes échelles).
+  division_remainder: { canonical: ga, variants: [ga], status: unresolved }
 
 scales:
-  hundred: { value: 100, canonical: zangou, variants: [zangou], status: unresolved }
+  # `zongou` est une prononciation attestée de la même centaine (décision locuteur
+  # 2026-07-25) : les deux se disent. `zangou` reste la forme GÉNÉRÉE — une seule
+  # forme de surface par nombre, c'est ce qui rend le décodage contraint
+  # déterministe — et `zongou` est acceptée en entrée comme toute variante.
+  hundred: { value: 100, canonical: zangou, variants: [zangou, zongou], status: unresolved }
   thousand: { value: 1000, canonical: zambar, variants: [zambar], status: unresolved }
   ten_thousand: { value: 10000, canonical: null, variants: [], status: unresolved }
   hundred_thousand: { value: 100000, canonical: null, variants: [], status: unresolved }
   # Forme million résolue (emprunt) — Session 1. Reste `unresolved` (gate ≥3 locuteurs).
   million: { value: 1000000, canonical: million, variants: [million, millio], status: unresolved }
+
+# Opérateurs arithmétiques (story 6.1, décision D1) — mots PRONONCÉS entre les
+# deux opérandes (ordre infixe confirmé par le locuteur, Q2 de la fiche).
+# Source : docs/lexique-operateurs-a-valider.md, remplie par un locuteur natif.
+#
+# Les quatre formes courtes ont été livrées par le locuteur : `tonton` / `zabou`
+# en session initiale, `ingaybor` / `inafaysor` le 2026-07-25 (mots isolés, tirés
+# des phrases `kali ngay boor` et `kaŋ i fa i sɔrɔ`).
+#
+# `symbol` est l'opérateur mathématique (clé de l'évaluateur) ; `variants` sont
+# des variantes LINGUISTIQUES, jamais des corrections d'erreurs ASR. Une forme
+# `canonical: null` resterait **absente** de la grammaire plutôt que devinée —
+# c'est le mécanisme qui a tenu × et ÷ hors du système jusqu'ici.
+operators:
+  add: { symbol: "+", canonical: tonton, variants: [tonton, itonton], status: unresolved }
+  subtract: { symbol: "-", canonical: zabou, variants: [zabou, izabou], status: unresolved }
+  multiply: { symbol: "*", canonical: ingaybor, variants: [ingaybor], status: unresolved }
+  divide: { symbol: "/", canonical: inafaysor, variants: [inafaysor], status: unresolved }
 
 # STRUCTURE DISTINCTE — corrections d'erreurs acoustiques, JAMAIS mélangée aux variants linguistiques.
 # clé = forme erronée produite par l'ASR, valeur = forme canonique correcte.

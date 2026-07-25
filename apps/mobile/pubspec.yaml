@@ -8,6 +8,7 @@ environment:
   flutter: '>=3.24.0'
 
 dependencies:
+  audioplayers: ^6.8.1
   dio: 5.7.0
   flutter:
     sdk: flutter
@@ -32,3 +33,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # Banque vocale embarquée (story 6.1) — l'application doit pouvoir *dire* le
+  # résultat sans réseau : sur un marché, la connexion n'est pas acquise.
+  # ~940 Ko de WAV 16 kHz mono ; c'est le produit lui-même, pas une ressource
+  # accessoire. Les mots sont assemblés à la volée depuis la forme canonique
+  # renvoyée par l'API — aucune phrase pré-enregistrée, sauf les consignes.
+  assets:
+    - assets/voice/words/
+    - assets/voice/prompts/

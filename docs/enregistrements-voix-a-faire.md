@@ -1,8 +1,18 @@
 # Liste d'enregistrement — banque vocale zarma
 
-> **40 mots + quelques phrases.** Une fois enregistrés, l'application peut prononcer
-> **les 1 000 001 nombres** (0 à 1 000 000) et le résultat de n'importe quelle opération.
+> ## ✅ La banque vocale est complète (séance `~/Music/voix2`, 2026-07-25)
 >
+> **40 / 40 mots + 4 consignes.** L'application peut prononcer **les 1 000 001 nombres**
+> (0 à 1 000 000), n'importe quel résultat d'opération (reste de division compris), la
+> demande de confirmation et le message de refus. Couverture vérifiée : **1001/1001**.
+>
+> **Il reste un seul lot d'enregistrements**, et il ne sert pas à ce que l'app *parle*
+> mais à ce qu'elle *comprenne* : le **groupe E5** (160 énoncés d'opérations complets).
+> C'est le dernier point qui bloque la mesure de la story 6.1.
+>
+> Les groupes A–D ci-dessous sont conservés comme référence — ils redeviennent la liste
+> à suivre pour enregistrer une **voix supplémentaire**.
+
 > Liste générée depuis `lexicon.yaml` — **source unique**, rien n'est inventé ici.
 
 ## ⚙️ Réglages techniques
@@ -116,15 +126,21 @@ dépend moins du micro que de la **régularité**.
 
 ---
 
-## GROUPE C — Opérateurs (4 mots)
+## GROUPE C — Opérateurs (4 mots) · ✅ **complet**
 
-- [ ] `tonton` — addition `+` ✅ *validé par le locuteur*
-- [ ] `zabou` — soustraction `−` ✅ *validé par le locuteur*
-- [ ] `______________` — multiplication `×` ⏳ **forme à confirmer**
-- [ ] `______________` — division `÷` ⏳ **forme à confirmer**
+- [x] `tonton` — addition `+` ✅ *validé par le locuteur*
+- [x] `zabou` — soustraction `−` ✅ *validé par le locuteur*
+- [x] `ingaybor` — multiplication `×` ✅ *validé le 2026-07-25*
+- [x] `inafaysor` — division `÷` ✅ *validé le 2026-07-25*
 
-> Les formes de `×` et `÷` ne sont pas encore fixées (cf. `docs/lexique-operateurs-a-valider.md`).
-> Enregistre-les dès que ton locuteur les aura arrêtées.
+> Les quatre formes sont **intégrées au lexique** (`grammar_version` 1.4.0) : les quatre
+> opérations sont désormais reconnues, évaluées et prononçables.
+
+> ⚠️ **Ces mots servent aussi à ce que l'app parle**, pas seulement à ce qu'elle comprenne :
+> pour demander « c'est bien vingt-trois plus quinze ? », elle doit **relire l'opération**.
+> Sans `tonton` et `zabou` dans la banque, aucune confirmation d'opération n'est prononçable.
+> Enregistre-les avec l'**intonation plate** du groupe A (ce sont des briques à assembler),
+> même si tu les redis autrement dans les phrases du groupe E.
 
 ---
 
@@ -134,12 +150,17 @@ L'utilisateur cible **ne lit pas** : tout ce que l'application « dit » doit ê
 Ces phrases doivent d'abord être **formulées par ton locuteur natif**, puis enregistrées
 d'un seul tenant (ce sont des phrases, pas des mots à assembler).
 
-| Rôle | Quand l'app le dit | ✍️ Formulation zarma |
-|---|---|---|
-| **Confirmation** | « C'est bien … ? » avant de valider | |
-| **Répéter** | Quand elle n'a pas compris (`repeat`) | |
-| **Impossible** | Résultat négatif ou hors limites | |
-| **Résultat** | « ça fait … » (si une amorce est nécessaire) | |
+| Rôle | Nom de fichier | Quand l'app le dit | ✍️ Formulation zarma |
+|---|---|---|---|
+| **Confirmation** | `confirm.wav` | « C'est bien … ? » avant de valider | |
+| **Impossible** | `cannot_answer.wav` | Résultat négatif ou hors limites | |
+| **Répéter** | `repeat.wav` | Quand elle n'a pas compris (`repeat`) | |
+| **Résultat** | `result.wav` | « ça fait … » (si une amorce est nécessaire) | |
+
+> Les deux premières sont **attendues par le code** (`--prompt-dir`) : sans elles, la
+> confirmation et le refus restent muets — donc inutilisables (le code refuse de
+> prononcer un énoncé incomplet plutôt que d'en dire la moitié). Les deux autres sont
+> facultatives à ce stade.
 
 > ⚠️ La confirmation est le cas le **plus fréquent** : la mesure de la story 5.6 montre que
 > l'application demande confirmation dans la grande majorité des cas. Sans cette phrase
@@ -151,15 +172,18 @@ d'un seul tenant (ce sont des phrases, pas des mots à assembler).
 
 | Groupe | Nombre | Statut |
 |---|---|---|
-| A — Nombres | **35** | prêt à enregistrer |
-| B — Reste de division | **1** | prêt à enregistrer |
-| C — Opérateurs | **4** | 2 prêts, 2 en attente du locuteur |
-| D — Phrases | ~4 | à formuler d'abord |
-| **Total mots** | **40** | |
+| A — Nombres | **35** | ✅ enregistré (séance `voix2`) |
+| B — Reste de division | **1** | ✅ enregistré |
+| C — Opérateurs | **4** | ✅ enregistré, les 4 formes validées |
+| D — Phrases | 4 | ✅ enregistré (`confirm`, `cannot_answer`, `repeat`, `result`) |
+| **Total mots** | **40** | ✅ **40 / 40** |
 
 > Les 35 mots du groupe A sont **exactement** l'alphabet de l'automate de la grammaire
 > (vérifié) : ni un de plus, ni un de moins. En retirer un rend certains nombres
 > imprononçables ; en ajouter un ne sert à rien.
+>
+> La commande `--list-missing` ci-dessous est **la référence** : elle est calculée depuis
+> le lexique, donc elle ne peut pas être en retard sur ce document.
 
 ---
 
@@ -172,18 +196,33 @@ d'un seul tenant (ce sont des phrases, pas des mots à assembler).
 > Ici, **pas d'intonation plate** : parle naturellement, comme un utilisateur réel.
 > Nom de fichier : `<locuteur>-<nombre>.wav` (ex. `v4-372.wav`), même format WAV 16 kHz mono.
 
-### E1. Ré-enregistrer 4 fichiers devenus faux (locuteur v2)
+### E1. ~~Ré-enregistrer 4 fichiers devenus faux (locuteur v2)~~ — ❌ **demande annulée**
 
-Ces quatre-là avaient été dits avec l'ancien connecteur `nda`, qui n'existe plus :
+**Rien à refaire.** Ces quatre fichiers ont été écoutés par le locuteur : ils sont
+**corrects**. La demande précédente était une erreur d'analyse, corrigée ici.
 
-| Fichier | Nombre | Ancienne forme (périmée) | **Forme correcte à dire** |
-|---|---|---|---|
-| `v2-102.wav` | 102 | ~~zangou nda hinka~~ | **zangou di hinka** |
-| `v2-103.wav` | 103 | ~~zangou nda hinza~~ | **zangou di hinza** |
-| `v2-104.wav` | 104 | ~~zangou nda taci~~ | **zangou di taci** |
-| `v2-110.wav` | 110 | ~~zangou nda iwey~~ | **zangou di wey** |
+| Fichier | Nombre | Statut |
+|---|---|---|
+| `v2-102.wav` | 102 | ✅ à conserver |
+| `v2-103.wav` | 103 | ✅ à conserver |
+| `v2-104.wav` | 104 | ✅ à conserver |
+| `v2-110.wav` | 110 | ✅ à conserver |
 
-Tant qu'ils ne sont pas refaits, la mesure de performance est faussée sur ces 4 cas.
+**Pourquoi c'était une erreur.** `nda` n'a jamais cessé d'exister : le lexique le
+déclare comme **variante linguistique** de `da` (`connectors.groups.variants`).
+Ce que 1.2.0 a changé, c'est la forme que le générateur *produit*, pas celles que
+le système *accepte*. Vérifié sur le code :
+
+```
+normalize("zangou nda hinka")  →  "zangou da hinka"
+parse("zangou nda hinka")      →  102          ✅
+grammar.canonical_token("nda") →  "da"         ✅ (le décodeur contraint la connaît)
+```
+
+La vérité terrain de ces 4 audios est donc **exacte**, et la mesure n'est pas
+faussée. Un énoncé prononcé avec la variante est simplement un cas un peu plus
+exigeant pour le décodage — c'est-à-dire exactement ce qu'un corpus d'évaluation
+doit contenir, pas ce qu'il faut en retirer.
 
 ### E2. Un **4ᵉ locuteur** (le plus important)
 
@@ -192,17 +231,21 @@ n'existe donc **aucun jeu de réglage** distinct, ce qui bloque le calibrage du 
 Un 4ᵉ locuteur (idéalement une voix différente : autre sexe, autre âge, autre région)
 débloque ça. Même liste de nombres que les autres, ~35 fichiers.
 
-### E3. Enregistrements **non numériques** de contrôle
+### E3. Enregistrements **non numériques** de contrôle · 🟡 **matière fournie**
 
 Sans eux, impossible de régler le seuil à partir duquel l'app doit dire « je n'ai pas
 compris » plutôt que d'inventer un nombre. **~15 fichiers courts** suffisent :
 
-- [ ] 5 phrases zarma quelconques **sans aucun nombre** (« il fait chaud aujourd'hui »…)
-- [ ] 4 enregistrements de **bruit ambiant** seul (marché, rue, ventilateur)
-- [ ] 3 enregistrements de **silence** (micro ouvert, personne ne parle)
-- [ ] 3 enregistrements de **musique** ou de radio
+- [x] 5 phrases zarma quelconques **sans aucun nombre** (`phrase quelqconque1..5.wav`)
+- [x] 4 enregistrements de **bruit ambiant** seul (`bruit ambiant1..5.wav`)
+- [x] 3 enregistrements de **silence** (`silence1..2.wav`)
+- [x] 3 enregistrements de **musique** ou de radio (`music1..2.wav`)
 
-Nomme-les `nonum-01.wav`, `nonum-02.wav`, etc.
+Ces fichiers sont dans `~/Music/voix2`. ⚠️ **Bruit, silence et musique durent 3 min 23
+chacun** : ce sont de longues prises, pas des extraits courts. Il faudra les découper
+en segments de quelques secondes avant calibration — sinon un seul fichier pèse autant
+que tout le reste du corpus de contrôle. Les 5 phrases, elles (1,4 s à 6,6 s), sont
+directement exploitables.
 
 ### E4. Condition **bruit** (objectif de qualité non mesuré à ce jour)
 
@@ -210,25 +253,89 @@ Tout le corpus actuel est en condition calme. L'objectif « ≥ 90 % en bruit mo
 donc **jamais** été mesuré. Réenregistrer **~20 nombres** avec un bruit de fond réaliste
 (marché, radio) suffirait à le chiffrer. Nomme-les `<locuteur>-bruit-<nombre>.wav`.
 
+### E5. **Énoncés d'opérations complets** (story 6.1)
+
+> ⚠️ **Les 16 fichiers de `~/Music/operation/` ne servent PAS ici.** Un opérateur
+> prononcé seul ne sonne pas comme le même opérateur au milieu d'une phrase
+> (coarticulation) : ils servent à fixer le lexique, pas à mesurer.
+
+La liste exacte est **générée**, pas écrite à la main :
+
+```bash
+uv run python scripts/bench/build_benchmark_corpus.py plan-expressions \
+    --speakers v1 v2 v3 v4 \
+    --out dataset/benchmark/expression_recording_plan.jsonl
+```
+
+Chaque ligne donne la phrase à dire (`expected_prompt`). Depuis la validation de
+`×` et `÷` : **160 consignes** pour 4 locuteurs, couvrant les **quatre** opérations,
+dont **20 cas volontairement impossibles** (résultat négatif, dépassement) qui
+servent à mesurer que l'application refuse au lieu d'inventer, et **20 divisions
+avec reste**.
+
+C'est désormais **le seul enregistrement qui bloque encore la story 6.1** : sans
+lui, aucun chiffre de performance de la calculatrice vocale ne peut être publié.
+
 | Sous-groupe | Fichiers | Débloque |
 |---|---|---|
-| E1 — les 4 périmés | 4 | mesure juste sur ces cas |
+| ~~E1 — les 4 périmés~~ | ~~4~~ | ❌ annulé : les fichiers sont corrects |
 | E2 — 4ᵉ locuteur | ~35 | jeu de réglage + validité statistique |
 | E3 — non numériques | ~15 | le refus « je n'ai pas compris » |
 | E4 — condition bruit | ~20 | l'objectif de qualité en bruit |
+| E5 — opérations complètes | **160** | **toute la mesure de la calculatrice vocale** |
 
 ---
 
 ## Après l'enregistrement
 
+**Tu n'as pas à te soucier du format ni des fautes de frappe** : un outil convertit
+les prises brutes (n'importe quel taux d'échantillonnage, mono ou stéréo), coupe les
+silences promis au début et à la fin de chaque mot, corrige les noms évidents, et dit
+ce qui manque encore.
+
 ```bash
-# Vérifier qu'il ne manque rien
-uv run python scripts/speech/say_number.py --voice v1 --bank-dir ~/Music/voix2 --list-missing
+# 1) Bilan sans rien écrire
+uv run python scripts/speech/prepare_bank.py --source ~/Music/voix2 --dry-run
 
-# Vérifier la couverture (attendu : 1001/1001)
-uv run python scripts/speech/say_number.py --voice v1 --bank-dir ~/Music/voix2 --coverage
+# 2) Préparer la banque (les sources ne sont jamais modifiées)
+uv run python scripts/speech/prepare_bank.py \
+    --source ~/Music/voix2 --out dataset/voice/v4
 
-# Écouter un nombre difficile
-uv run python scripts/speech/say_number.py --voice v1 --bank-dir ~/Music/voix2 \
-    --number 372 --out /tmp/372.wav
+# 3) Vérifier la couverture (attendu : 1001/1001)
+uv run python scripts/speech/say_number.py --voice v4 \
+    --bank-dir dataset/voice/v4/words --prompt-dir dataset/voice/v4/prompts --coverage
+
+# 4) Écouter — un nombre difficile, un reste de division, une confirmation
+uv run python scripts/speech/say_number.py --voice v4 \
+    --bank-dir dataset/voice/v4/words --number 372 --out /tmp/372.wav
+uv run python scripts/speech/say_number.py --voice v4 \
+    --bank-dir dataset/voice/v4/words --expression "103 / 5" --out /tmp/reste.wav
+uv run python scripts/speech/say_number.py --voice v4 \
+    --bank-dir dataset/voice/v4/words --prompt-dir dataset/voice/v4/prompts \
+    --number 42 --confirm --out /tmp/confirm.wav
 ```
+
+### ✅ État mesuré au 2026-07-25 — séance `~/Music/voix2`
+
+| Mesure | Valeur |
+|---|---|
+| Mots préparés | **40 / 40** |
+| Consignes préparées | **4** (`confirm`, `cannot_answer`, `repeat`, `result`) |
+| **Couverture 0–1000** | **1001 / 1001** |
+| Grandes échelles | `1 234`, `100 005`, `999 999`, `1 000 000` ✅ |
+| Format des prises | 44,1 kHz mono 16 bits → converti automatiquement en 16 kHz |
+| Noms corrigés automatiquement | `igouwav`, `taciwav`, `waytaciwav`, `zongou` |
+
+**La banque vocale est complète.** Plus rien à enregistrer pour que l'application
+parle : n'importe quel nombre de 0 à 1 000 000, n'importe quel résultat d'opération
+(reste de division compris), la demande de confirmation et le message de refus.
+
+**Sur `zongou` / `zangou`** — décision : *les deux se disent*. `zangou` reste la forme
+que le système **produit** (une seule forme de surface par nombre, c'est ce qui rend
+le décodage déterministe), et `zongou` est déclarée **variante linguistique** :
+elle est acceptée à la reconnaissance, et l'outil de préparation range
+automatiquement `zongou.wav` sous `zangou.wav`. Aucun réenregistrement.
+
+> Les 1001/1001 annoncés en D3 avaient été mesurés **avant** la correction du
+> connecteur (`nda` → `da`/`di`) et avant l'ajout de `ga`. Cette séance couvre tout :
+> la promesse est de nouveau tenue, cette fois vérifiée sur les vrais fichiers.

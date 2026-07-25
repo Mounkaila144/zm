@@ -13,6 +13,20 @@ chaque entrée du manifest 5.1, puis agrège :
 Source ASR **interchangeable** (NFR9) : un ``SpeechRecognizer`` obtenu par
 configuration, ou un **rejeu** d'hypothèses pré-calculées (JSONL) — aucun modèle
 n'est appelé en dur, aucun GPU requis pour un rejeu.
+
+Story 6.1 — **Exact Expression Accuracy**
+-----------------------------------------
+
+Quand le manifest porte des expressions, une entrée n'est comptée juste que si
+**l'opération entière** l'est : les deux opérandes *et* l'opérateur *et* le
+résultat (reste de division compris). Reconnaître « 23 » dans « 23 + 15 » ne
+vaut rien pour l'utilisateur — d'où une métrique tout-ou-rien, ventilée par
+opérateur et par longueur d'opérandes.
+
+Les entrées volontairement **hors domaine** (résultat négatif, dépassement) ne
+sont pas des échecs : la bonne réponse y est un **refus**, avec le bon code. Le
+taux de refus correct est donc mesuré à part, et c'est lui qui atteste que
+« jamais de résultat inventé » (FR21/NFR14) tient sur le terrain.
 """
 
 from __future__ import annotations
@@ -34,11 +48,20 @@ from app.asr.base import AsrResult, AudioInput, Candidate, SpeechRecognizer
 from app.config import Settings
 from app.pipeline.confidence import is_known_asr_confusion
 from app.pipeline.recognition import run_recognition_pipeline
-from benchmark_corpus import ManifestEntry, classify, confusable_forms
+from benchmark_corpus import (
+    ManifestEntry,
+    classify,
+    confusable_forms,
+    parse_expression_spec,
+)
 from zarma_numbers import Lexicon
 
 #: Version du harnais (métadonnée de reproductibilité, NFR12).
-HARNESS_VERSION = "5.2.0"
+#: 6.1.0 — ajout de l'Exact Expression Accuracy et du taux de refus correct.
+HARNESS_VERSION = "6.1.0"
+
+#: Frontière courts/longs pour les opérandes (même seuil que le corpus 5.1).
+SHORT_OPERAND_MAX_EXCLUSIVE = 100
 
 #: Une source ASR mappe une entrée de manifest vers un ``AsrResult``.
 AsrSource = Callable[[ManifestEntry], AsrResult]
@@ -51,7 +74,7 @@ class EvaluationError(Exception):
 @dataclass(frozen=True, slots=True)
 class EntryEvaluation:
     audio_path: str
-    expected_number: int
+    expected_number: int | None
     recognized_number: int | None
     decision: str
     condition: str
@@ -60,6 +83,22 @@ class EntryEvaluation:
     correct: bool
     latency_ms: int
     model_version: str
+    #: Spécification attendue (``"23+15"``) — ``None`` pour un « nombre seul ».
+    expected_expression: str | None = None
+    #: Spécification effectivement reconnue, ``None`` si aucune.
+    recognized_expression: str | None = None
+    #: Code de refus attendu (entrée volontairement hors domaine).
+    expected_refusal: str | None = None
+    #: Code de refus effectivement produit.
+    recognized_refusal: str | None = None
+
+    @property
+    def is_expression(self) -> bool:
+        return self.expected_expression is not None
+
+    @property
+    def expects_refusal(self) -> bool:
+        return self.expected_refusal is not None
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,6 +129,29 @@ class DecisionRates:
     correct_acceptance_rate: float
 
 
+@dataclass(frozen=True, slots=True)
+class RefusalRates:
+    """Comportement du système sur les entrées volontairement hors domaine.
+
+    ``correct`` = a refusé **avec le bon code**. ``wrong_code`` = a refusé, mais
+    en invoquant autre chose. ``answered`` = a produit un résultat là où il n'en
+    existe pas : c'est le seul cas réellement grave (FR21).
+    """
+
+    total: int
+    correct: int
+    wrong_code: int
+    answered: int
+
+    @property
+    def correct_rate(self) -> float:
+        return round(self.correct / self.total, 4) if self.total else 0.0
+
+    @property
+    def invented_rate(self) -> float:
+        return round(self.answered / self.total, 4) if self.total else 0.0
+
+
 @dataclass(slots=True)
 class EvaluationResult:
     total: int
@@ -102,10 +164,25 @@ class EvaluationResult:
     confusion_pairs: list[ConfusionPair]
     model_versions: list[str]
     entries: list[EntryEvaluation] = field(default_factory=list)
+    #: Ventilations propres aux expressions (vides sur un corpus « nombres »).
+    by_operator: dict[str, GroupAccuracy] = field(default_factory=dict)
+    by_operand_length: dict[str, GroupAccuracy] = field(default_factory=dict)
+    expression_total: int = 0
+    expression_correct: int = 0
+    refusals: RefusalRates = field(
+        default_factory=lambda: RefusalRates(total=0, correct=0, wrong_code=0, answered=0)
+    )
 
     @property
     def accuracy(self) -> float:
         return round(self.correct / self.total, 4) if self.total else 0.0
+
+    @property
+    def exact_expression_accuracy(self) -> float:
+        """Part d'opérations **entièrement** justes (opérandes, opérateur, résultat)."""
+        if not self.expression_total:
+            return 0.0
+        return round(self.expression_correct / self.expression_total, 4)
 
 
 # --------------------------------------------------------------------------- #
@@ -231,6 +308,21 @@ def _decision_rates(entries: Sequence[EntryEvaluation]) -> DecisionRates:
     )
 
 
+def _refusal_rates(entries: Sequence[EntryEvaluation]) -> RefusalRates:
+    """Agrège le comportement sur les entrées attendues hors domaine."""
+    expected = [entry for entry in entries if entry.expects_refusal]
+    correct = sum(1 for e in expected if e.recognized_refusal == e.expected_refusal)
+    answered = sum(1 for e in expected if e.recognized_number is not None)
+    wrong_code = sum(
+        1
+        for e in expected
+        if e.recognized_refusal is not None and e.recognized_refusal != e.expected_refusal
+    )
+    return RefusalRates(
+        total=len(expected), correct=correct, wrong_code=wrong_code, answered=answered
+    )
+
+
 def _confusion_pairs(
     entries: Sequence[EntryEvaluation],
     lexicon: Lexicon,
@@ -238,6 +330,10 @@ def _confusion_pairs(
 ) -> list[ConfusionPair]:
     counter: Counter[tuple[int, int | None]] = Counter()
     for entry in entries:
+        # Les entrées sans nombre attendu (refus) n'ont pas de « confusion de
+        # nombres » à documenter : elles sont couvertes par ``RefusalRates``.
+        if entry.expected_number is None:
+            continue
         if entry.recognized_number != entry.expected_number:
             counter[(entry.expected_number, entry.recognized_number)] += 1
 
@@ -268,6 +364,75 @@ def _confusion_pairs(
     return pairs[:top_n]
 
 
+def _expression_spec(expression: zarma_numbers.Expression) -> str:
+    """Spécification canonique d'une opération (``"23+15"``) — comparable telle quelle."""
+    return f"{expression.left}{expression.symbol}{expression.right}"
+
+
+def _operand_length_tag(entry: ManifestEntry) -> str:
+    """``short`` / ``long`` d'après l'opérande le plus grand de l'expression."""
+    expression = parse_expression_spec(entry.expected_expression or "")
+    largest = max(expression.left, expression.right)
+    return "short" if largest < SHORT_OPERAND_MAX_EXCLUSIVE else "long"
+
+
+def _evaluate_expression_entry(
+    entry: ManifestEntry, outcome, asr_result: AsrResult
+) -> EntryEvaluation:
+    """Vérité tout-ou-rien : l'opération **entière** est-elle juste ?
+
+    Reconnaître un seul opérande ne vaut rien pour l'utilisateur : opérandes,
+    opérateur, résultat et reste doivent tous correspondre. Sur une entrée
+    attendue hors domaine, la bonne réponse est au contraire le **bon code de
+    refus** — produire un nombre y est l'échec le plus grave.
+    """
+    recognized_spec = (
+        _expression_spec(outcome.expression) if outcome.expression is not None else None
+    )
+    result = outcome.expression_result
+
+    if entry.expected_refusal is not None:
+        correct = (
+            recognized_spec == entry.expected_expression
+            and outcome.refusal_code == entry.expected_refusal
+        )
+    else:
+        correct = (
+            recognized_spec == entry.expected_expression
+            and result is not None
+            and result.value == entry.expected_number
+            and result.remainder == entry.expected_remainder
+        )
+
+    expression = parse_expression_spec(entry.expected_expression or "")
+    tags = {
+        "expression",
+        f"operator:{expression.operator_name}",
+        _operand_length_tag(entry),
+    }
+    if entry.expected_refusal is not None:
+        tags.add("out_of_domain")
+    if entry.expected_remainder:
+        tags.add("remainder")
+
+    return EntryEvaluation(
+        audio_path=entry.audio_path,
+        expected_number=entry.expected_number,
+        recognized_number=result.value if result is not None else None,
+        decision=outcome.decision,
+        condition=entry.condition,
+        split=entry.split,
+        tags=frozenset(tags),
+        correct=correct,
+        latency_ms=asr_result.latency_ms,
+        model_version=asr_result.model_version,
+        expected_expression=entry.expected_expression,
+        recognized_expression=recognized_spec,
+        expected_refusal=entry.expected_refusal,
+        recognized_refusal=outcome.refusal_code,
+    )
+
+
 def evaluate(
     entries: Sequence[ManifestEntry],
     asr_source: AsrSource,
@@ -285,6 +450,9 @@ def evaluate(
     for entry in entries:
         asr_result = asr_source(entry)
         outcome = run_recognition_pipeline(asr_result, settings)
+        if entry.is_expression:
+            evaluations.append(_evaluate_expression_entry(entry, outcome, asr_result))
+            continue
         tags = classify(entry.expected_number, entry.expected_prompt, confusables)
         evaluations.append(
             EntryEvaluation(
@@ -304,6 +472,25 @@ def evaluate(
     correct = sum(1 for e in evaluations if e.correct)
     by_tag = _group_accuracy([(tag, e.correct) for e in evaluations for tag in sorted(e.tags)])
     latency = _summarize_latency([e.latency_ms for e in evaluations]).model_dump()
+
+    expressions = [e for e in evaluations if e.is_expression]
+    by_operator = _group_accuracy(
+        [
+            (tag.removeprefix("operator:"), e.correct)
+            for e in expressions
+            for tag in sorted(e.tags)
+            if tag.startswith("operator:")
+        ]
+    )
+    by_operand_length = _group_accuracy(
+        [
+            (tag, e.correct)
+            for e in expressions
+            for tag in sorted(e.tags)
+            if tag in {"short", "long"}
+        ]
+    )
+
     return EvaluationResult(
         total=len(evaluations),
         correct=correct,
@@ -315,6 +502,11 @@ def evaluate(
         confusion_pairs=_confusion_pairs(evaluations, lex, top_confusions),
         model_versions=sorted({e.model_version for e in evaluations}),
         entries=evaluations,
+        by_operator=by_operator,
+        by_operand_length=by_operand_length,
+        expression_total=len(expressions),
+        expression_correct=sum(1 for e in expressions if e.correct),
+        refusals=_refusal_rates(evaluations),
     )
 
 
@@ -385,6 +577,21 @@ def build_report(
             "exact_number_accuracy": result.accuracy,
             "total": result.total,
             "correct": result.correct,
+            # Story 6.1 — présent même à zéro sur un corpus « nombres seuls » :
+            # une métrique absente se lit comme une mesure oubliée.
+            "exact_expression_accuracy": result.exact_expression_accuracy,
+            "expression_total": result.expression_total,
+            "expression_correct": result.expression_correct,
+            "by_operator": _group_dict(result.by_operator),
+            "by_operand_length": _group_dict(result.by_operand_length),
+            "refusals": {
+                "total": result.refusals.total,
+                "correct": result.refusals.correct,
+                "wrong_code": result.refusals.wrong_code,
+                "answered": result.refusals.answered,
+                "correct_rate": result.refusals.correct_rate,
+                "invented_rate": result.refusals.invented_rate,
+            },
             "by_condition": _group_dict(result.by_condition),
             "by_tag": _group_dict(result.by_tag),
             "by_split": _group_dict(result.by_split),
@@ -436,6 +643,52 @@ def report_to_json(report: dict[str, object]) -> str:
     return json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
 
 
+def _expression_sections(metrics: dict) -> list[str]:
+    """Sections « expressions » du rapport — omises si le corpus n'en contient pas."""
+    if not metrics.get("expression_total"):
+        return []
+
+    lines = [
+        "",
+        f"## Exact Expression Accuracy : **{metrics['exact_expression_accuracy']:.4f}** "
+        f"({metrics['expression_correct']}/{metrics['expression_total']})",
+        "",
+        "> Tout-ou-rien : les deux opérandes, l'opérateur et le résultat "
+        "(reste compris) doivent être justes.",
+        "",
+        "### Par opérateur",
+        "",
+        "| opérateur | accuracy | correct/total |",
+        "|---|---|---|",
+    ]
+    for name, g in metrics["by_operator"].items():
+        lines.append(f"| {name} | {g['accuracy']:.4f} | {g['correct']}/{g['total']} |")
+
+    lines += [
+        "",
+        "### Par longueur d'opérandes",
+        "",
+        "| longueur | accuracy | correct/total |",
+        "|---|---|---|",
+    ]
+    for name, g in metrics["by_operand_length"].items():
+        lines.append(f"| {name} | {g['accuracy']:.4f} | {g['correct']}/{g['total']} |")
+
+    refusals = metrics["refusals"]
+    if refusals["total"]:
+        lines += [
+            "",
+            "### Cas hors domaine (la bonne réponse est un refus)",
+            "",
+            f"- refus correct : {refusals['correct_rate']:.4f} "
+            f"({refusals['correct']}/{refusals['total']})",
+            f"- refus au mauvais motif : {refusals['wrong_code']}",
+            f"- **résultat inventé** : {refusals['invented_rate']:.4f} "
+            f"({refusals['answered']}/{refusals['total']}) — doit rester à 0 (FR21)",
+        ]
+    return lines
+
+
 def report_to_markdown(report: dict[str, object]) -> str:
     """Rend un rapport Markdown lisible pour la revue QA."""
 
@@ -464,6 +717,8 @@ def report_to_markdown(report: dict[str, object]) -> str:
     lines += ["", "### Par tag", "", "| tag | accuracy | correct/total |", "|---|---|---|"]
     for name, g in metrics["by_tag"].items():  # type: ignore[index]
         lines.append(f"| {name} | {g['accuracy']:.4f} | {g['correct']}/{g['total']} |")
+
+    lines += _expression_sections(metrics)
 
     rates = metrics["decision_rates"]  # type: ignore[index]
     lines += [
@@ -534,6 +789,8 @@ __all__ = [
     "EvaluationError",
     "EvaluationResult",
     "GroupAccuracy",
+    "RefusalRates",
+    "SHORT_OPERAND_MAX_EXCLUSIVE",
     "asr_result_to_dict",
     "atomic_write_text",
     "build_report",

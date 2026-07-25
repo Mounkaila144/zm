@@ -309,29 +309,45 @@ class _Nfa:
         self.transitions[src].setdefault(token, set()).add(dst)
 
     def graft(self, trie: _Trie, root: int) -> list[int]:
-        """Greffe ``trie`` sur l'état ``root`` ; retourne node de trie -> état NFA."""
+        """Greffe ``trie`` sur l'état ``root`` ; retourne node de trie -> état NFA.
+
+        Les états terminaux ne sont **pas** marqués acceptants ici : c'est
+        l'appelant qui décide ce qu'« accepter » veut dire. Un même sous-langage
+        (les nombres) est en effet greffé deux fois dans la grammaire des
+        expressions, où seul le second opérande termine l'énoncé.
+        """
         mapping = [root] + [self.new_state() for _ in range(len(trie.children) - 1)]
         for node, edges in enumerate(trie.children):
             for token, child in edges.items():
                 self.add_edge(mapping[node], token, mapping[child])
-        for node in trie.terminals:
-            self.accepting.add(mapping[node])
         return mapping
 
+    def graft_terminals(self, trie: _Trie, root: int) -> tuple[list[int], set[int]]:
+        """``graft`` + l'ensemble des états NFA correspondant à une forme complète."""
+        mapping = self.graft(trie, root)
+        return mapping, {mapping[node] for node in trie.terminals}
 
-def _build_nfa(derived: _Derived) -> tuple[_Nfa, int]:
-    nfa = _Nfa()
-    start = nfa.new_state()
+
+def _graft_number_language(nfa: _Nfa, root: int, derived: _Derived) -> set[int]:
+    """Greffe la langue des **nombres** sur ``root``.
+
+    Retourne les états où un nombre complet vient d'être lu. Rien n'est marqué
+    acceptant : dans la grammaire des nombres ces états *sont* les acceptants ;
+    dans celle des expressions, ceux de l'opérande gauche portent au contraire
+    les arêtes de l'opérateur.
+    """
+    complete: set[int] = set()
 
     standalone_trie = _Trie()
     for form in derived.standalone.values():
         standalone_trie.insert(form)
     if derived.million is not None:
         standalone_trie.insert(derived.million)
-    nfa.graft(standalone_trie, start)
+    _, terminals = nfa.graft_terminals(standalone_trie, root)
+    complete |= terminals
 
     if not derived.multipliers:
-        return nfa, start
+        return complete
 
     # Branche des milliers : <millier> <multiplicateur> [ <queue(r)> ], où la
     # queue observée inclut son connecteur (``da …`` / ``di …``), ou, pour les
@@ -341,29 +357,32 @@ def _build_nfa(derived: _Derived) -> tuple[_Nfa, int]:
         m: multiplier_trie.insert(derived.thousand + form)
         for m, form in derived.multipliers.items()
     }
-    multiplier_states = nfa.graft(multiplier_trie, start)
+    multiplier_states, terminals = nfa.graft_terminals(multiplier_trie, root)
+    complete |= terminals
 
-    def entry_edges(trie: _Trie) -> list[tuple[str, int]]:
+    def entry_edges(trie: _Trie) -> tuple[list[tuple[str, int]], set[int]]:
         """Greffe ``trie`` sur un état neuf ; retourne ses arêtes racine.
 
         Recopier ces arêtes sur chaque état de fin de multiplicateur équivaut à
         une ε-transition vers la racine du trie : le connecteur est la première
         arête du trie, donc ses continuations en dépendent par construction.
         """
-        states = nfa.graft(trie, nfa.new_state())
-        return [(token, states[child]) for token, child in trie.children[0].items()]
+        states, ends = nfa.graft_terminals(trie, nfa.new_state())
+        return [(token, states[child]) for token, child in trie.children[0].items()], ends
 
     tail_trie = _Trie()
     for tail in derived.remainder_tails.values():
         tail_trie.insert(tail)
-    tail_edges = entry_edges(tail_trie)
+    tail_edges, tail_ends = entry_edges(tail_trie)
+    complete |= tail_ends
 
     marked_edges: list[tuple[str, int]] = []
     if derived.marker_prefix is not None:
         marked_trie = _Trie()
         for form in derived.marker_remainders.values():
             marked_trie.insert(derived.marker_prefix + form)
-        marked_edges = entry_edges(marked_trie)
+        marked_edges, marked_ends = entry_edges(marked_trie)
+        complete |= marked_ends
 
     for m, node in multiplier_nodes.items():
         required = derived.marker_required.get(m, False)
@@ -372,6 +391,45 @@ def _build_nfa(derived: _Derived) -> tuple[_Nfa, int]:
         for token, target in marked_edges if required else tail_edges:
             nfa.add_edge(multiplier_states[node], token, target)
 
+    return complete
+
+
+def _build_nfa(derived: _Derived) -> tuple[_Nfa, int]:
+    nfa = _Nfa()
+    start = nfa.new_state()
+    nfa.accepting = _graft_number_language(nfa, start, derived)
+    return nfa, start
+
+
+def _build_expression_nfa(
+    derived: _Derived, operators: Sequence[tuple[str, tuple[str, ...]]]
+) -> tuple[_Nfa, int]:
+    """NFA de ``EXPRESSION := NOMBRE OPÉRATEUR NOMBRE`` (story 6.1, task 2).
+
+    La grammaire des nombres n'est **pas réécrite** : elle est greffée deux fois
+    à l'identique, reliée par les mots d'opérateur. Seuls les états de fin du
+    **second** opérande sont acceptants — un nombre seul, ou un nombre suivi d'un
+    opérateur, ne termine pas un énoncé valide.
+    """
+    nfa = _Nfa()
+    start = nfa.new_state()
+    left_complete = _graft_number_language(nfa, start, derived)
+
+    right_root = nfa.new_state()
+    right_complete = _graft_number_language(nfa, right_root, derived)
+
+    for _name, tokens in operators:
+        # Chaîne de l'opérateur construite à rebours depuis l'opérande droit :
+        # elle est partagée par tous les états de fin de l'opérande gauche.
+        node = right_root
+        for token in reversed(tokens[1:]):
+            previous = nfa.new_state()
+            nfa.add_edge(previous, token, node)
+            node = previous
+        for state in left_complete:
+            nfa.add_edge(state, tokens[0], node)
+
+    nfa.accepting = right_complete
     return nfa, start
 
 
@@ -425,6 +483,9 @@ def _canonical_token_forms(lex: Lexicon) -> set[str]:
     for scale in lex.scales.values():
         if scale.canonical:
             forms.add(scale.canonical)
+    for operator in lex.operators.values():
+        if operator.canonical:
+            forms.update(operator.canonical.split())
     return forms
 
 
@@ -475,6 +536,8 @@ def _build_pronunciations(lex: Lexicon, alphabet: frozenset[str]) -> dict[str, t
         register(term.canonical, term.variants)
     for scale in lex.scales.values():
         register(scale.canonical, scale.variants)
+    for operator in lex.operators.values():
+        register(operator.canonical, operator.variants)
 
     return {token: tuple(sorted(forms)) for token, forms in alternatives.items()}
 
@@ -501,6 +564,12 @@ class NumberGrammar:
     pronunciations: Mapping[str, tuple[str, ...]]
     _transitions: tuple[Mapping[str, int], ...]
     _canonical_by_spelling: Mapping[str, str]
+    #: Langue décrite : ``"numbers"`` (5.6) ou ``"expressions"`` (6.1). Même
+    #: structure, même interface — c'est ce qui permet au décodeur contraint de
+    #: changer de langue sans changer d'algorithme.
+    kind: str = "numbers"
+    #: Mots d'opérateur présents dans l'automate (vide pour ``"numbers"``).
+    operator_tokens: frozenset[str] = frozenset()
 
     # --- structure ---
 
@@ -586,11 +655,15 @@ def _as_tokens(text_or_tokens: str | Iterable[str]) -> tuple[str, ...]:
     return tuple(text_or_tokens)
 
 
-def build_grammar(lexicon: Lexicon | None = None) -> NumberGrammar:
-    """Construit la grammaire à partir du lexique et du **générateur** (source unique)."""
-    lex = lexicon if lexicon is not None else load_lexicon()
-    derived = _derive_forms(lex)
-    nfa, start = _build_nfa(derived)
+def _finalize(
+    lex: Lexicon,
+    nfa: _Nfa,
+    start: int,
+    *,
+    kind: str,
+    operator_tokens: frozenset[str] = frozenset(),
+) -> NumberGrammar:
+    """Déterminise, construit la table de prononciations et emballe le DFA."""
     transitions, accepting, dfa_start = _determinize(nfa, start)
 
     alphabet = frozenset(token for edges in transitions for token in edges)
@@ -609,7 +682,90 @@ def build_grammar(lexicon: Lexicon | None = None) -> NumberGrammar:
         pronunciations=MappingProxyType(pronunciations),
         _transitions=tuple(MappingProxyType(dict(edges)) for edges in transitions),
         _canonical_by_spelling=MappingProxyType(canonical_by_spelling),
+        kind=kind,
+        operator_tokens=operator_tokens,
     )
+
+
+def build_grammar(lexicon: Lexicon | None = None) -> NumberGrammar:
+    """Construit la grammaire à partir du lexique et du **générateur** (source unique)."""
+    lex = lexicon if lexicon is not None else load_lexicon()
+    derived = _derive_forms(lex)
+    nfa, start = _build_nfa(derived)
+    return _finalize(lex, nfa, start, kind="numbers")
+
+
+def _operator_surfaces(lex: Lexicon, number_alphabet: frozenset[str]) -> list[tuple[str, ...]]:
+    """Mots d'opérateur **résolus**, après contrôle de non-ambiguïté.
+
+    C'est ici que se joue le risque identifié par la story : la composition des
+    nombres utilise déjà des connecteurs (``da`` / ``di`` / ``cindi``). Si un mot
+    d'opérateur en était un, une même suite de mots serait à la fois *un nombre*
+    et *une opération*, et le décodage contraint n'aurait plus de chemin unique.
+
+    Le contrôle n'est pas une supposition, c'est une **vérification mécanique**
+    à chaque construction : l'alphabet des opérateurs doit être disjoint de celui
+    des nombres, sinon ``GrammarDerivationError``. La disjonction suffit à établir
+    la non-ambiguïté de la langue des expressions :
+
+    1. un mot d'opérateur ne peut apparaître dans aucun nombre, donc toute
+       expression acceptée contient **exactement une** occurrence d'un mot
+       d'opérateur — la découpe ``gauche | opérateur | droite`` est unique ;
+    2. chaque côté est un nombre, et la langue des nombres est elle-même
+       univoque sur la plage résolue (invariant ``parse(generate(n)) == n``).
+
+    Une expression acceptée a donc une seule lecture. La déterminisation, elle,
+    ne fait que rendre le parcours efficace : elle n'apporte pas cette propriété.
+    """
+    surfaces: list[tuple[str, ...]] = []
+    for name in sorted(lex.operators):
+        operator = lex.operators[name]
+        if operator.canonical is None:
+            continue  # forme non validée par un locuteur : absente, jamais devinée
+        tokens = tuple(operator.canonical.split())
+        if not tokens:
+            raise GrammarDerivationError(f"Opérateur '{name}' : forme canonique vide.")
+        collisions = sorted(set(tokens) & number_alphabet)
+        if collisions:
+            raise GrammarDerivationError(
+                f"Opérateur '{name}' ambigu : {collisions} appartient déjà à la "
+                "grammaire des nombres. Une même suite de mots serait lisible "
+                "comme un nombre et comme une opération."
+            )
+        surfaces.append(tokens)
+    return surfaces
+
+
+def build_expression_grammar(lexicon: Lexicon | None = None) -> NumberGrammar:
+    """Automate de ``NOMBRE OPÉRATEUR NOMBRE`` (story 6.1, task 2).
+
+    Même type, même interface que ``build_grammar`` — le décodeur contraint de
+    la story 5.6 change donc de **langue**, pas d'algorithme.
+
+    Les opérateurs non résolus au lexique (``canonical: null``) sont simplement
+    absents : la grammaire décrit alors les seules opérations réellement
+    attestées. Si **aucun** opérateur n'est résolu, la construction échoue
+    (``GrammarDerivationError``) plutôt que de produire un automate vide qui
+    n'accepterait rien en silence.
+    """
+    lex = lexicon if lexicon is not None else load_lexicon()
+    derived = _derive_forms(lex)
+
+    number_nfa, number_start = _build_nfa(derived)
+    number_alphabet = frozenset(token for edges in number_nfa.transitions for token in edges)
+    surfaces = _operator_surfaces(lex, number_alphabet)
+    if not surfaces:
+        raise GrammarDerivationError(
+            "Aucun opérateur résolu dans le lexique : la grammaire des "
+            "expressions n'accepterait rien. Compléter `operators` "
+            "(cf. docs/lexique-operateurs-a-valider.md)."
+        )
+    del number_nfa, number_start  # n'a servi qu'à observer l'alphabet des nombres
+
+    named = [(" ".join(tokens), tokens) for tokens in surfaces]
+    nfa, start = _build_expression_nfa(derived, named)
+    operator_tokens = frozenset(token for tokens in surfaces for token in tokens)
+    return _finalize(lex, nfa, start, kind="expressions", operator_tokens=operator_tokens)
 
 
 @lru_cache(maxsize=1)
@@ -618,4 +774,16 @@ def load_grammar() -> NumberGrammar:
     return build_grammar()
 
 
-__all__ = ["NumberGrammar", "build_grammar", "load_grammar"]
+@lru_cache(maxsize=1)
+def load_expression_grammar() -> NumberGrammar:
+    """Grammaire des expressions du lexique embarqué (construite une seule fois)."""
+    return build_expression_grammar()
+
+
+__all__ = [
+    "NumberGrammar",
+    "build_grammar",
+    "build_expression_grammar",
+    "load_grammar",
+    "load_expression_grammar",
+]

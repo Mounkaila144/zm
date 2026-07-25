@@ -39,14 +39,19 @@ async def history(
             id=row.id,
             recognized_number=row.recognized_number,
             zarma_text=(
-                zarma_numbers.generate(row.recognized_number)
-                if row.recognized_number is not None
-                else ""
+                row.expression["zarma_text"]
+                if row.expression
+                else (
+                    zarma_numbers.generate(row.recognized_number)
+                    if row.recognized_number is not None
+                    else ""
+                )
             ),
             normalized_text=row.normalized_text,
             confidence=row.confidence,
             decision=row.decision,
             alternatives=row.alternatives,
+            expression=row.expression,
             model_version=row.model_version,
             grammar_version=row.grammar_version,
             latency_total_ms=row.latency_total_ms or 0,

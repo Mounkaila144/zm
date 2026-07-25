@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,8 @@ import 'package:zarma_mobile/feedback/feedback_models.dart';
 import 'package:zarma_mobile/feedback/feedback_repository.dart';
 import 'package:zarma_mobile/models/recognition_result.dart';
 import 'package:zarma_mobile/navigation/app_routes.dart';
+import 'package:zarma_mobile/speech/voice_bank.dart';
+import 'package:zarma_mobile/speech/zarma_speaker.dart';
 
 class RecordingFeedbackRepository implements FeedbackRepository {
   RecordingFeedbackRepository(this.handler);
@@ -31,8 +34,8 @@ class RecordingFeedbackRepository implements FeedbackRepository {
 void main() {
   testWidgets('confirm ordonne et déduplique proposition et alternatives',
       (WidgetTester tester) async {
-    final RecordingFeedbackRepository repository =
-        RecordingFeedbackRepository((FeedbackRequest r) async => _receiptFor(r));
+    final RecordingFeedbackRepository repository = RecordingFeedbackRepository(
+        (FeedbackRequest r) async => _receiptFor(r));
 
     await _pumpConfirmation(tester, _confirmResult(), repository);
 
@@ -45,8 +48,8 @@ void main() {
 
   testWidgets('sélection de la proposition principale envoie confirmed',
       (WidgetTester tester) async {
-    final RecordingFeedbackRepository repository =
-        RecordingFeedbackRepository((FeedbackRequest r) async => _receiptFor(r));
+    final RecordingFeedbackRepository repository = RecordingFeedbackRepository(
+        (FeedbackRequest r) async => _receiptFor(r));
 
     await _pumpConfirmation(tester, _confirmResult(), repository);
     await tester.tap(find.byKey(const Key('candidate-option-42')));
@@ -62,8 +65,8 @@ void main() {
 
   testWidgets('sélection d’une alternative confirme ce nombre',
       (WidgetTester tester) async {
-    final RecordingFeedbackRepository repository =
-        RecordingFeedbackRepository((FeedbackRequest r) async => _receiptFor(r));
+    final RecordingFeedbackRepository repository = RecordingFeedbackRepository(
+        (FeedbackRequest r) async => _receiptFor(r));
 
     await _pumpConfirmation(tester, _confirmResult(), repository);
     await tester.tap(find.byKey(const Key('candidate-option-7')));
@@ -78,8 +81,8 @@ void main() {
 
   testWidgets('Répéter depuis confirm envoie repeat_requested',
       (WidgetTester tester) async {
-    final RecordingFeedbackRepository repository =
-        RecordingFeedbackRepository((FeedbackRequest r) async => _receiptFor(r));
+    final RecordingFeedbackRepository repository = RecordingFeedbackRepository(
+        (FeedbackRequest r) async => _receiptFor(r));
 
     await _pumpConfirmation(tester, _confirmResult(), repository);
     await tester.tap(find.byKey(const Key('request-repeat-button')));
@@ -95,8 +98,8 @@ void main() {
 
   testWidgets('Corriger ouvre la route sans envoyer de feedback',
       (WidgetTester tester) async {
-    final RecordingFeedbackRepository repository =
-        RecordingFeedbackRepository((FeedbackRequest r) async => _receiptFor(r));
+    final RecordingFeedbackRepository repository = RecordingFeedbackRepository(
+        (FeedbackRequest r) async => _receiptFor(r));
 
     await _pumpConfirmation(tester, _confirmResult(), repository);
     await tester.tap(find.byKey(const Key('open-correction-button')));
@@ -108,8 +111,8 @@ void main() {
 
   testWidgets('repeat n’affiche aucun candidat et invite à réenregistrer',
       (WidgetTester tester) async {
-    final RecordingFeedbackRepository repository =
-        RecordingFeedbackRepository((FeedbackRequest r) async => _receiptFor(r));
+    final RecordingFeedbackRepository repository = RecordingFeedbackRepository(
+        (FeedbackRequest r) async => _receiptFor(r));
 
     await _pumpConfirmation(tester, _repeatResult(), repository);
 
@@ -130,8 +133,8 @@ void main() {
 
   testWidgets('un confirm sans candidat exploitable bascule en répétition',
       (WidgetTester tester) async {
-    final RecordingFeedbackRepository repository =
-        RecordingFeedbackRepository((FeedbackRequest r) async => _receiptFor(r));
+    final RecordingFeedbackRepository repository = RecordingFeedbackRepository(
+        (FeedbackRequest r) async => _receiptFor(r));
 
     await _pumpConfirmation(tester, _confirmWithoutCandidate(), repository);
 
@@ -184,24 +187,73 @@ void main() {
     await tester.pump();
 
     expect(repository.requests, hasLength(1));
-    expect(find.byKey(const Key('feedback-progress-indicator')), findsOneWidget);
+    expect(
+        find.byKey(const Key('feedback-progress-indicator')), findsOneWidget);
 
     pending.complete(_receiptFor(repository.requests.single));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('result-screen')), findsOneWidget);
+  });
+
+  testWidgets(
+      'une opération est répétée après trois secondes jusqu’à confirmation',
+      (WidgetTester tester) async {
+    final List<Uint8List> played = <Uint8List>[];
+    final RecordingFeedbackRepository repository = RecordingFeedbackRepository(
+        (FeedbackRequest r) async => _receiptFor(r));
+
+    await _pumpConfirmation(
+      tester,
+      _expressionResult(),
+      repository,
+      bank: _expressionVoiceBank(),
+      played: played,
+    );
+
+    expect(played, hasLength(1));
+    expect(
+      find.byKey(const Key('confirm-expression-replay-button')),
+      findsNothing,
+    );
+    expect(find.byKey(const Key('confirm-expression-button')), findsOneWidget);
+    expect(find.byKey(const Key('request-repeat-button')), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 2999));
+    expect(played, hasLength(1));
+
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pumpAndSettle();
+    expect(played, hasLength(2));
+
+    await tester.tap(find.byKey(const Key('confirm-expression-button')));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 6));
+
+    expect(repository.requests, hasLength(1));
+    expect(repository.requests.single.feedbackType, FeedbackType.confirmed);
+    expect(repository.requests.single.proposedNumber, 38);
+    expect(find.byKey(const Key('calculation-screen')), findsOneWidget);
+    expect(played, hasLength(2), reason: 'la boucle doit être arrêtée');
   });
 }
 
 Future<void> _pumpConfirmation(
   WidgetTester tester,
   RecognitionResult result,
-  FeedbackRepository repository,
-) async {
+  FeedbackRepository repository, {
+  VoiceBank? bank,
+  List<Uint8List>? played,
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: <Override>[
         feedbackRepositoryProvider.overrideWithValue(repository),
         anonIdProvider.overrideWithValue('anon-id'),
+        if (bank != null) voiceBankProvider.overrideWith((ref) async => bank),
+        if (played != null)
+          wavPlayerProvider.overrideWithValue(
+            (Uint8List wav) async => played.add(wav),
+          ),
       ],
       child: MaterialApp(
         onGenerateRoute: AppRoutes.onGenerateRoute,
@@ -216,7 +268,14 @@ Future<void> _pumpConfirmation(
   );
   final NavigatorState navigator = tester.state(find.byType(Navigator));
   navigator.pushNamed(AppRoutes.confirmation, arguments: result);
-  await tester.pumpAndSettle();
+  if (played == null) {
+    await tester.pumpAndSettle();
+    return;
+  }
+  await tester.pump();
+  for (int attempt = 0; attempt < 20 && played.isEmpty; attempt++) {
+    await tester.pump(const Duration(milliseconds: 1));
+  }
 }
 
 RecognitionResult _confirmResult() {
@@ -267,6 +326,46 @@ RecognitionResult _confirmWithoutCandidate() {
     ],
     modelVersion: 'mock',
     grammarVersion: 'v1',
+  );
+}
+
+RecognitionResult _expressionResult() {
+  return const RecognitionResult(
+    id: 'expression-id',
+    recognizedNumber: null,
+    zarmaText: 'waranka cindi hinza tonton iwey cindi gou',
+    normalizedText: 'waranka cindi hinza tonton iwey cindi gou',
+    confidence: 0.95,
+    decision: Decision.accept,
+    modelVersion: 'ctc',
+    grammarVersion: 'v1',
+    expression: RecognizedExpression(
+      left: 23,
+      operator: '+',
+      right: 15,
+      zarmaText: 'waranka cindi hinza tonton iwey cindi gou',
+      result: 38,
+      resultZarmaText: 'waranza cindi hakou',
+    ),
+  );
+}
+
+VoiceBank _expressionVoiceBank() {
+  const List<String> words = <String>[
+    'waranka',
+    'cindi',
+    'hinza',
+    'tonton',
+    'iwey',
+    'gou',
+  ];
+  return VoiceBank(
+    assetByWord: <String, String>{
+      for (final String word in words) word: 'assets/voice/words/$word.wav',
+    },
+    assetByPrompt: const <String, String>{
+      kPromptConfirm: 'assets/voice/prompts/confirm.wav',
+    },
   );
 }
 

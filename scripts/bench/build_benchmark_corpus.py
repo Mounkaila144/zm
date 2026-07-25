@@ -9,6 +9,12 @@ split strict par locuteur. Trois sous-commandes :
         --speakers spk01 spk02 spk03 spk04 \
         --out dataset/benchmark/recording_plan.jsonl
 
+    # 1 bis) Générer le plan d'ÉNONCÉS D'OPÉRATIONS (story 6.1) — énoncés
+    #        complets, jamais des opérateurs isolés, cas hors domaine inclus :
+    uv run python scripts/bench/build_benchmark_corpus.py plan-expressions \
+        --speakers spk01 spk02 spk03 spk04 \
+        --out dataset/benchmark/expression_recording_plan.jsonl
+
     # 2) Assembler le manifest versionné depuis l'index des audios enregistrés :
     uv run python scripts/bench/build_benchmark_corpus.py build \
         --source dataset/benchmark/source_index.jsonl \
@@ -38,11 +44,14 @@ if str(_BENCH_DIR) not in sys.path:
 import zarma_numbers  # noqa: E402
 from benchmark_corpus import (  # noqa: E402
     DEFAULT_SPLIT_SEED,
+    build_expression_recording_plan,
     build_manifest,
     build_recording_plan,
+    expression_plan_dict,
     plan_dict,
     read_manifest,
     read_source,
+    select_target_expressions,
     select_target_numbers,
     validate_manifest,
     write_jsonl,
@@ -60,6 +69,31 @@ def _cmd_plan(args: argparse.Namespace) -> int:
         f"Plan écrit : {len(plan)} consigne(s) pour {len(args.speakers)} locuteur(s) "
         f"[couverture : {', '.join(sorted(tags))}] → {args.out}"
     )
+    return 0
+
+
+def _cmd_plan_expressions(args: argparse.Namespace) -> int:
+    lexicon = zarma_numbers.load_lexicon()
+    targets = select_target_expressions(lexicon)
+    plan = build_expression_recording_plan(targets, args.speakers)
+    write_jsonl(args.out, [expression_plan_dict(item) for item in plan])
+
+    tags = {tag for item in plan for tag in item.tags}
+    refusals = sum(1 for item in plan if item.expected_refusal is not None)
+    unresolved = sorted(
+        name for name, operator in lexicon.operators.items() if not operator.resolved
+    )
+    print(
+        f"Plan d'expressions écrit : {len(plan)} consigne(s) pour "
+        f"{len(args.speakers)} locuteur(s), dont {refusals} cas hors domaine "
+        f"[couverture : {', '.join(sorted(tags))}] → {args.out}"
+    )
+    if unresolved:
+        print(
+            f"⚠️  Opérateurs non couverts (forme zarma non validée) : {', '.join(unresolved)}. "
+            "Compléter docs/lexique-operateurs-a-valider.md les fera apparaître ici.",
+            file=sys.stderr,
+        )
     return 0
 
 
@@ -116,6 +150,14 @@ def _build_parser() -> argparse.ArgumentParser:
     plan_cmd.add_argument("--speakers", nargs="+", required=True, help="Labels de locuteurs.")
     plan_cmd.add_argument("--out", type=Path, required=True)
     plan_cmd.set_defaults(func=_cmd_plan)
+
+    expressions_cmd = sub.add_parser(
+        "plan-expressions",
+        help="Générer le plan d'enregistrement des ÉNONCÉS D'OPÉRATIONS (story 6.1).",
+    )
+    expressions_cmd.add_argument("--speakers", nargs="+", required=True)
+    expressions_cmd.add_argument("--out", type=Path, required=True)
+    expressions_cmd.set_defaults(func=_cmd_plan_expressions)
 
     build_cmd = sub.add_parser("build", help="Assembler le manifest depuis l'index source.")
     build_cmd.add_argument("--source", type=Path, required=True)

@@ -248,3 +248,40 @@ class TestIntegration:
         assert result.model_version == "mock-1.0.0"
         assert isinstance(result.latency_ms, int)
         assert isinstance(result.candidates, list)
+
+
+# --- ASR_MOCK_TEXT : confort de dev, sans effet hors du mock (story 6.1) ---
+
+
+def test_mock_recognizer_is_silent_by_default():
+    """Défaut inchangé : le mock ne transcrit rien, donc le pipeline dit `repeat`."""
+    from app.asr.base import AudioInput
+    from app.asr.factory import get_recognizer
+    from app.config import Settings
+
+    recognizer = get_recognizer(Settings(ASR_MODE="mock"))
+    assert recognizer.transcribe(AudioInput(data=b"", format="wav")).text == ""
+
+
+def test_mock_text_is_returned_when_configured():
+    from app.asr.base import AudioInput
+    from app.asr.factory import get_recognizer
+    from app.config import Settings
+
+    settings = Settings(ASR_MODE="mock", ASR_MOCK_TEXT="waranka cindi hinza")
+    recognizer = get_recognizer(settings)
+    assert recognizer.transcribe(AudioInput(data=b"", format="wav")).text == ("waranka cindi hinza")
+
+
+def test_mock_text_has_no_effect_on_a_real_recognizer():
+    """Garde-fou : la commodité de dev ne doit jamais atteindre le mode réel."""
+    from app.asr.factory import get_recognizer
+    from app.asr.remote import RemoteCtcRecognizer
+    from app.config import Settings
+
+    settings = Settings(
+        ASR_MODE="ctc",
+        ASR_ENDPOINT_URL="https://example.invalid/transcribe",
+        ASR_MOCK_TEXT="waranka cindi hinza",
+    )
+    assert isinstance(get_recognizer(settings), RemoteCtcRecognizer)

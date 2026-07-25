@@ -53,6 +53,14 @@ testpaths = [
     # Tests du décodeur contraint (story 5.6) — sans GPU : decoding.py est
     # auto-contenu (numpy) et chargé par importlib (cf. services/asr/tests/conftest.py).
     "services/asr/tests",
+    # Restitution vocale par concaténation (story 6.1) — logique pure, WAV
+    # synthétiques en tmp_path : ni audio réel, ni réseau.
+    "scripts/speech/tests",
 ]
-pythonpath = ["packages/zarma_numbers/src", "services/api", "scripts/bench"]
+pythonpath = [
+    "packages/zarma_numbers/src",
+    "services/api",
+    "scripts/bench",
+    "scripts/speech",
+]
 addopts = "-ra"

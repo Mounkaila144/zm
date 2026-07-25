@@ -8,6 +8,8 @@ linguistique). Il expose le pipeline complet : ``load_lexicon``, ``generate``
 """
 
 from .exceptions import (
+    DomainError,
+    ExpressionParseError,
     GenerationError,
     GrammarDerivationError,
     LexiconError,
@@ -16,9 +18,27 @@ from .exceptions import (
     ParseError,
     UnresolvedFormError,
 )
-from .generator import generate
-from .grammar import NumberGrammar, build_grammar, load_grammar
-from .loader import Lexicon, load_lexicon
+from .expressions import (
+    Expression,
+    ExpressionParseResult,
+    ExpressionResult,
+    evaluate,
+    evaluate_text,
+    parse_expression,
+    parse_expression_detailed,
+    render_expression,
+    render_result,
+    supported_operators,
+)
+from .generator import generate, generate_combined
+from .grammar import (
+    NumberGrammar,
+    build_expression_grammar,
+    build_grammar,
+    load_expression_grammar,
+    load_grammar,
+)
+from .loader import Lexicon, Operator, load_lexicon
 from .normalizer import NormalizationResult, normalize, normalize_with_trace
 from .parser import ParseCandidate, ParseResult, parse, parse_detailed
 from .validator import InvariantReport, validate_invariant
@@ -28,8 +48,10 @@ __version__ = "0.1.0"
 __all__ = [
     "__version__",
     "Lexicon",
+    "Operator",
     "load_lexicon",
     "generate",
+    "generate_combined",
     "normalize",
     "normalize_with_trace",
     "NormalizationResult",
@@ -41,7 +63,19 @@ __all__ = [
     "InvariantReport",
     "NumberGrammar",
     "build_grammar",
+    "build_expression_grammar",
     "load_grammar",
+    "load_expression_grammar",
+    "Expression",
+    "ExpressionResult",
+    "ExpressionParseResult",
+    "parse_expression",
+    "parse_expression_detailed",
+    "evaluate",
+    "evaluate_text",
+    "render_expression",
+    "render_result",
+    "supported_operators",
     "LexiconError",
     "LexiconValidationError",
     "GenerationError",
@@ -49,4 +83,6 @@ __all__ = [
     "UnresolvedFormError",
     "GrammarDerivationError",
     "ParseError",
+    "ExpressionParseError",
+    "DomainError",
 ]

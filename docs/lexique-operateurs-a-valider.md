@@ -1,5 +1,22 @@
 # Fiche de transcription — opérateurs arithmétiques zarma
 
+> ## ✅ FICHE CLOSE — D1 résolue le 2026-07-25
+>
+> Les quatre formes courtes sont validées et **intégrées au lexique** (`lexicon.yaml`,
+> `grammar_version` **1.4.0**) :
+>
+> | Opération | Forme canonique | Variantes | Enregistré |
+> |---|---|---|---|
+> | Addition `+` | `tonton` | `itonton` | ✅ `tonton.wav` |
+> | Soustraction `−` | `zabou` | `izabou` | ✅ `zabou.wav` |
+> | Multiplication `×` | `ingaybor` | — | ✅ `ingaybor.wav` |
+> | Division `÷` | `inafaysor` | — | ✅ `inafaysor.wav` |
+>
+> Conséquence : les 4 opérations sont reconnues, évaluées et prononçables de bout en
+> bout. Le plan de corpus est passé de 84 à **160 consignes**.
+>
+> La suite du document est conservée comme **trace de la session** de transcription.
+
 > **À faire remplir par un locuteur natif zarmaphone.** Story 6.1, Task 0 (décision D1).
 >
 > ⚠️ Les colonnes « brouillon » ci-dessous sont ce que le **modèle de reconnaissance** a cru
@@ -58,8 +75,8 @@ Pour chaque opération, **une** forme de référence + les variantes légitimes.
 |---|--------------------|--------------------------|
 | Addition `+` | tonton             | itonton                  |
 | Soustraction `−` | zabou              | izabou                   |
-| Multiplication `×` |                   |                          |
-| Division `÷` |                    |                          |
+| Multiplication `×` | ingaybor          |                          |
+| Division `÷` | inafaysor          |                          |
 
 ## 3. ❓ Questions structurelles (déterminent la faisabilité)
 
@@ -73,8 +90,17 @@ français) ?
 
 - Addition : ✍️tonton  (`tonton` seul  )
 - Soustraction : ✍️ zabou  (`zabu` seul )
-- Multiplication : ✍️ ______________
-- Division : ✍️ ______________
+- Multiplication : ✍️ ingaybor
+- Division : ✍️ inafaysor
+
+> ✅ **Réponse : oui, un mot court existe pour les quatre.** C'était la meilleure issue
+> possible : la machine distingue les opérations sur un mot entier, et non sur la
+> dernière syllabe d'une phrase de quatre mots dont trois seraient communs.
+>
+> ⚠️ La contradiction relevée plus haut sur `kalin gay boor` (donné pour `×` dans le
+> tableau par locuteur, pour `÷` dans l'exemple Q2) est **tranchée par les formes
+> courtes** : `ingaybor` = `×`, `inafaysor` = `÷`. L'exemple Q2 « 40 ÷ 8 » contenait
+> donc bien une erreur.
 
 > **Pourquoi ça compte :** si l'opérateur est une phrase de 4 mots dont 3 sont **communs aux
 > quatre opérations**, la machine ne distingue l'opération que sur **le dernier mot**. C'est plus

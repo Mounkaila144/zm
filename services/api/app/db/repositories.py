@@ -55,6 +55,11 @@ class RecognitionRepo:
             alternatives=[
                 alternative.model_dump(mode="json") for alternative in response.alternatives
             ],
+            expression=(
+                response.expression.model_dump(mode="json")
+                if response.expression is not None
+                else None
+            ),
             model_version=response.model_version,
             grammar_version=response.grammar_version,
             latency_total_ms=response.latency_total_ms,

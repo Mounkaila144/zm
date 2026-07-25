@@ -45,13 +45,28 @@ class _ProcessingScreenState extends ConsumerState<ProcessingScreen> {
     }
     _navigationScheduled = true;
     final RecognitionResult result = next.result!;
-    final String destination = result.decision == Decision.accept
-        ? AppRoutes.result
-        : AppRoutes.confirmation;
-    Navigator.of(context).pushReplacementNamed(
+    // Une opération doit toujours être relue et confirmée par la personne,
+    // même lorsque la confiance serveur permettrait de l'accepter directement.
+    // Le calcul n'est présenté qu'après cette confirmation explicite.
+    final String destination = result.expression != null
+        ? AppRoutes.confirmation
+        : result.decision == Decision.accept
+            ? AppRoutes.result
+            : AppRoutes.confirmation;
+    unawaited(_openDestination(destination, result));
+  }
+
+  Future<void> _openDestination(
+    String destination,
+    RecognitionResult result,
+  ) async {
+    await Navigator.of(context).pushNamed(
       destination,
       arguments: result,
     );
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -74,7 +89,10 @@ class _ProcessingScreenState extends ConsumerState<ProcessingScreen> {
       },
       child: Scaffold(
         key: const Key('processing-screen'),
-        appBar: AppBar(title: const Text('Traitement')),
+        appBar: AppBar(
+          title: const Text('Traitement'),
+          automaticallyImplyLeading: false,
+        ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -118,7 +136,7 @@ class _ProcessingBody extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'Nous écoutons votre nombre…',
+          'Nous écoutons votre calcul…',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleLarge,
         ),

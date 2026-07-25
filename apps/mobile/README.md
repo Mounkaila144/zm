@@ -27,6 +27,48 @@ machine qui exécute l'API. Cette configuration ne doit contenir aucun token,
 aucune clé ASR et aucun autre secret. Les secrets restent exclusivement côté
 serveur ; aucun fichier `.env` mobile n'est requis ou versionné.
 
+### Appareil branché en USB (recommandé)
+
+`adb reverse` fait passer l'API par le **câble** : rien ne sort sur le réseau, et
+aucune adresse IP à retrouver à chaque changement de Wi-Fi.
+
+```bash
+# 1) API locale (sans GPU ; ASR_MOCK_TEXT force une transcription — DÉV uniquement)
+ASR_MODE=mock ASR_MOCK_TEXT="waranka cindi hinza tonton iwey cindi gou" \
+  uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --app-dir services/api
+
+# 2) Rediriger le port 8000 du téléphone vers celui de la machine
+adb reverse tcp:8000 tcp:8000
+
+# 3) Lancer l'app
+flutter run --dart-define=API_BASE_URL=http://localhost:8000/api/v1
+```
+
+Le HTTP en clair n'est autorisé que par le manifeste **debug**
+(`android/app/src/debug/AndroidManifest.xml`) : un build release reste en HTTPS
+obligatoire (NFR3).
+
+## Parcours vocal simplifié
+
+L'accueil ne présente qu'une action principale. Un appui sur le grand micro
+ouvre l'écran d'enregistrement et démarre immédiatement la capture. La personne
+arrête avec le même geste explicite sur le bouton d'arrêt, ou laisse
+l'application s'arrêter automatiquement à dix secondes. Un audio valide est
+envoyé au traitement sans bouton « Continuer ».
+
+Toute opération reconnue est relue à voix haute pour confirmation, y compris
+lorsque le serveur l'a classée `accept`. Tant que la personne n'a choisi ni
+« Oui » ni « Non », l'application attend trois secondes après la fin de la
+lecture puis répète la demande. « Oui » ouvre le calcul et prononce
+automatiquement la réponse ; « Non » revient à l'enregistrement et relance le
+micro. L'écran de résultat ne conserve qu'une action pour dire une nouvelle
+opération.
+
+⚠️ **Chaîne de build.** Flutter ≥ 3.27 exige Gradle ≥ 8.7 alors que le wrapper du
+projet est en 8.3 (aligné sur Flutter 3.24.5, la version du tech-stack). Avec un
+SDK plus récent, ajouter `--android-skip-build-dependency-validation` à
+`flutter build` / `flutter run`, ou installer la version pinnée.
+
 ## Commandes
 
 Depuis `apps/mobile` :

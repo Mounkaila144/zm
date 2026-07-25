@@ -62,6 +62,12 @@ uv run python scripts/bench/build_benchmark_corpus.py plan \
     --speakers spk01 spk02 spk03 spk04 \
     --out dataset/benchmark/recording_plan.jsonl
 
+# 1 bis) Plan d'ÉNONCÉS D'OPÉRATIONS (story 6.1) — phrases complètes,
+#        4 opérateurs × opérandes courts/longs, cas hors domaine inclus :
+uv run python scripts/bench/build_benchmark_corpus.py plan-expressions \
+    --speakers spk01 spk02 spk03 spk04 \
+    --out dataset/benchmark/expression_recording_plan.jsonl
+
 # 2) Assembler le manifest versionné depuis l'index des audios enregistrés :
 uv run python scripts/bench/build_benchmark_corpus.py build \
     --source dataset/benchmark/source_index.jsonl \
@@ -76,6 +82,11 @@ uv run python scripts/bench/build_benchmark_corpus.py validate \
 - **Split par locuteur** : fonction pure de `(seed, speaker_key)` — seed
   documentée `zarma-benchmark-split-v1`. Un locuteur ne peut jamais apparaître
   dans deux splits. Deux exécutions → manifest identique (reproductible).
+- **Expressions (6.1)** : le plan ne demande que des **énoncés complets**. Un
+  opérateur prononcé seul ne sonne pas comme le même opérateur au milieu d'une
+  phrase (coarticulation) : les 16 fichiers de `~/Music/operation/` servent au
+  *lexique*, jamais au benchmark. Les opérateurs non résolus au lexique sont
+  omis du plan et signalés — rien n'est deviné.
 - **Fail-closed** : `build` refuse toute entrée sans vérité terrain valide,
   condition invalide ou audio manquant (`--allow-partial` pour exclure et
   poursuivre).
@@ -177,6 +188,39 @@ côtés ; rappel de la **référence du prototype** (Annexe A §4 de la story 5.
 (≥ 95 % calme, ≥ 90 % bruit) calculé par condition — jamais masqué.
 
 Les chiffres de décision se lisent sur le split `test` (locuteurs jamais vus).
+
+## Restitution vocale (story 6.1)
+
+L'utilisateur cible **ne lit pas** : le résultat doit être *dit*. Le vocabulaire des
+nombres étant fermé (40 mots), il suffit d'une banque de mots enregistrés assemblés
+dans l'ordre — pas de synthèse vocale entraînée, aucun réseau.
+
+```bash
+# 1) Préparer une séance d'enregistrement : conversion 16 kHz mono PCM16,
+#    détourage des silences, correction des noms, bilan de ce qui manque.
+uv run python scripts/speech/prepare_bank.py --source ~/Music/voix2 --dry-run
+uv run python scripts/speech/prepare_bank.py \
+    --source ~/Music/voix2 --out dataset/raw/voice/v4
+
+# 2) Vérifier la couverture, puis écouter
+uv run python scripts/speech/say_number.py --voice v4 \
+    --bank-dir dataset/raw/voice/v4/words \
+    --prompt-dir dataset/raw/voice/v4/prompts --coverage
+
+uv run python scripts/speech/say_number.py --voice v4 \
+    --bank-dir dataset/raw/voice/v4/words --expression "103 / 5" --out /tmp/reste.wav
+```
+
+- **Fail-closed (FR21)** : s'il manque un seul mot, **rien** n'est produit. Un
+  résultat prononcé à moitié serait indétectable pour la cible — donc pire que le
+  silence.
+- **Source unique** : les formes viennent de `generate()` / `render_result()` ;
+  aucune n'est réécrite côté audio.
+- **Corrections de noms justifiables uniquement** : faute de frappe mécanique
+  (`igouwav` → `igou`) ou **variante déclarée au lexique** (`zongou` → `zangou`).
+  Un nom inconnu est signalé, jamais renommé au jugé (NFR14).
+- Les **consignes** (`confirm`, `cannot_answer`) sont des phrases entières
+  enregistrées telles quelles : le code ne les fabrique pas.
 
 ## Démo moteur linguistique
 

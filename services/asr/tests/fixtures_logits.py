@@ -116,6 +116,37 @@ def _synthetic_fixtures() -> dict[str, LogitsFixture]:
     }
 
 
+def expression_fixtures() -> dict[str, LogitsFixture]:
+    """Logits synthétiques d'**expressions** complètes (story 6.1, task 4).
+
+    Volontairement séparées du jeu ci-dessus : elles ne relèvent pas de la même
+    langue contrainte, et le décodeur des nombres seuls doit continuer d'être
+    testé exactement comme avant (non-régression des epics 1–5).
+
+    ``expected_number`` porte ici le **résultat** attendu de l'opération, et
+    ``expected_prompt`` la forme canonique de l'énoncé.
+    """
+    from zarma_numbers.expressions import Expression, evaluate, render_expression
+
+    specs = [
+        ("clean-23-plus-15", Expression(23, "+", 15)),
+        ("clean-40-minus-8", Expression(40, "-", 8)),
+        ("noisy-105-plus-7", Expression(105, "+", 7)),
+    ]
+    fixtures: dict[str, LogitsFixture] = {}
+    for name, expression in specs:
+        prompt = render_expression(expression)
+        noise = 1.5 if name.startswith("noisy") else 0.0
+        fixtures[name] = LogitsFixture(
+            name=name,
+            logits=clean_logits(prompt, noise=noise, seed=7),
+            expected_number=evaluate(expression).value,
+            expected_prompt=prompt,
+            provenance="synthetic",
+        )
+    return fixtures
+
+
 def _model_fixtures() -> dict[str, LogitsFixture]:
     """Fixtures réelles présentes sur disque (aucune si le dump n'a pas eu lieu)."""
     if not FIXTURES_DIR.is_dir():
@@ -187,6 +218,7 @@ __all__ = [
     "REAL_SEPARATOR_IDS",
     "LogitsFixture",
     "clean_logits",
+    "expression_fixtures",
     "lexicon_for",
     "load_fixture",
     "real_token_lexicon",

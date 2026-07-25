@@ -14,8 +14,15 @@ connaître, ce qui préserve l'étanchéité de l'interface ``SpeechRecognizer``
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+#: Langues contraintes disponibles : les nombres seuls (epics 1–5) ou les
+#: expressions arithmétiques (story 6.1). Même automate, même décodeur — c'est
+#: la **langue** qui change, pas l'algorithme.
+GrammarKind = Literal["numbers", "expressions"]
 
 
 class AsrSettings(BaseSettings):
@@ -31,6 +38,10 @@ class AsrSettings(BaseSettings):
 
     #: Active le décodage contraint à la grammaire (sinon décodage glouton).
     DECODE_CONSTRAINED: bool = True
+    #: Langue contrainte : ``numbers`` (défaut — comportement des epics 1–5
+    #: **inchangé**) ou ``expressions`` (calculatrice vocale, story 6.1).
+    #: Bascule par configuration, jamais par du code applicatif (NFR9).
+    DECODE_GRAMMAR: GrammarKind = "numbers"
     #: Largeur du faisceau (préfixes conservés par trame) — choisie sur un
     #: critère de **latence**, pas sur l'accuracy (cf. `services/asr/README.md`).
     DECODE_BEAM_WIDTH: int = Field(default=256, ge=1)
@@ -64,6 +75,22 @@ class AsrSettings(BaseSettings):
             return ()
         return tuple(int(part) for part in raw.replace(",", " ").split())
 
+    def load_grammar(self):
+        """Automate correspondant à ``DECODE_GRAMMAR`` (import tardif : léger).
+
+        Point d'accès **unique** à la grammaire côté service ASR : le module de
+        décodage reste agnostique de la langue qu'il contraint, et basculer la
+        calculatrice vocale ne demande qu'une variable d'environnement.
+        """
+        from zarma_numbers.grammar import (  # noqa: PLC0415 - construction coûteuse
+            load_expression_grammar,
+            load_grammar,
+        )
+
+        if self.DECODE_GRAMMAR == "expressions":
+            return load_expression_grammar()
+        return load_grammar()
+
     def decoder_config(self):
         """Construit le ``DecoderConfig`` correspondant (import tardif : léger)."""
         from .decoding import DecoderConfig  # noqa: PLC0415 - évite numpy à l'import
@@ -79,4 +106,4 @@ class AsrSettings(BaseSettings):
         )
 
 
-__all__ = ["AsrSettings"]
+__all__ = ["AsrSettings", "GrammarKind"]

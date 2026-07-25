@@ -70,6 +70,33 @@ class ParseError(Exception):
         self.code = code or self.default_code
 
 
+class ExpressionParseError(ParseError):
+    """Échec d'analyse d'une **expression** zarma (story 6.1).
+
+    Même contrat que ``ParseError`` : ``parse_expression()`` la capture et
+    retourne ``None``. Une expression mal formée n'est jamais « réparée ».
+    """
+
+    default_code = "EXPRESSION_PARSE_ERROR"
+
+
+class DomainError(Exception):
+    """Le résultat d'une opération sort du domaine arithmétique supporté.
+
+    Politique D2 de la story 6.1 : le moteur ne connaît que les entiers de
+    0 à 1 000 000. Un résultat négatif, un dépassement ou une division par zéro
+    donnent lieu à un **refus explicite** — jamais à un arrondi, une troncature
+    ou un « à peu près » (FR21/NFR14). Le ``code`` est machine-lisible pour que
+    l'API et le mobile restituent le bon message sans réinterpréter le texte.
+    """
+
+    default_code = "OUT_OF_DOMAIN"
+
+    def __init__(self, message: str, code: str | None = None) -> None:
+        super().__init__(message)
+        self.code = code or self.default_code
+
+
 __all__ = [
     "LexiconError",
     "LexiconValidationError",
@@ -78,4 +105,6 @@ __all__ = [
     "UnresolvedFormError",
     "GrammarDerivationError",
     "ParseError",
+    "ExpressionParseError",
+    "DomainError",
 ]

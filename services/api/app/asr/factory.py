@@ -33,7 +33,12 @@ def get_recognizer(
         ValueError: If ASR_MODE is not supported
     """
     if settings.ASR_MODE == "mock":
-        return MockRecognizer()
+        recognizer = MockRecognizer()
+        if settings.ASR_MOCK_TEXT:
+            # Confort de développement : exercer le pipeline complet sur un
+            # appareil réel, sans GPU ni endpoint. Ne s'applique qu'au mock.
+            recognizer.set_text(settings.ASR_MOCK_TEXT)
+        return recognizer
     if settings.ASR_MODE == "ctc":
         return RemoteCtcRecognizer(settings)
     if settings.ASR_MODE == "llm":

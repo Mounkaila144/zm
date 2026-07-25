@@ -11,6 +11,7 @@ import 'package:zarma_mobile/recognition/recognition_repository.dart';
 import 'package:zarma_mobile/recording/audio_recording_models.dart';
 import 'package:zarma_mobile/screens/processing_screen.dart';
 import 'package:zarma_mobile/screens/result_screen.dart';
+import 'package:zarma_mobile/speech/zarma_speaker.dart';
 
 class WidgetRepository implements RecognitionRepository {
   WidgetRepository(this.handler);
@@ -91,6 +92,21 @@ void main() {
     });
   }
 
+  testWidgets('une opération acceptée exige quand même une confirmation', (
+    tester,
+  ) async {
+    final RecognitionController controller = _controller(
+      WidgetRepository((_) async => _expressionResult()),
+    );
+
+    await _pumpProcessing(tester, controller);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('confirmation-screen')), findsOneWidget);
+    expect(find.byKey(const Key('calculation-screen')), findsNothing);
+    expect(find.byKey(const Key('confirm-expression-button')), findsOneWidget);
+  });
+
   testWidgets('Résultat affiche chiffres + zarma sans métadonnées', (
     tester,
   ) async {
@@ -122,6 +138,7 @@ Future<void> _pumpProcessing(
         recognitionControllerProvider.overrideWith(
           (ref, AudioHandoff handoff) => controller,
         ),
+        zarmaSpeakerProvider.overrideWithValue(null),
       ],
       child: MaterialApp(
         routes: _routesWithoutHome(),
@@ -164,4 +181,23 @@ RecognitionResult _result(Decision decision) => RecognitionResult(
       decision: decision,
       modelVersion: 'mock',
       grammarVersion: 'v1',
+    );
+
+RecognitionResult _expressionResult() => const RecognitionResult(
+      id: 'expression-id',
+      recognizedNumber: null,
+      zarmaText: 'waranka cindi hinza tonton iwey cindi gou',
+      normalizedText: 'waranka cindi hinza tonton iwey cindi gou',
+      confidence: 0.95,
+      decision: Decision.accept,
+      modelVersion: 'ctc',
+      grammarVersion: 'v1',
+      expression: RecognizedExpression(
+        left: 23,
+        operator: '+',
+        right: 15,
+        zarmaText: 'waranka cindi hinza tonton iwey cindi gou',
+        result: 38,
+        resultZarmaText: 'waranza cindi hakou',
+      ),
     );

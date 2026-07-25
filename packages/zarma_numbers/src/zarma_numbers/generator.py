@@ -67,6 +67,26 @@ def generate(n: int) -> str:
     return _compose_below_million(n, lex)
 
 
+def generate_combined(n: int) -> str:
+    """Forme de ``n`` en position **combinée**, c'est-à-dire après un connecteur.
+
+    Identique à ``generate`` partout sauf sur 1..9, où le zarma emploie la forme
+    combinée et non la forme isolée : ``waranka cindi hinza`` (23), jamais
+    ``waranka cindi ihinza``. C'est exactement la forme dont a besoin le reste
+    d'une division (``… ga cindi <reste>``, story 6.1) — d'où son extraction ici,
+    dans le seul module autorisé à composer des formes.
+
+    Mêmes refus que ``generate`` : hors plage ou forme non résolue → exception.
+    """
+    if isinstance(n, bool) or not isinstance(n, int):
+        raise TypeError(f"generate_combined() attend un entier, reçu {type(n).__name__}.")
+    if n < MIN_VALUE or n > MAX_VALUE:
+        raise OutOfRangeError(f"Nombre hors plage [0, 1 000 000] : {n}.")
+    if 1 <= n <= 9:
+        return _lexicon().units[n].combined
+    return generate(n)
+
+
 #: Valeurs de tête qui appellent le connecteur élidé ``di`` (correction locuteur
 #: 2026-07-25). Partout ailleurs le connecteur est ``da``. Table explicite : aucune
 #: règle phonétique n'a été devinée — `da hakou` et `di hinka` commencent tous deux
@@ -181,4 +201,4 @@ def _compose_below_million(n: int, lex: Lexicon) -> str:
     return " ".join(parts)
 
 
-__all__ = ["generate", "MIN_VALUE", "MAX_VALUE"]
+__all__ = ["generate", "generate_combined", "MIN_VALUE", "MAX_VALUE"]

@@ -16,11 +16,22 @@ class RecordingScreen extends ConsumerStatefulWidget {
 class _RecordingScreenState extends ConsumerState<RecordingScreen>
     with WidgetsBindingObserver {
   bool _allowPop = false;
+  bool _processingScheduled = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final RecordingController controller =
+          ref.read(recordingControllerProvider.notifier);
+      if (ref.read(recordingControllerProvider).phase == RecordingPhase.idle) {
+        unawaited(controller.start());
+      }
+    });
   }
 
   @override
@@ -46,12 +57,42 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen>
     }
   }
 
+  Future<void> _openProcessing(
+    RecordingController controller,
+    AudioHandoff handoff,
+  ) async {
+    await Navigator.of(context).pushNamed(
+      AppRoutes.processing,
+      arguments: handoff,
+    );
+    if (!mounted) {
+      return;
+    }
+    _processingScheduled = false;
+    if (ref.read(recordingControllerProvider).phase == RecordingPhase.idle) {
+      unawaited(controller.start());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final RecordingState recording = ref.watch(recordingControllerProvider);
     final RecordingController controller = ref.read(
       recordingControllerProvider.notifier,
     );
+
+    if (recording.phase == RecordingPhase.ready &&
+        recording.handoff != null &&
+        !_processingScheduled) {
+      _processingScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          unawaited(
+            _openProcessing(controller, recording.handoff!),
+          );
+        }
+      });
+    }
 
     return PopScope<Object?>(
       canPop: _allowPop,
@@ -62,7 +103,10 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen>
       },
       child: Scaffold(
         key: const Key('recording-screen'),
-        appBar: AppBar(title: const Text('Enregistrement')),
+        appBar: AppBar(
+          title: const Text('Enregistrement'),
+          automaticallyImplyLeading: false,
+        ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -70,7 +114,7 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen>
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 const Text(
-                  'Prononcez un seul nombre.',
+                  'Dites votre calcul.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                 ),
@@ -84,32 +128,9 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen>
                         onStop: controller.stop,
                         onOpenSettings: controller.openSettings,
                         onRefreshPermission: controller.refreshPermission,
-                        onContinue: () {
-                          if (recording.handoff != null) {
-                            Navigator.of(
-                              context,
-                            ).pushNamed(
-                              AppRoutes.processing,
-                              arguments: recording.handoff,
-                            );
-                          }
-                        },
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                _LargeAction(
-                  key: const Key('cancel-recording-button'),
-                  semanticLabel: 'Annuler et supprimer l’enregistrement',
-                  icon: Icons.close,
-                  label: recording.phase == RecordingPhase.ready
-                      ? 'Supprimer et annuler'
-                      : 'Annuler',
-                  onPressed: () async {
-                    await _cancelAndClose(controller);
-                  },
-                  outlined: true,
                 ),
               ],
             ),
@@ -127,7 +148,6 @@ class _RecordingContent extends StatelessWidget {
     required this.onStop,
     required this.onOpenSettings,
     required this.onRefreshPermission,
-    required this.onContinue,
   });
 
   final RecordingState state;
@@ -135,7 +155,6 @@ class _RecordingContent extends StatelessWidget {
   final VoidCallback onStop;
   final VoidCallback onOpenSettings;
   final VoidCallback onRefreshPermission;
-  final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -207,18 +226,10 @@ class _RecordingContent extends StatelessWidget {
           progress: true,
         );
       case RecordingPhase.ready:
-        return _StatusPanel(
+        return const _StatusPanel(
           icon: Icons.check_circle_outline,
-          message: '${state.message}\n'
-              '${_formatDuration(state.handoff!.duration)} · '
-              '${_formatSize(state.handoff!.sizeBytes)}',
-          action: _LargeAction(
-            key: const Key('continue-processing-button'),
-            semanticLabel: 'Continuer avec cet audio',
-            icon: Icons.arrow_forward,
-            label: 'Continuer',
-            onPressed: onContinue,
-          ),
+          message: 'Enregistrement terminé. Traitement en cours…',
+          progress: true,
         );
       case RecordingPhase.invalid:
         return _StatusPanel(
@@ -381,14 +392,12 @@ class _LargeAction extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onPressed,
-    this.outlined = false,
   });
 
   final String semanticLabel;
   final IconData icon;
   final String label;
   final VoidCallback onPressed;
-  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -397,19 +406,12 @@ class _LargeAction extends StatelessWidget {
         Size.fromHeight(52),
       ),
     );
-    final Widget button = outlined
-        ? OutlinedButton.icon(
-            onPressed: onPressed,
-            style: style,
-            icon: Icon(icon),
-            label: Text(label),
-          )
-        : FilledButton.icon(
-            onPressed: onPressed,
-            style: style,
-            icon: Icon(icon),
-            label: Text(label),
-          );
+    final Widget button = FilledButton.icon(
+      onPressed: onPressed,
+      style: style,
+      icon: Icon(icon),
+      label: Text(label),
+    );
     return Semantics(
       button: true,
       label: semanticLabel,
@@ -422,8 +424,4 @@ String _formatDuration(Duration duration) {
   final int seconds = duration.inSeconds;
   final int tenths = (duration.inMilliseconds % 1000) ~/ 100;
   return '00:${seconds.toString().padLeft(2, '0')}.$tenths';
-}
-
-String _formatSize(int bytes) {
-  return '${(bytes / 1024).toStringAsFixed(0)} Ko';
 }
