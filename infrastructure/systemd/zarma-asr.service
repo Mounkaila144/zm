@@ -24,21 +24,67 @@ WorkingDirectory=/opt/zarma
 # `ps` l'exposerait à tous les utilisateurs de la machine.
 EnvironmentFile=/opt/zarma/.env.asr
 
-# Fixe le parallélisme interne de PyTorch. Laissé libre, il ouvre autant de fils
-# que de cœurs et les workers se disputent le CPU au lieu de se compléter.
+# Deux fils, pas quatre — à contre-courant de l'intuition, mais mesuré.
+#
+# `scripts/bench/latency_report.py` compare trois variantes en les alternant
+# énoncé par énoncé (indispensable ici : la charge de la machine dérive assez
+# pour fabriquer n'importe quel résultat si on mesure les variantes l'une après
+# l'autre). Sur le corpus réel :
+#
+#              p50       p95       max
+#   4 fils    3716 ms   9541 ms  13892 ms
+#   2 fils    2759 ms   3531 ms   4010 ms
+#
+# Le p50 gagne un quart, mais c'est la **queue** qui change de nature : p95
+# divisé par 2,7, et plus aucune pointe à 14 s. C'est cohérent avec le débit
+# GEMM mesuré à part — 91 GFLOP/s à 1 fil, 187 à 2, puis 105 à 3 et 164 à 4,
+# très instable : au-delà de deux fils, ils se disputent les 8 Mo de cache L3 et
+# la bande passante mémoire au lieu d'ajouter du calcul. Le service consommait
+# 237 % de CPU pour 4 fils, soit 59 % d'efficacité parallèle seulement.
+#
+# Effet de bord bienvenu : les 2 vCPU restants absorbent nginx, l'API et
+# PostgreSQL sans plus disputer les cœurs au modèle.
+#
+# Ce réglage dépend du matériel, pas du code : le re-mesurer si le VPS change.
 Environment=OMP_NUM_THREADS=2
 Environment=MKL_NUM_THREADS=2
 
 # Cache des poids du modèle : hors du home, pour survivre à un redéploiement.
 Environment=HF_HOME=/opt/zarma/models
+Environment=FAIRSEQ2_CACHE_DIR=/opt/zarma/models
 
+# `--threads 2` double `OMP_NUM_THREADS` à dessein : la variable d'environnement
+# ne dimensionne que le pool OpenMP, tandis que `torch.set_num_threads` gouverne
+# aussi les noyaux qui ne passent pas par OpenMP. Laisser les deux diverger
+# recrée exactement la sur-souscription qu'on cherche à éliminer.
 ExecStart=/opt/zarma/asrenv/bin/python /opt/zarma/services/asr/local_server.py \
     --host 127.0.0.1 \
     --port 8001 \
     --device cpu \
     --grammar expressions \
-    --workers 2 \
+    --beam-width 64 \
+    --threads 2 \
+    --workers 1 \
     --queue-seconds 20
+
+# Cette machine n'est PAS dédiée à Zarma : elle héberge aussi un panel PHP-FPM,
+# MariaDB, Apache et des conteneurs Docker (307 h de CPU cumulées côté PHP au
+# moment de la mesure). C'est la première cause de dispersion de la latence — la
+# file des processus exécutables monte à 3–10 sur 4 vCPU pendant une inférence,
+# sans aucun vol d'hyperviseur (`st = 0`).
+#
+# `CPUWeight` ne réserve rien et ne bride personne : il ne joue **qu'en cas de
+# contention**, en donnant la priorité à la reconnaissance vocale, qui est
+# interactive, sur des tâches de fond qui ne le sont pas. Honnêtement : l'effet
+# mesuré ici est allé dans le bon sens (médiane 4 894 → 4 220 ms) mais reste dans
+# le bruit sur 12 requêtes par variante — c'est retenu parce que le risque est
+# nul, pas parce que le gain est démontré.
+#
+# Le vrai correctif de la queue de distribution est ailleurs : soit isoler
+# Zarma sur sa propre machine, soit borner le panel co-hébergé (`CPUQuota` sur
+# ses unités). Voir la section « risques restants » du rapport.
+CPUWeight=1000
+Nice=-5
 
 # Le chargement du modèle prend quelques secondes ; ne pas déclarer l'échec trop tôt.
 TimeoutStartSec=180

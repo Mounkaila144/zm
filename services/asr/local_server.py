@@ -62,9 +62,15 @@ if str(_APP_DIR) not in sys.path:
     sys.path.insert(0, str(_APP_DIR))
 
 import numpy as np  # noqa: E402
-from app.decoding import ConstrainedCtcDecoder, DecoderConfig, build_token_lexicon  # noqa: E402
+from app.decoding import (  # noqa: E402
+    ConstrainedCtcDecoder,
+    DecoderConfig,
+    DecodeResult,
+    build_token_lexicon,
+)
 from app.http_form import MultipartError, parse_multipart  # noqa: E402
 from app.transcription import build_transcribe_payload  # noqa: E402
+from app.vad import analyse as analyse_silence  # noqa: E402
 
 CTC_MODEL = "omniASR_CTC_300M_v2"
 TARGET_SAMPLE_RATE = 16_000
@@ -117,8 +123,31 @@ def _select_placement(requested: str) -> tuple[str, object]:
 class LocalAsr:
     """Modèle chargé une fois, décodeur compilé une fois."""
 
-    def __init__(self, *, grammar_kind: str, config: DecoderConfig, device: str = "auto") -> None:
+    def __init__(
+        self,
+        *,
+        grammar_kind: str,
+        config: DecoderConfig,
+        device: str = "auto",
+        threads: int | None = None,
+    ) -> None:
+        import torch
         from omnilingual_asr.models.inference.pipeline import ASRInferencePipeline
+
+        if threads is not None:
+            # Réglé dans le processus, et pas seulement via OMP_NUM_THREADS :
+            # la variable d'environnement ne fixe que le pool OpenMP, alors que
+            # `at::get_num_threads` gouverne aussi les noyaux qui ne passent pas
+            # par OpenMP. Les deux doivent concorder, sinon on obtient plus de
+            # fils que de cœurs et ils se disputent le CPU.
+            torch.set_num_threads(threads)
+            # Un seul énoncé à la fois : le parallélisme entre opérations n'a
+            # rien à recouvrir et ses fils ne feraient que concurrencer ceux du
+            # calcul lui-même.
+            try:
+                torch.set_num_interop_threads(1)
+            except RuntimeError:
+                pass  # déjà fixé (appel après la première opération parallèle)
 
         print(f"Chargement du modèle {CTC_MODEL}…", flush=True)
         started = time.perf_counter()
@@ -221,11 +250,40 @@ class LocalAsr:
         samples, sample_rate = _decode_wav(wav_bytes)
         audio_seconds = len(samples) / TARGET_SAMPLE_RATE
 
-        # Les deux étapes sont chronométrées séparément : sans cette ventilation,
-        # diagnostiquer une lenteur revient à deviner. La mesure a montré que
-        # l'inférence pèse ~96 % du temps et le décodage ~4 %.
+        # Élagage des bords muets **avant** le modèle. Le coût de l'inférence est
+        # linéaire en trames : chaque seconde de silence retirée en tête ou en
+        # queue est ~500 ms de calcul économisé, sans toucher au contenu parlé.
         mark = time.perf_counter()
-        logits = self._logits(samples, sample_rate)
+        trimmed = analyse_silence(samples, sample_rate)
+        vad_ms = int((time.perf_counter() - mark) * 1000)
+
+        if trimmed.is_silent:
+            # Rien à transcrire : on s'abstient tout de suite, sans payer le
+            # passage du modèle (mesuré à 7,7 s sur 8 s de silence). La réponse
+            # est celle d'un rejet — texte vide — donc le pipeline API décide
+            # `repeat` par le chemin existant : aucune décision nouvelle ici.
+            latency_ms = int((time.perf_counter() - started) * 1000)
+            payload = build_transcribe_payload(
+                DecodeResult(
+                    hypotheses=(),
+                    frame_count=0,
+                    latency_ms=0,
+                    reject_threshold=self._decoder.config.reject_threshold,
+                ),
+                model_version=CTC_MODEL,
+                latency_ms=latency_ms,
+            )
+            print(
+                f"  → «  » (audio muet) · audio {audio_seconds:.1f}s · "
+                f"modèle contourné · total {latency_ms} ms",
+                flush=True,
+            )
+            return payload
+
+        # Les étapes sont chronométrées séparément : sans cette ventilation,
+        # diagnostiquer une lenteur revient à deviner.
+        mark = time.perf_counter()
+        logits = self._logits(trimmed.samples, sample_rate)
         infer_ms = int((time.perf_counter() - mark) * 1000)
 
         mark = time.perf_counter()
@@ -234,10 +292,13 @@ class LocalAsr:
 
         latency_ms = int((time.perf_counter() - started) * 1000)
         payload = build_transcribe_payload(result, model_version=CTC_MODEL, latency_ms=latency_ms)
+        trimmed_note = (
+            f" · élagué {trimmed.trimmed_seconds:.1f}s" if trimmed.trimmed_seconds > 0.05 else ""
+        )
         print(
             f"  → « {payload['text']} » (confiance {payload['acoustic_score']:.2f}) · "
-            f"audio {audio_seconds:.1f}s · modèle {infer_ms} ms · "
-            f"décodage {decode_ms} ms · total {latency_ms} ms",
+            f"audio {audio_seconds:.1f}s{trimmed_note} · vad {vad_ms} ms · "
+            f"modèle {infer_ms} ms · décodage {decode_ms} ms · total {latency_ms} ms",
             flush=True,
         )
         return payload
@@ -358,6 +419,15 @@ def main(argv: list[str] | None = None) -> int:
         default=20.0,
         help="Attente maximale en file avant de répondre 503 (défaut : 20 s).",
     )
+    parser.add_argument(
+        "--threads",
+        type=int,
+        default=None,
+        help=(
+            "Fils de calcul PyTorch. Sur ce VPS (4 vCPU AMD sans AVX-512), "
+            "l'efficacité parallèle s'effondre au-delà de 2 : mesurer avant de changer."
+        ),
+    )
     args = parser.parse_args(argv)
 
     # Le secret ne transite jamais par la ligne de commande (visible dans `ps`).
@@ -366,6 +436,7 @@ def main(argv: list[str] | None = None) -> int:
     asr = LocalAsr(
         grammar_kind=args.grammar,
         device=args.device,
+        threads=args.threads,
         config=DecoderConfig(
             beam_width=args.beam_width,
             nbest=args.nbest,

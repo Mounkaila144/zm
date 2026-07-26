@@ -123,10 +123,49 @@ class _TokenAutomaton:
     #: Nombre minimal de tokens restant à émettre pour atteindre l'acceptation
     #: (∞ si aucun chemin) — support de la contrainte de durée.
     min_tokens: list[float] = field(default_factory=list)
+    #: Ids tokenizer réellement atteignables, blank compris, triés.
+    #:
+    #: La grammaire n'emploie que **21 ids distincts** sur les 10 288 du
+    #: tokenizer. Tout le décodage peut donc travailler sur une matrice
+    #: ``(T, 22)`` au lieu de ``(T, 10 288)`` : 470 fois moins de colonnes à
+    #: parcourir, et une ligne de trame qui tient dans le cache L1 au lieu d'un
+    #: bloc de 80 Ko qui l'évince à chaque trame.
+    used_ids: tuple[int, ...] = ()
+    #: ``token_id -> indice de colonne`` dans la matrice compacte.
+    col_of: dict[int, int] = field(default_factory=dict)
+    #: Arcs pré-résolus pour la boucle chaude :
+    #: ``(token_id, colonne, nœud suivant, mot émis, trames minimales requises)``.
+    #: Pré-calculer la colonne et le seuil de durée évite, à chaque trame et pour
+    #: chaque faisceau, une recherche de dictionnaire et une multiplication.
+    fast_arcs: list[tuple[tuple[int, int, int, str | None, float], ...]] = field(
+        default_factory=list
+    )
 
     def new_node(self) -> int:
         self.arcs.append([])
         return len(self.arcs) - 1
+
+    def finalize(self, *, blank_id: int, min_frames_per_token: float) -> None:
+        """Calcule le sous-vocabulaire utile et pré-résout les arcs."""
+        used = {blank_id}
+        for node_arcs in self.arcs:
+            for token_id, _, _ in node_arcs:
+                used.add(token_id)
+        self.used_ids = tuple(sorted(used))
+        self.col_of = {token_id: col for col, token_id in enumerate(self.used_ids)}
+        self.fast_arcs = [
+            tuple(
+                (
+                    token_id,
+                    self.col_of[token_id],
+                    next_node,
+                    emitted,
+                    self.min_tokens[next_node] * min_frames_per_token,
+                )
+                for token_id, next_node, emitted in node_arcs
+            )
+            for node_arcs in self.arcs
+        ]
 
 
 def _compile_automaton(grammar: NumberGrammar, lexicon: TokenLexicon) -> _TokenAutomaton:
@@ -286,6 +325,33 @@ class DecodeResult:
 # ---------------------------------------------------------------------------
 
 
+_LOG2 = math.log(2.0)
+
+
+def _logaddexp(x: float, y: float) -> float:
+    """``np.logaddexp`` sur deux scalaires, **sans le coût de dispatch numpy**.
+
+    Mesuré sur ce VPS : 976 ns pour ``np.logaddexp`` sur des scalaires Python
+    contre 204 ns ici — un facteur 4,8. L'opération est appelée des millions de
+    fois par décodage (une fois par faisceau et par arc, à chaque trame), donc
+    ce facteur se retrouve tel quel dans la latence.
+
+    La séquence de branches reproduit exactement celle de ``npy_logaddexp`` et
+    s'appuie sur les mêmes fonctions libm (``exp``, ``log1p``) : la sortie est
+    **identique bit à bit**, vérifié sur 60 000 paires couvrant les infinis et
+    les extrêmes de l'exposant. Ce n'est donc pas une approximation, et aucune
+    hypothèse de décodage ne peut basculer à cause de ce remplacement.
+    """
+    if x == y:
+        return x + _LOG2
+    difference = x - y
+    if difference > 0:
+        return x + math.log1p(math.exp(-difference))
+    if difference <= 0:
+        return y + math.log1p(math.exp(difference))
+    return difference  # NaN se propage, comme dans numpy
+
+
 def log_softmax(logits: np.ndarray) -> np.ndarray:
     """Log-softmax ligne à ligne, stable ; idempotent sur des log-probs."""
     x = np.asarray(logits, dtype=np.float64)
@@ -300,6 +366,16 @@ def ctc_forward_score(log_probs: np.ndarray, ids: Sequence[int], blank_id: int =
     un seul exemple — la fonction de score validée par le prototype, sans
     dépendance torch. ``inf`` si l'alignement est impossible (séquence plus
     longue que le nombre de trames, répétitions comprises).
+
+    La récurrence est **vectorisée sur l'axe des étiquettes étendues**. La
+    version précédente parcourait ce même axe en Python : pour un énoncé long
+    (375 trames, ~100 étiquettes étendues) cela faisait 37 000 itérations et
+    plus de 100 000 ``np.logaddexp`` scalaires par hypothèse — et le rescoring
+    s'applique à chaque hypothèse acceptante du faisceau. C'était, de loin, le
+    premier poste du décodage (1 424 ms sur ``long_2``).
+
+    Le résultat est **inchangé bit à bit** : mêmes opérations, mêmes ordres
+    d'association ; seul l'axe de parcours passe de Python à numpy.
     """
     lp = np.asarray(log_probs, dtype=np.float64)
     frames = lp.shape[0]
@@ -315,21 +391,36 @@ def ctc_forward_score(log_probs: np.ndarray, ids: Sequence[int], blank_id: int =
         extended.extend((label, blank_id))
     size = len(extended)
 
+    # Colonnes de `lp` dans l'ordre des étiquettes étendues, rassemblées une
+    # seule fois : la boucle sur les trames n'accède plus qu'à des lignes
+    # contiguës de taille `size`, au lieu d'indexer la matrice complète.
+    emissions = lp[:, extended]
+
+    # Masque du saut de blank : constant sur toute la séquence, donc calculé
+    # une fois. Interdit entre deux labels identiques (règle CTC).
+    skip = np.zeros(size, dtype=bool)
+    for s in range(2, size):
+        skip[s] = extended[s] != blank_id and extended[s] != extended[s - 2]
+
     alpha = np.full(size, -np.inf)
     alpha[0] = lp[0, blank_id]
     if size > 1:
         alpha[1] = lp[0, extended[1]]
+
+    shifted_one = np.empty(size)
+    shifted_two = np.empty(size)
     for t in range(1, frames):
         prev = alpha
-        alpha = np.full(size, -np.inf)
-        for s in range(size):
-            best = prev[s]
-            if s >= 1:
-                best = np.logaddexp(best, prev[s - 1])
-            # Saut du blank intermédiaire, interdit entre labels identiques.
-            if s >= 2 and extended[s] != blank_id and extended[s] != extended[s - 2]:
-                best = np.logaddexp(best, prev[s - 2])
-            alpha[s] = best + lp[t, extended[s]]
+        shifted_one[0] = -np.inf
+        shifted_one[1:] = prev[:-1]
+        if size > 2:
+            shifted_two[:2] = -np.inf
+            np.copyto(shifted_two[2:], prev[:-2], where=skip[2:])
+            shifted_two[2:][~skip[2:]] = -np.inf
+        else:
+            shifted_two[:] = -np.inf
+        alpha = np.logaddexp(np.logaddexp(prev, shifted_one), shifted_two) + emissions[t]
+
     total = alpha[-1] if size == 1 else np.logaddexp(alpha[-1], alpha[-2])
     return float(-total)
 
@@ -381,6 +472,13 @@ def decoding_confidence(neg_log_likelihood: float, free_nll: float, token_count:
 
 _NEG_INF = -math.inf
 
+#: Trames traitées d'un coup par le log-softmax. À 10 288 colonnes en float64,
+#: 16 trames font ~1,3 Mo par tableau temporaire : les trois temporaires de la
+#: normalisation tiennent alors dans les 8 Mo de cache L3 du processeur, au lieu
+#: de faire des allers-retours en RAM. Le résultat est inchangé — la découpe est
+#: horizontale et chaque ligne est normalisée indépendamment.
+_LOG_SOFTMAX_BLOCK = 16
+
 
 def _bump(
     beams: dict[tuple[int, tuple[int, ...]], list],
@@ -388,14 +486,20 @@ def _bump(
     slot: int,
     value: float,
     words: tuple[str, ...],
+    last_col: int,
 ) -> None:
-    """Accumule ``value`` (log-domaine) dans ``beams[key][slot]``."""
+    """Accumule ``value`` (log-domaine) dans ``beams[key][slot]``.
+
+    ``last_col`` est la colonne compacte du dernier id du préfixe, mémorisée avec
+    le faisceau : la règle CTC de répétition la relit à chaque trame, et la
+    recalculer coûterait une recherche de dictionnaire par faisceau et par trame.
+    """
     if value == _NEG_INF:
         return
     entry = beams.get(key)
     if entry is None:
-        beams[key] = entry = [_NEG_INF, _NEG_INF, words]
-    entry[slot] = np.logaddexp(entry[slot], value)
+        beams[key] = entry = [_NEG_INF, _NEG_INF, words, last_col]
+    entry[slot] = _logaddexp(entry[slot], value)
 
 
 class ConstrainedCtcDecoder:
@@ -418,67 +522,144 @@ class ConstrainedCtcDecoder:
     ) -> None:
         self._config = config if config is not None else DecoderConfig()
         self._automaton = _compile_automaton(grammar, lexicon)
+        self._automaton.finalize(
+            blank_id=self._config.blank_id,
+            min_frames_per_token=self._config.min_frames_per_token,
+        )
 
     @property
     def config(self) -> DecoderConfig:
         return self._config
 
+    def _restricted_log_probs(self, logits: np.ndarray) -> tuple[np.ndarray, float]:
+        """Log-probs **restreintes au sous-vocabulaire de la grammaire**, et NLL libre.
+
+        Le log-softmax doit se normaliser sur les 10 288 colonnes — c'est la
+        définition. Mais rien n'oblige à *matérialiser* le résultat sur 10 288
+        colonnes alors que le décodage n'en lit que 22 : pour un énoncé de 8 s
+        cela réduit la matrice transmise à la suite du calcul de 33 Mo à 70 Ko.
+
+        La NLL du chemin libre se déduit du même calcul sans passer par la
+        matrice complète : après soustraction du maximum de ligne, ce maximum
+        vaut exactement zéro, donc ``max_v log p[t, v] = -denominateur[t]``.
+
+        Les valeurs produites sont **identiques bit à bit** à
+        ``log_softmax(logits)[:, used]`` et à ``free_path_nll(log_softmax(logits))`` :
+        mêmes opérations dans le même ordre, seules les colonnes inutiles ne sont
+        jamais écrites.
+        """
+        source = np.asarray(logits)
+        if source.ndim != 2:
+            raise ValueError(f"logits de forme (T, V) attendus, reçu {source.shape}.")
+        used = self._automaton.used_ids
+        frames = source.shape[0]
+        if frames == 0:
+            return np.empty((0, len(used)), dtype=np.float64), 0.0
+
+        restricted = np.empty((frames, len(used)), dtype=np.float64)
+        denominator = np.empty(frames, dtype=np.float64)
+
+        # Traitement par blocs de trames. Le calcul reste rigoureusement le même
+        # — toutes les opérations sont indépendantes ligne à ligne, et la somme
+        # par ligne conserve son ordre —, mais les tableaux temporaires cessent
+        # d'être proportionnels à la durée de l'audio.
+        #
+        # En une passe, la version précédente allouait trois matrices
+        # ``(T, 10 288)`` en float64 : 99 Mo de trafic mémoire pour 8 s d'audio,
+        # bien au-delà des 8 Mo de cache L3 de ce processeur. Par blocs, les
+        # temporaires tiennent dans le cache et la mémoire de pointe du décodage
+        # devient indépendante de la longueur de l'énoncé.
+        for start in range(0, frames, _LOG_SOFTMAX_BLOCK):
+            stop = min(start + _LOG_SOFTMAX_BLOCK, frames)
+            block = source[start:stop].astype(np.float64)
+            block -= block.max(axis=-1, keepdims=True)
+            block_denominator = np.log(np.exp(block).sum(axis=-1))
+            denominator[start:stop] = block_denominator
+            restricted[start:stop] = block[:, used] - block_denominator[:, None]
+
+        return restricted, float(denominator.sum())
+
     def decode(self, logits: np.ndarray) -> DecodeResult:
         """Décode des logits ``(T, V)`` (ou log-probs : log_softmax idempotent)."""
         started = time.perf_counter()
-        lp = log_softmax(logits)
-        if lp.ndim != 2:
-            raise ValueError(f"logits de forme (T, V) attendus, reçu {lp.shape}.")
-        frames = lp.shape[0]
         cfg = self._config
         aut = self._automaton
-        blank = cfg.blank_id
+        restricted, free_nll = self._restricted_log_probs(logits)
+        frames = restricted.shape[0]
+        blank_col = aut.col_of[cfg.blank_id]
+        beam_width = cfg.beam_width
 
-        # clé = (nœud, préfixe d'ids) ; valeur = [p_blank, p_non_blank, mots].
-        beams: dict[tuple[int, tuple[int, ...]], list] = {(aut.start, ()): [0.0, _NEG_INF, ()]}
+        # Lignes converties en listes Python : l'arithmétique du faisceau se fait
+        # alors sur des `float` natifs et non des `np.float64`, dont chaque
+        # opération repasse par le dispatch numpy. Les valeurs sont les mêmes
+        # (double IEEE dans les deux cas) — seul le coût par opération change.
+        rows = restricted.tolist()
+        fast_arcs = aut.fast_arcs
+
+        # clé = (nœud, préfixe d'ids) ;
+        # valeur = [p_blank, p_non_blank, mots, colonne du dernier id].
+        beams: dict[tuple[int, tuple[int, ...]], list] = {(aut.start, ()): [0.0, _NEG_INF, (), -1]}
 
         for t in range(frames):
-            frame = lp[t]
+            frame = rows[t]
             remaining = frames - t - 1
+            blank_score = frame[blank_col]
             nxt: dict[tuple[int, tuple[int, ...]], list] = {}
 
-            for (node, ids), (p_b, p_nb, words) in beams.items():
-                total = np.logaddexp(p_b, p_nb)
+            for (node, ids), (p_b, p_nb, words, last_col) in beams.items():
+                total = _logaddexp(p_b, p_nb)
                 # 1) blank : le préfixe ne change pas.
-                _bump(nxt, (node, ids), 0, total + frame[blank], words)
+                _bump(nxt, (node, ids), 0, total + blank_score, words, last_col)
                 # 2) répétition du dernier token : absorbée (pas d'émission).
                 if ids:
-                    _bump(nxt, (node, ids), 1, p_nb + frame[ids[-1]], words)
+                    _bump(nxt, (node, ids), 1, p_nb + frame[last_col], words, last_col)
                 # 3) extensions le long des arcs de l'automate.
-                for token_id, next_node, emitted in aut.arcs[node]:
+                last_id = ids[-1] if ids else None
+                for token_id, col, next_node, emitted, min_frames in fast_arcs[node]:
                     # Contrainte de durée / faisabilité : chaque token restant
                     # exige min_frames_per_token trames (principe acoustique).
-                    if aut.min_tokens[next_node] * cfg.min_frames_per_token > remaining:
+                    if min_frames > remaining:
                         continue
                     # CTC : étendre avec le même token que le dernier émis
                     # nécessite un blank intermédiaire → part de p_b seul.
-                    base = p_b if (ids and token_id == ids[-1]) else total
+                    base = p_b if token_id == last_id else total
                     if base == _NEG_INF:
                         continue
                     new_words = words + (emitted,) if emitted else words
-                    _bump(nxt, (next_node, ids + (token_id,)), 1, base + frame[token_id], new_words)
+                    _bump(
+                        nxt,
+                        (next_node, ids + (token_id,)),
+                        1,
+                        base + frame[col],
+                        new_words,
+                        col,
+                    )
 
-            pruned = sorted(nxt.items(), key=lambda kv: -np.logaddexp(kv[1][0], kv[1][1]))[
-                : cfg.beam_width
-            ]
-            beams = dict(pruned)
+            if len(nxt) > beam_width:
+                # L'ordre du dictionnaire conservé influe sur l'ordre
+                # d'accumulation de la trame suivante, donc sur les derniers bits
+                # des scores : on trie systématiquement, comme avant, plutôt que
+                # de court-circuiter quand l'élagage ne retire rien.
+                beams = dict(
+                    sorted(nxt.items(), key=lambda kv: -_logaddexp(kv[1][0], kv[1][1]))[:beam_width]
+                )
+            else:
+                beams = dict(sorted(nxt.items(), key=lambda kv: -_logaddexp(kv[1][0], kv[1][1])))
 
         # Hypothèses finales : uniquement les préfixes terminés sur un état
         # acceptant. Les orthographes convergentes (mêmes mots canoniques via
         # des ids différents) sont fusionnées en gardant le meilleur score.
-        free_nll = free_path_nll(lp)
+        col_of = aut.col_of
+        blank_for_rescore = blank_col
         by_text: dict[str, Hypothesis] = {}
-        for (node, ids), (p_b, p_nb, words) in beams.items():
+        for (node, ids), (p_b, p_nb, words, _last_col) in beams.items():
             if node not in aut.accepting or not ids:
                 continue
-            nll = float(-np.logaddexp(p_b, p_nb))
+            nll = float(-_logaddexp(p_b, p_nb))
             if cfg.exact_rescore:
-                nll = ctc_forward_score(lp, ids, blank)
+                # Rescoring sur la matrice restreinte : mêmes valeurs, donc même
+                # score, en parcourant 22 colonnes au lieu de 10 288.
+                nll = ctc_forward_score(restricted, [col_of[i] for i in ids], blank_for_rescore)
             score = nll / (len(ids) ** cfg.length_exponent)
             text = " ".join(words)
             current = by_text.get(text)

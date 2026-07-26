@@ -59,3 +59,9 @@ def transcription():
 def asr_config():
     """Module ``services/asr/app/config.py`` — ``AsrSettings``."""
     return _submodule("config")
+
+
+@pytest.fixture(scope="session")
+def vad():
+    """Module ``services/asr/app/vad.py`` — élagage des silences (sans torch)."""
+    return _submodule("vad")
