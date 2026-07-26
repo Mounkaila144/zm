@@ -7,10 +7,12 @@ class BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.title,
     this.automaticallyImplyLeading = true,
+    this.actions,
   });
 
   final String title;
   final bool automaticallyImplyLeading;
+  final List<Widget>? actions;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -26,8 +28,9 @@ class BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       title: _BrandTitle(
         title: title,
-        useLogoColors: title == 'ZarmaIA',
+        useLogoColors: title == 'Zarma IA',
       ),
+      actions: actions,
     );
   }
 }

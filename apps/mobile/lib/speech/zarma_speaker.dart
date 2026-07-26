@@ -32,12 +32,10 @@ typedef WavPlayer = Future<void> Function(Uint8List wav);
 
 class ZarmaSpeaker {
   ZarmaSpeaker({
-    required VoiceBank bank,
-    required AssetBundle bundle,
-    required WavPlayer play,
-  })  : _bank = bank,
-        _bundle = bundle,
-        _play = play;
+    required this._bank,
+    required this._bundle,
+    required this._play,
+  });
 
   final VoiceBank _bank;
   final AssetBundle _bundle;

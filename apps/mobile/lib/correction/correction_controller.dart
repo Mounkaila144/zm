@@ -23,12 +23,10 @@ class CorrectionState {
 /// forme zarma. Aucune règle numérique n'est recalculée localement.
 class CorrectionController extends StateNotifier<CorrectionState> {
   CorrectionController({
-    required ZarmaGeneratorRepository repository,
-    required CancelTokenFactory cancelTokenFactory,
+    required this._repository,
+    required this._cancelTokenFactory,
     this.debounceDuration = const Duration(milliseconds: 300),
-  })  : _repository = repository,
-        _cancelTokenFactory = cancelTokenFactory,
-        super(const CorrectionState());
+  })  : super(const CorrectionState());
 
   // Doit rester synchronisé avec `MAX_VALUE` de `zarma_numbers` (extension
   // million, story au-delà de 1.7) : 99 999 millions + un reste complet.

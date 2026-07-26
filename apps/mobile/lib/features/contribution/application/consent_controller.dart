@@ -37,15 +37,12 @@ class ConsentState {
 
 class ConsentController extends StateNotifier<ConsentState> {
   ConsentController({
-    required ConsentRepository repository,
-    required String anonId,
-    required CancelToken Function() cancelTokenFactory,
+    required this._repository,
+    required this._anonId,
+    required this._cancelTokenFactory,
     bool loadOnCreate = true,
     ConsentState? initialState,
-  })  : _repository = repository,
-        _anonId = anonId,
-        _cancelTokenFactory = cancelTokenFactory,
-        super(initialState ?? const ConsentState()) {
+  })  : super(initialState ?? const ConsentState()) {
     if (loadOnCreate) {
       unawaited(loadCurrent());
     }

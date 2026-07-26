@@ -8,6 +8,7 @@ import 'package:zarma_mobile/screens/confirmation_screen.dart';
 import 'package:zarma_mobile/screens/correction_screen.dart';
 import 'package:zarma_mobile/screens/history_screen.dart';
 import 'package:zarma_mobile/screens/processing_screen.dart';
+import 'package:zarma_mobile/screens/privacy_screen.dart';
 import 'package:zarma_mobile/screens/recording_screen.dart';
 import 'package:zarma_mobile/screens/result_screen.dart';
 import 'package:zarma_mobile/screens/startup_gate.dart';
@@ -27,12 +28,14 @@ abstract final class AppRoutes {
   static const String correction = '/correction';
   static const String history = '/history';
   static const String contribute = '/contribute';
+  static const String privacy = '/privacy';
 
   static final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
     home: (_) => const StartupGate(),
     recording: (_) => const RecordingScreen(),
     history: (_) => const HistoryScreen(),
     contribute: (_) => const ContributionRoute(),
+    privacy: (_) => const PrivacyScreen(),
   };
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {

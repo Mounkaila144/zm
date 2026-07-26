@@ -99,10 +99,9 @@ abstract interface class ContributionPromptSource {
 
 class CatalogContributionPromptSource implements ContributionPromptSource {
   CatalogContributionPromptSource({
-    required PromptIndexSelector selector,
+    required this._selector,
     List<ContributionPromptSeed> catalog = contributionPromptCatalog,
-  })  : _selector = selector,
-        _catalog = List<ContributionPromptSeed>.unmodifiable(catalog) {
+  })  : _catalog = List<ContributionPromptSeed>.unmodifiable(catalog) {
     if (_catalog.isEmpty) {
       throw ArgumentError.value(catalog, 'catalog', 'ne peut pas être vide');
     }

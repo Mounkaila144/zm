@@ -416,8 +416,11 @@ void main() {
     );
     expect(find.text('zangou'), findsOneWidget);
 
-    await tester
-        .tap(find.byKey(const Key('stop-contribution-recording-button')));
+    final Finder stopButton =
+        find.byKey(const Key('stop-contribution-recording-button'));
+    await tester.ensureVisible(stopButton);
+    await tester.pump();
+    await tester.tap(stopButton);
     await tester.pump();
     expect(find.byKey(const Key('contribution-audio-ready')), findsOneWidget);
     expect(find.byKey(const Key('submit-contribution-button')), findsOneWidget);

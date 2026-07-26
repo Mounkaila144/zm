@@ -27,13 +27,10 @@ class FeedbackState {
 /// automatique : l'API feedback n'est pas idempotente.
 class FeedbackController extends StateNotifier<FeedbackState> {
   FeedbackController({
-    required FeedbackRepository repository,
-    required String anonId,
-    required CancelTokenFactory cancelTokenFactory,
-  })  : _repository = repository,
-        _anonId = anonId,
-        _cancelTokenFactory = cancelTokenFactory,
-        super(const FeedbackState());
+    required this._repository,
+    required this._anonId,
+    required this._cancelTokenFactory,
+  })  : super(const FeedbackState());
 
   final FeedbackRepository _repository;
   final String _anonId;

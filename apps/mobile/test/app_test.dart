@@ -91,10 +91,11 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('ZarmaIA'), findsOneWidget);
+    expect(find.text('Zarma IA'), findsOneWidget);
     expect(find.byIcon(Icons.mic), findsOneWidget);
     expect(find.byKey(const Key('open-history-button')), findsNothing);
     expect(find.byKey(const Key('open-contribution-button')), findsNothing);
+    expect(find.byKey(const Key('open-privacy-button')), findsOneWidget);
     expect(
       find.bySemanticsLabel('Démarrer un enregistrement audio'),
       findsOneWidget,
@@ -125,6 +126,12 @@ void main() {
     expect(AppRoutes.routes.containsKey(AppRoutes.recording), isTrue);
 
     final NavigatorState navigator = tester.state(find.byType(Navigator));
+    await tester.tap(find.byKey(const Key('open-privacy-button')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('privacy-screen')), findsOneWidget);
+
+    navigator.pop();
+    await tester.pumpAndSettle();
     navigator.pushNamed(
       AppRoutes.processing,
       arguments: const AudioHandoff(

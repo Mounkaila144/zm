@@ -1,4 +1,4 @@
-/// Palette et thème de marque ZarmaIA / PTR Niger.
+/// Palette et thème de marque Zarma IA / PTR Niger.
 ///
 /// Les teintes viennent du logo lui-même (`tool/build_brand_assets.py` les a
 /// mesurées dessus) — l'application doit se reconnaître au premier coup d'œil

@@ -35,10 +35,9 @@ abstract interface class ContributionPromptRepository {
 
 class ApiContributionPromptRepository implements ContributionPromptRepository {
   const ApiContributionPromptRepository({
-    required ContributionPromptSource source,
-    required ZarmaGeneratorRepository generator,
-  })  : _source = source,
-        _generator = generator;
+    required this._source,
+    required this._generator,
+  });
 
   final ContributionPromptSource _source;
   final ZarmaGeneratorRepository _generator;

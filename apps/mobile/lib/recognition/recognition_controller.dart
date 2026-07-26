@@ -28,17 +28,12 @@ typedef HandoffCleanup = Future<void> Function();
 
 class RecognitionController extends StateNotifier<RecognitionState> {
   RecognitionController({
-    required RecognitionRepository repository,
-    required AudioHandoff handoff,
-    required String anonId,
-    required CancelTokenFactory cancelTokenFactory,
-    required HandoffCleanup cleanup,
-  })  : _repository = repository,
-        _handoff = handoff,
-        _anonId = anonId,
-        _cancelTokenFactory = cancelTokenFactory,
-        _cleanup = cleanup,
-        super(const RecognitionState());
+    required this._repository,
+    required this._handoff,
+    required this._anonId,
+    required this._cancelTokenFactory,
+    required this._cleanup,
+  })  : super(const RecognitionState());
 
   final RecognitionRepository _repository;
   final AudioHandoff _handoff;

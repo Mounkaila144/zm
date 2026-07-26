@@ -64,7 +64,10 @@ void main() {
         child: MaterialApp(home: CalculationScreen(result: value)),
       ),
     );
-    await tester.pumpAndSettle();
+    // Évite pumpAndSettle : il avance l'horloge factice par pas de 100 ms et
+    // consomme donc une partie du délai de répétition que ces tests mesurent.
+    await tester.pump();
+    await tester.pump();
   }
 
   testWidgets('affiche l’opération et le résultat, jamais la forme zarma',

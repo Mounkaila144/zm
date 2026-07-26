@@ -10,13 +10,10 @@ typedef RecordingTickerFactory = RecordingTicker Function();
 
 class RecordingController extends StateNotifier<RecordingState> {
   RecordingController({
-    required AudioRecordingService service,
-    required MicrophonePermissionGateway permissionGateway,
-    required RecordingTickerFactory tickerFactory,
-  })  : _service = service,
-        _permissionGateway = permissionGateway,
-        _tickerFactory = tickerFactory,
-        super(const RecordingState());
+    required this._service,
+    required this._permissionGateway,
+    required this._tickerFactory,
+  })  : super(const RecordingState());
 
   final AudioRecordingService _service;
   final MicrophonePermissionGateway _permissionGateway;

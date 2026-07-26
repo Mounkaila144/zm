@@ -5,12 +5,12 @@ Riverpod pour l'injection de dépendances et Dio pour le futur accès à l'API.
 
 ## Prérequis
 
-- Flutter 3.24.5 stable
-- Dart 3.5.x (fourni par Flutter 3.24.x)
-- Android SDK et un émulateur ou appareil Android
+- Flutter 3.44.7 stable
+- Dart 3.12.x (fourni par Flutter 3.44.x)
+- Android SDK 36, JDK 17 et un émulateur ou appareil Android
 
-La CI est figée sur Flutter 3.24.5. Le projet accepte Dart à partir de 3.5 afin de
-rester compatible avec la baseline d'architecture.
+La CI est figée sur Flutter 3.44.7. Android compile et cible l'API 36 pour
+respecter les exigences Google Play applicables à partir du 31 août 2026.
 
 ## Configuration non secrète
 
@@ -109,10 +109,8 @@ automatiquement la réponse ; « Non » revient à l'enregistrement et relance l
 micro. L'écran de résultat ne conserve qu'une action pour dire une nouvelle
 opération.
 
-⚠️ **Chaîne de build.** Flutter ≥ 3.27 exige Gradle ≥ 8.7 alors que le wrapper du
-projet est en 8.3 (aligné sur Flutter 3.24.5, la version du tech-stack). Avec un
-SDK plus récent, ajouter `--android-skip-build-dependency-validation` à
-`flutter build` / `flutter run`, ou installer la version pinnée.
+La chaîne Android release utilise AGP 8.11.1, Gradle 8.14.5 et JDK 17. Aucun
+contournement `--android-skip-build-dependency-validation` n'est nécessaire.
 
 ## Commandes
 

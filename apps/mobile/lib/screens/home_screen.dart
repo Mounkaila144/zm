@@ -11,8 +11,18 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       key: const Key('home-screen'),
-      appBar:
-          const BrandAppBar(title: 'ZarmaIA', automaticallyImplyLeading: false),
+      appBar: BrandAppBar(
+        title: 'Zarma IA',
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          IconButton(
+            key: const Key('open-privacy-button'),
+            onPressed: () => Navigator.of(context).pushNamed(AppRoutes.privacy),
+            tooltip: 'Confidentialité',
+            icon: const Icon(Icons.privacy_tip_outlined),
+          ),
+        ],
+      ),
       bottomNavigationBar: const BrandFooter(),
       body: SafeArea(
         child: LayoutBuilder(

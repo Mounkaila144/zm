@@ -1,0 +1,7 @@
+Première version Android de Zarma IA.
+
+• Enregistrement vocal simplifié des nombres et calculs en zarma
+• Confirmation vocale automatique
+• Lecture automatique du résultat
+• Consentement versionné et contrôle du retrait des données vocales
+• Mise à jour obligatoire pilotée par le serveur

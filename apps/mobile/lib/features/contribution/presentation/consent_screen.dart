@@ -88,7 +88,7 @@ class _ConsentBody extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            'Votre voix aide ZarmaIA',
+            'Votre voix aide Zarma IA',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge,
           ),

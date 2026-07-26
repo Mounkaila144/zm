@@ -1,0 +1,56 @@
+name: Android release bundle
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: URL HTTPS de l'API de production
+        required: true
+        default: https://ia.ptrniger.com/api/v1
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.7"
+          channel: stable
+          cache: true
+      - name: Restore Play upload key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+        run: |
+          test -n "$KEYSTORE_BASE64"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/upload-keystore.jks
+          {
+            printf 'storePassword=%s\n' "$STORE_PASSWORD"
+            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+            printf 'keyAlias=%s\n' "$KEY_ALIAS"
+            printf 'storeFile=upload-keystore.jks\n'
+          } > android/key.properties
+          chmod 600 android/upload-keystore.jks android/key.properties
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Verify source
+        run: flutter analyze && flutter test
+      - name: Build signed Android App Bundle
+        run: >-
+          flutter build appbundle --release
+          --dart-define=API_BASE_URL=${{ inputs.api_base_url }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zarmaia-android-${{ github.sha }}
+          path: apps/mobile/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14

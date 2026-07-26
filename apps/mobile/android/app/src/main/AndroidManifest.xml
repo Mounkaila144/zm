@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     <application
-        android:label="zarma_mobile"
+        android:label="Zarma IA"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

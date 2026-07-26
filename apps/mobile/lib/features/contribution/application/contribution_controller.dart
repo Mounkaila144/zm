@@ -57,26 +57,17 @@ class ContributionState {
 
 class ContributionController extends StateNotifier<ContributionState> {
   ContributionController({
-    required ContributionPromptRepository promptRepository,
-    required ContributionUploadRepository uploadRepository,
-    required ContributionWithdrawalRepository withdrawalRepository,
-    required ContributionMetadataSource metadataSource,
-    required RecordingController recordingController,
-    required String anonId,
-    required ConsentState consent,
-    required void Function() onWithdrawalCompleted,
-    required CancelToken Function() cancelTokenFactory,
+    required this._promptRepository,
+    required this._uploadRepository,
+    required this._withdrawalRepository,
+    required this._metadataSource,
+    required this._recordingController,
+    required this._anonId,
+    required this._consent,
+    required this._onWithdrawalCompleted,
+    required this._cancelTokenFactory,
     bool loadOnCreate = true,
-  })  : _promptRepository = promptRepository,
-        _uploadRepository = uploadRepository,
-        _withdrawalRepository = withdrawalRepository,
-        _metadataSource = metadataSource,
-        _recordingController = recordingController,
-        _anonId = anonId,
-        _consent = consent,
-        _onWithdrawalCompleted = onWithdrawalCompleted,
-        _cancelTokenFactory = cancelTokenFactory,
-        super(const ContributionState()) {
+  })  : super(const ContributionState()) {
     _removeRecordingListener = _recordingController.addListener(
       _onRecordingChanged,
       fireImmediately: true,
