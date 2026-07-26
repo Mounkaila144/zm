@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zarma_mobile/features/contribution/application/consent_controller.dart';
+import 'package:zarma_mobile/widgets/brand_app_bar.dart';
+import 'package:zarma_mobile/widgets/brand_footer.dart';
 
 class ConsentScreen extends ConsumerWidget {
   const ConsentScreen({super.key});
@@ -12,7 +14,8 @@ class ConsentScreen extends ConsumerWidget {
 
     return Scaffold(
       key: const Key('consent-screen'),
-      appBar: AppBar(title: const Text('Consentement')),
+      appBar: const BrandAppBar(title: 'Consentement'),
+      bottomNavigationBar: const BrandFooter(),
       body: SafeArea(
         child: hasText
             ? _ConsentBody(consent: consent)

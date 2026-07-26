@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zarma_mobile/models/recognition_result.dart';
 import 'package:zarma_mobile/network/api_client.dart';
@@ -85,7 +86,11 @@ class DioRecognitionRepository implements RecognitionRepository {
       );
     } on RecognitionFailure {
       rethrow;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Recognition request failed unexpectedly: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }
       throw const RecognitionFailure(
         type: RecognitionFailureType.unknown,
         message: 'Le service n’a pas pu traiter la demande.',

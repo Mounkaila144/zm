@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zarma_mobile/history/history_repository.dart';
 import 'package:zarma_mobile/models/recognition_result.dart';
 import 'package:zarma_mobile/network/api_client.dart';
+import 'package:zarma_mobile/widgets/brand_app_bar.dart';
+import 'package:zarma_mobile/widgets/brand_footer.dart';
 import 'package:zarma_mobile/widgets/zarma_number_display.dart';
 
 /// Écran Historique : liste des reconnaissances récentes de l'`anon_id` local.
@@ -21,7 +23,8 @@ class HistoryScreen extends ConsumerWidget {
 
     return Scaffold(
       key: const Key('history-screen'),
-      appBar: AppBar(title: const Text('Historique')),
+      appBar: const BrandAppBar(title: 'Historique'),
+      bottomNavigationBar: const BrandFooter(),
       body: history.when(
         loading: () => const Center(
           child: CircularProgressIndicator(key: Key('history-loading')),
@@ -56,10 +59,7 @@ class _HistoryList extends StatelessWidget {
         final String date = _formatDate(item.createdAt);
         return ListTile(
           key: Key('history-item-$index'),
-          title: ZarmaNumberDisplay(
-            number: item.recognizedNumber,
-            zarmaText: item.zarmaText,
-          ),
+          title: ZarmaNumberDisplay(number: item.recognizedNumber),
           trailing: date.isEmpty
               ? null
               : Text(date, style: Theme.of(context).textTheme.bodySmall),

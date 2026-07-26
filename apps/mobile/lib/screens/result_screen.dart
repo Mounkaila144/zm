@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:zarma_mobile/feedback/feedback_models.dart';
 import 'package:zarma_mobile/models/recognition_result.dart';
 import 'package:zarma_mobile/navigation/app_routes.dart';
+import 'package:zarma_mobile/widgets/brand_app_bar.dart';
+import 'package:zarma_mobile/widgets/brand_footer.dart';
 import 'package:zarma_mobile/widgets/zarma_number_display.dart';
 
 class ResultScreen extends StatelessWidget {
@@ -22,7 +24,8 @@ class ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       key: const Key('result-screen'),
-      appBar: AppBar(title: const Text('Résultat')),
+      appBar: const BrandAppBar(title: 'Résultat'),
+      bottomNavigationBar: const BrandFooter(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -45,10 +48,7 @@ class ResultScreen extends StatelessWidget {
                                     Theme.of(context).textTheme.headlineMedium,
                               ),
                         ),
-                        child: ZarmaNumberDisplay(
-                          number: _number,
-                          zarmaText: _zarmaText,
-                        ),
+                        child: ZarmaNumberDisplay(number: _number),
                       ),
                     ),
                   ),

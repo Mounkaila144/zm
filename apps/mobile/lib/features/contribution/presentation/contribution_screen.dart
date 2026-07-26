@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zarma_mobile/features/contribution/application/contribution_controller.dart';
 import 'package:zarma_mobile/features/contribution/models/contribution_models.dart';
 import 'package:zarma_mobile/recording/audio_recording_models.dart';
+import 'package:zarma_mobile/widgets/brand_app_bar.dart';
+import 'package:zarma_mobile/widgets/brand_footer.dart';
 
 class ContributionScreen extends ConsumerStatefulWidget {
   const ContributionScreen({super.key});
@@ -114,7 +116,8 @@ class _ContributionScreenState extends ConsumerState<ContributionScreen>
       },
       child: Scaffold(
         key: const Key('contribution-screen'),
-        appBar: AppBar(title: const Text('Contribuer')),
+        appBar: const BrandAppBar(title: 'Contribuer'),
+        bottomNavigationBar: const BrandFooter(),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),

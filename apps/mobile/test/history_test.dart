@@ -259,7 +259,7 @@ void main() {
 
       expect(find.byKey(const Key('history-list')), findsOneWidget);
       expect(find.text('42'), findsOneWidget);
-      expect(find.text('waranka cindi hinka'), findsOneWidget);
+      expect(find.text('waranka cindi hinka'), findsNothing);
       expect(find.text('7'), findsOneWidget);
       // La date est affichée pour chaque élément (année stable quel que soit
       // le fuseau du runner CI).

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zarma_mobile/navigation/app_routes.dart';
+import 'package:zarma_mobile/theme/brand.dart';
 
 class ZarmaApp extends StatelessWidget {
   const ZarmaApp({super.key});
@@ -7,15 +8,9 @@ class ZarmaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Zarma',
+      title: 'ZarmaIA',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF315C49),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
+      theme: buildBrandTheme(),
       initialRoute: AppRoutes.home,
       routes: AppRoutes.routes,
       onGenerateRoute: AppRoutes.onGenerateRoute,

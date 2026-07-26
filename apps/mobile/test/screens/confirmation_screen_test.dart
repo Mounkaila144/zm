@@ -76,7 +76,7 @@ void main() {
     expect(repository.requests.single.proposedNumber, 7);
     expect(find.byKey(const Key('result-screen')), findsOneWidget);
     expect(find.text('7'), findsOneWidget);
-    expect(find.text('iyye'), findsOneWidget);
+    expect(find.text('iyye'), findsNothing);
   });
 
   testWidgets('Répéter depuis confirm envoie repeat_requested',

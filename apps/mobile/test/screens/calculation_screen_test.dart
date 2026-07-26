@@ -67,7 +67,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('affiche l’opération, le résultat et sa forme zarma',
+  testWidgets('affiche l’opération et le résultat, jamais la forme zarma',
       (tester) async {
     await pump(
       tester,
@@ -85,7 +85,11 @@ void main() {
 
     expect(find.text('23 + 15'), findsOneWidget);
     expect(find.text('38'), findsOneWidget);
-    expect(find.text('waranza cindi hakou'), findsOneWidget);
+    expect(find.text('waranza cindi hakou'), findsNothing);
+    expect(
+      find.text('waranka cindi hinza tonton iwey cindi gou'),
+      findsNothing,
+    );
     expect(find.byKey(const Key('calculation-refusal')), findsNothing);
   });
 
@@ -107,7 +111,7 @@ void main() {
     );
 
     expect(find.text('20 reste 3'), findsOneWidget);
-    expect(find.text('waranka ga cindi hinza'), findsOneWidget);
+    expect(find.text('waranka ga cindi hinza'), findsNothing);
   });
 
   testWidgets('un refus n’affiche aucun nombre', (tester) async {
@@ -153,7 +157,7 @@ void main() {
         reason: 'le résultat doit être dit sans action');
   });
 
-  testWidgets('ne prononce pas deux fois le même résultat', (tester) async {
+  testWidgets('ne répète pas avant deux secondes', (tester) async {
     await pump(
       tester,
       result(expression: sum),
@@ -162,6 +166,66 @@ void main() {
     await tester.pump();
 
     expect(played, hasLength(1));
+  });
+
+  testWidgets('répète le résultat toutes les deux secondes', (tester) async {
+    await pump(
+      tester,
+      result(expression: sum),
+      bank: bankOf(<String>['waranza', 'cindi', 'hakou']),
+    );
+    expect(played, hasLength(1));
+
+    await tester.pump(const Duration(milliseconds: 1999));
+    expect(played, hasLength(1));
+
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump();
+    expect(played, hasLength(2));
+
+    await tester.pump(calculationRepeatDelay);
+    await tester.pump();
+    expect(played, hasLength(3));
+  });
+
+  testWidgets('la boucle s’arrête en quittant l’écran', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          voiceBankProvider.overrideWith(
+            (ref) async => bankOf(<String>['waranza', 'cindi', 'hakou']),
+          ),
+          wavPlayerProvider.overrideWithValue(
+            (Uint8List wav) async => played.add(wav),
+          ),
+        ],
+        child: MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) => Center(
+              child: FilledButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) =>
+                        CalculationScreen(result: result(expression: sum)),
+                  ),
+                ),
+                child: const Text('ouvrir'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('ouvrir'));
+    await tester.pumpAndSettle();
+    expect(played, hasLength(1));
+
+    await tester.tap(find.byKey(const Key('record-new-calculation-button')));
+    await tester.pumpAndSettle();
+
+    await tester.pump(const Duration(seconds: 6));
+    expect(played, hasLength(1),
+        reason: 'la boucle doit s’arrêter quand l’écran est quitté');
   });
 
   testWidgets('ne garde qu’un bouton pour lancer une nouvelle opération',

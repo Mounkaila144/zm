@@ -6,6 +6,8 @@ import 'package:zarma_mobile/models/recognition_result.dart';
 import 'package:zarma_mobile/navigation/app_routes.dart';
 import 'package:zarma_mobile/recognition/recognition_controller.dart';
 import 'package:zarma_mobile/recording/audio_recording_models.dart';
+import 'package:zarma_mobile/widgets/brand_app_bar.dart';
+import 'package:zarma_mobile/widgets/brand_footer.dart';
 
 class ProcessingScreen extends ConsumerStatefulWidget {
   const ProcessingScreen({super.key, required this.handoff});
@@ -89,10 +91,11 @@ class _ProcessingScreenState extends ConsumerState<ProcessingScreen> {
       },
       child: Scaffold(
         key: const Key('processing-screen'),
-        appBar: AppBar(
-          title: const Text('Traitement'),
+        appBar: const BrandAppBar(
+          title: 'Traitement',
           automaticallyImplyLeading: false,
         ),
+        bottomNavigationBar: const BrandFooter(),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),

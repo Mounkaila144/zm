@@ -11,6 +11,8 @@ import 'package:zarma_mobile/screens/home_screen.dart';
 import 'package:zarma_mobile/screens/processing_screen.dart';
 import 'package:zarma_mobile/screens/recording_screen.dart';
 import 'package:zarma_mobile/screens/result_screen.dart';
+import 'package:zarma_mobile/widgets/brand_app_bar.dart';
+import 'package:zarma_mobile/widgets/brand_footer.dart';
 
 abstract final class AppRoutes {
   static const String home = '/';
@@ -88,7 +90,8 @@ class _InvalidArgumentsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       key: const Key('invalid-route-arguments-screen'),
-      appBar: AppBar(title: const Text('Navigation impossible')),
+      appBar: const BrandAppBar(title: 'Navigation impossible'),
+      bottomNavigationBar: const BrandFooter(),
       body: Center(
         child: FilledButton.icon(
           onPressed: () =>

@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zarma_mobile/navigation/app_routes.dart';
 import 'package:zarma_mobile/recording/audio_recording_models.dart';
 import 'package:zarma_mobile/recording/recording_controller.dart';
+import 'package:zarma_mobile/widgets/brand_app_bar.dart';
+import 'package:zarma_mobile/widgets/brand_footer.dart';
 
 class RecordingScreen extends ConsumerStatefulWidget {
   const RecordingScreen({super.key});
@@ -103,10 +105,11 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen>
       },
       child: Scaffold(
         key: const Key('recording-screen'),
-        appBar: AppBar(
-          title: const Text('Enregistrement'),
+        appBar: const BrandAppBar(
+          title: 'Enregistrement',
           automaticallyImplyLeading: false,
         ),
+        bottomNavigationBar: const BrandFooter(),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),

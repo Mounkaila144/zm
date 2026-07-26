@@ -25,6 +25,10 @@ enum VoiceSegmentKind { word, prompt }
 const String kPromptConfirm = 'confirm';
 const String kPromptCannotAnswer = 'cannot_answer';
 
+/// Consigne jouée quand aucun nombre n'a pu être identifié (repérage échoué,
+/// pas un calcul refusé — voir [kPromptCannotAnswer] pour ce second cas).
+const String kPromptRepeat = 'repeat';
+
 /// Un morceau d'énoncé à prononcer.
 class VoiceSegment {
   const VoiceSegment.word(this.key) : kind = VoiceSegmentKind.word;
@@ -70,6 +74,14 @@ List<VoiceSegment> confirmationUtterance(List<VoiceSegment> inner) {
 /// d'une panne pour l'utilisateur (AC4/FR21).
 List<VoiceSegment> refusalUtterance() {
   return const <VoiceSegment>[VoiceSegment.prompt(kPromptCannotAnswer)];
+}
+
+/// Consigne annonçant qu'aucun nombre n'a pu être identifié dans la voix.
+///
+/// Même principe que [refusalUtterance] : silence et échec sont
+/// indistinguables pour qui ne lit pas, donc jamais de silence ici non plus.
+List<VoiceSegment> repeatUtterance() {
+  return const <VoiceSegment>[VoiceSegment.prompt(kPromptRepeat)];
 }
 
 /// Fichiers audio réellement embarqués dans l'application.

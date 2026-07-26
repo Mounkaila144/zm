@@ -40,7 +40,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Accueil'), findsOneWidget);
+    expect(find.text('ZarmaIA'), findsOneWidget);
     expect(find.byIcon(Icons.mic), findsOneWidget);
     expect(find.byKey(const Key('open-history-button')), findsNothing);
     expect(find.byKey(const Key('open-contribution-button')), findsNothing);

@@ -6,6 +6,8 @@ import 'package:zarma_mobile/feedback/feedback_controller.dart';
 import 'package:zarma_mobile/feedback/feedback_models.dart';
 import 'package:zarma_mobile/models/recognition_result.dart';
 import 'package:zarma_mobile/navigation/app_routes.dart';
+import 'package:zarma_mobile/widgets/brand_app_bar.dart';
+import 'package:zarma_mobile/widgets/brand_footer.dart';
 import 'package:zarma_mobile/widgets/number_keypad.dart';
 import 'package:zarma_mobile/widgets/zarma_number_display.dart';
 
@@ -60,7 +62,8 @@ class _CorrectionScreenState extends ConsumerState<CorrectionScreen> {
 
     return Scaffold(
       key: const Key('correction-screen'),
-      appBar: AppBar(title: const Text('Correction')),
+      appBar: const BrandAppBar(title: 'Correction'),
+      bottomNavigationBar: const BrandFooter(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -156,7 +159,7 @@ class _GenerationView extends StatelessWidget {
     final AsyncValue<ZarmaGeneration>? value = generation;
     if (value == null) {
       return Text(
-        'La forme zarma s’affichera ici.',
+        'Le nombre saisi s’affichera ici.',
         key: const Key('correction-idle'),
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.bodyMedium,
@@ -177,10 +180,7 @@ class _GenerationView extends StatelessWidget {
                     bodyMedium: Theme.of(context).textTheme.headlineSmall,
                   ),
             ),
-            child: ZarmaNumberDisplay(
-              number: data.number,
-              zarmaText: data.zarmaText,
-            ),
+            child: ZarmaNumberDisplay(number: data.number),
           ),
         ),
       ),

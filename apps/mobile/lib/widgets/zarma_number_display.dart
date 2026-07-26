@@ -1,36 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:zarma_mobile/theme/brand.dart';
 
-/// Affiche un nombre reconnu : chiffres + forme zarma (partagé entre écrans).
+/// Affiche un nombre reconnu — gros et seul (partagé entre écrans).
 ///
-/// Widget purement présentatif — aucune logique numérique. `zarmaText` et
-/// `number` proviennent de l'API.
+/// L'utilisateur cible ne lit pas : la forme zarma n'est **jamais** affichée
+/// à l'écran, seulement dite (voir `ZarmaSpeaker`). Ce widget ne montre donc
+/// que le chiffre, en aussi grand que possible.
 class ZarmaNumberDisplay extends StatelessWidget {
-  const ZarmaNumberDisplay({
-    super.key,
-    required this.zarmaText,
-    this.number,
-  });
+  const ZarmaNumberDisplay({super.key, this.number});
 
-  final String zarmaText;
   final int? number;
 
   @override
   Widget build(BuildContext context) {
-    final TextTheme textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text(
-          number?.toString() ?? '—',
-          style: textTheme.titleLarge,
-        ),
-        if (zarmaText.isNotEmpty)
-          Text(
-            zarmaText,
-            style: textTheme.bodyMedium,
+    return Text(
+      number?.toString() ?? '—',
+      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: BrandColors.navy,
           ),
-      ],
     );
   }
 }

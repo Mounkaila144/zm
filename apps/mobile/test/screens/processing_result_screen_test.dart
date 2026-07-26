@@ -107,7 +107,7 @@ void main() {
     expect(find.byKey(const Key('confirm-expression-button')), findsOneWidget);
   });
 
-  testWidgets('Résultat affiche chiffres + zarma sans métadonnées', (
+  testWidgets('Résultat affiche le chiffre seul, jamais la forme zarma ni les métadonnées', (
     tester,
   ) async {
     final RecognitionResult result = _result(Decision.accept);
@@ -120,7 +120,7 @@ void main() {
     );
 
     expect(find.text('42'), findsOneWidget);
-    expect(find.text('waranka cindi hinka'), findsOneWidget);
+    expect(find.text('waranka cindi hinka'), findsNothing);
     expect(find.textContaining('0.95'), findsNothing);
     expect(find.textContaining('mock'), findsNothing);
     expect(find.byKey(const Key('record-new-number-button')), findsOneWidget);

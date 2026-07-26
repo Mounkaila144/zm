@@ -9,6 +9,8 @@ import 'package:zarma_mobile/models/recognition_result.dart';
 import 'package:zarma_mobile/navigation/app_routes.dart';
 import 'package:zarma_mobile/speech/voice_bank.dart';
 import 'package:zarma_mobile/speech/zarma_speaker.dart';
+import 'package:zarma_mobile/widgets/brand_app_bar.dart';
+import 'package:zarma_mobile/widgets/brand_footer.dart';
 
 const Duration confirmationRepeatDelay = Duration(seconds: 3);
 
@@ -32,6 +34,18 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
   int _speechLoopVersion = 0;
   Timer? _speechRepeatTimer;
   Completer<void>? _speechDelayCompleter;
+  bool _repeatPromptSpoken = false;
+
+  /// Dit qu'aucun nombre n'a pu être identifié — l'écran seul ne le dirait
+  /// jamais à quelqu'un qui ne lit pas.
+  void _speakRepeatPrompt(ZarmaSpeaker speaker) {
+    _repeatPromptSpoken = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        unawaited(speaker.speak(repeatUtterance()));
+      }
+    });
+  }
 
   /// Relit l'opération, attend trois secondes, puis recommence jusqu'à ce que
   /// la personne confirme ou demande un nouvel enregistrement.
@@ -230,10 +244,11 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
       }
       return Scaffold(
         key: const Key('confirmation-screen'),
-        appBar: AppBar(
-          title: const Text('Confirmation'),
+        appBar: const BrandAppBar(
+          title: 'Confirmation',
           automaticallyImplyLeading: false,
         ),
+        bottomNavigationBar: const BrandFooter(),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -249,9 +264,17 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
       );
     }
 
+    if (repeatOnly && !_repeatPromptSpoken) {
+      final ZarmaSpeaker? speaker = ref.watch(zarmaSpeakerProvider);
+      if (speaker != null) {
+        _speakRepeatPrompt(speaker);
+      }
+    }
+
     return Scaffold(
       key: const Key('confirmation-screen'),
-      appBar: AppBar(title: const Text('Confirmation')),
+      appBar: const BrandAppBar(title: 'Confirmation'),
+      bottomNavigationBar: const BrandFooter(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -355,23 +378,11 @@ class _ConfirmExpressionBody extends StatelessWidget {
               liveRegion: true,
               label: view.semanticsLabel,
               child: ExcludeSemantics(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      view.operationLabel,
-                      key: const Key('confirm-expression-operation'),
-                      style: textTheme.displaySmall,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      expression.zarmaText,
-                      key: const Key('confirm-expression-zarma'),
-                      style: textTheme.titleMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                child: Text(
+                  view.operationLabel,
+                  key: const Key('confirm-expression-operation'),
+                  style: textTheme.displaySmall,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
@@ -533,11 +544,6 @@ class _CandidateCard extends StatelessWidget {
                           style: primary
                               ? textTheme.displaySmall
                               : textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          candidate.zarmaText,
-                          style: textTheme.titleMedium,
                         ),
                       ],
                     ),

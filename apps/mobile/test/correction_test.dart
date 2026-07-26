@@ -63,7 +63,7 @@ void main() {
     registerFallbackValue(FakeFeedbackRequest());
   });
 
-  testWidgets('saisie 235 affiche la forme zarma générée par l’API',
+  testWidgets('saisie 235 génère la forme zarma sans l’afficher',
       (WidgetTester tester) async {
     final FakeGeneratorRepository generator = FakeGeneratorRepository(
       (int n) async => ZarmaGeneration(
@@ -81,7 +81,7 @@ void main() {
     await tester.pump(); // rebuild data
 
     expect(generator.calls, <int>[235]);
-    expect(find.text(_zarma235), findsOneWidget);
+    expect(find.text(_zarma235), findsNothing);
     expect(
       find.descendant(
         of: find.byType(ZarmaNumberDisplay),
@@ -145,7 +145,7 @@ void main() {
     expect(request.recognitionId, 'rec-id');
     expect(find.byKey(const Key('result-screen')), findsOneWidget);
     expect(find.text('235'), findsOneWidget);
-    expect(find.text(_zarma235), findsOneWidget);
+    expect(find.text(_zarma235), findsNothing);
   });
 
   testWidgets('une erreur de génération API affiche un message clair',

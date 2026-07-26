@@ -1,8 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zarma_mobile/calculation/calculation_view.dart';
 import 'package:zarma_mobile/models/recognition_result.dart';
 import 'package:zarma_mobile/speech/zarma_speaker.dart';
+import 'package:zarma_mobile/widgets/brand_app_bar.dart';
+import 'package:zarma_mobile/widgets/brand_footer.dart';
+
+/// Pause entre deux répétitions du résultat — assez courte pour qu'une
+/// personne qui n'a pas entendu la première fois n'ait pas à réenregistrer.
+const Duration calculationRepeatDelay = Duration(seconds: 2);
 
 /// Écran de calcul : l'opération entendue et sa réponse (story 6.1).
 ///
@@ -10,9 +18,9 @@ import 'package:zarma_mobile/speech/zarma_speaker.dart';
 /// le calcul vient du serveur, et l'assemblage audio de [ZarmaSpeaker]. Rien
 /// n'est recalculé, arrondi ni recomposé ici.
 ///
-/// Le résultat est **prononcé dès l'affichage** : l'utilisateur cible ne lit
-/// pas, l'écran seul ne lui apprendrait rien. Le seul bouton relance ensuite
-/// le parcours vocal pour une nouvelle opération.
+/// Le résultat est **prononcé en boucle** dès l'affichage, toutes les deux
+/// secondes : l'utilisateur cible ne lit pas, et peut ne pas regarder l'écran
+/// au moment exact où le résultat est dit une première fois.
 class CalculationScreen extends ConsumerStatefulWidget {
   const CalculationScreen({super.key, required this.result});
 
@@ -23,18 +31,56 @@ class CalculationScreen extends ConsumerStatefulWidget {
 }
 
 class _CalculationScreenState extends ConsumerState<CalculationScreen> {
-  bool _spokenOnce = false;
+  bool _loopStarted = false;
+  int _loopVersion = 0;
+  Timer? _repeatTimer;
+  Completer<void>? _delayCompleter;
   SpeechOutcome? _lastOutcome;
 
-  Future<void> _speak(CalculationView view) async {
-    final ZarmaSpeaker? speaker = ref.read(zarmaSpeakerProvider);
-    if (speaker == null) {
-      return; // banque pas encore chargée : le déclencheur automatique repassera
-    }
-    final SpeechOutcome outcome = await speaker.speak(view.utterance);
-    if (mounted) {
+  Future<void> _speakLoop(
+    CalculationView view,
+    ZarmaSpeaker speaker,
+    int version,
+  ) async {
+    while (mounted && version == _loopVersion) {
+      final SpeechOutcome outcome = await speaker.speak(view.utterance);
+      if (!mounted || version != _loopVersion) {
+        return;
+      }
       setState(() => _lastOutcome = outcome);
+      if (outcome == SpeechOutcome.incomplete) {
+        return; // rien à répéter : un silence en boucle n'aiderait personne
+      }
+      await _waitBeforeRepeating();
     }
+  }
+
+  Future<void> _waitBeforeRepeating() {
+    final Completer<void> completer = Completer<void>();
+    _delayCompleter = completer;
+    _repeatTimer = Timer(calculationRepeatDelay, () {
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    });
+    return completer.future;
+  }
+
+  void _stopLoop() {
+    _loopVersion++;
+    _repeatTimer?.cancel();
+    _repeatTimer = null;
+    final Completer<void>? completer = _delayCompleter;
+    _delayCompleter = null;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
+    }
+  }
+
+  @override
+  void dispose() {
+    _stopLoop();
+    super.dispose();
   }
 
   @override
@@ -51,18 +97,25 @@ class _CalculationScreenState extends ConsumerState<CalculationScreen> {
     final CalculationView view = CalculationView(expression);
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    // Dès que la banque est prête, l'énoncé est dit — une seule fois.
-    if (!_spokenOnce && ref.watch(zarmaSpeakerProvider) != null) {
-      _spokenOnce = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) => _speak(view));
+    // Dès que la banque est prête, l'énoncé est dit — puis répété en boucle.
+    final ZarmaSpeaker? speaker = ref.watch(zarmaSpeakerProvider);
+    if (!_loopStarted && speaker != null) {
+      _loopStarted = true;
+      final int version = ++_loopVersion;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && version == _loopVersion) {
+          unawaited(_speakLoop(view, speaker, version));
+        }
+      });
     }
 
     return Scaffold(
       key: const Key('calculation-screen'),
-      appBar: AppBar(
-        title: const Text('Calcul'),
+      appBar: const BrandAppBar(
+        title: 'Calcul',
         automaticallyImplyLeading: false,
       ),
+      bottomNavigationBar: const BrandFooter(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -82,13 +135,6 @@ class _CalculationScreenState extends ConsumerState<CalculationScreen> {
                             view.operationLabel,
                             key: const Key('calculation-operation'),
                             style: textTheme.headlineMedium,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            expression.zarmaText,
-                            key: const Key('calculation-operation-zarma'),
-                            style: textTheme.titleMedium,
                             textAlign: TextAlign.center,
                           ),
                           const Divider(height: 40),
@@ -143,13 +189,6 @@ class _CalculationScreenState extends ConsumerState<CalculationScreen> {
         view.resultLabel!,
         key: const Key('calculation-result'),
         style: textTheme.displayLarge,
-        textAlign: TextAlign.center,
-      ),
-      const SizedBox(height: 8),
-      Text(
-        view.resultZarmaText,
-        key: const Key('calculation-result-zarma'),
-        style: textTheme.headlineSmall,
         textAlign: TextAlign.center,
       ),
     ];
