@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zarma_mobile/features/contribution/application/consent_controller.dart';
 import 'package:zarma_mobile/widgets/brand_app_bar.dart';
 import 'package:zarma_mobile/widgets/brand_footer.dart';
 
 class ConsentScreen extends ConsumerWidget {
-  const ConsentScreen({super.key});
+  const ConsentScreen({super.key, this.mandatory = false});
+
+  final bool mandatory;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,11 +17,14 @@ class ConsentScreen extends ConsumerWidget {
 
     return Scaffold(
       key: const Key('consent-screen'),
-      appBar: const BrandAppBar(title: 'Consentement'),
+      appBar: BrandAppBar(
+        title: 'Votre accord',
+        automaticallyImplyLeading: !mandatory,
+      ),
       bottomNavigationBar: const BrandFooter(),
       body: SafeArea(
         child: hasText
-            ? _ConsentBody(consent: consent)
+            ? _ConsentBody(consent: consent, mandatory: mandatory)
             : _ConsentLoadingOrError(consent: consent),
       ),
     );
@@ -65,9 +71,13 @@ class _ConsentLoadingOrError extends ConsumerWidget {
 }
 
 class _ConsentBody extends ConsumerWidget {
-  const _ConsentBody({required this.consent});
+  const _ConsentBody({
+    required this.consent,
+    required this.mandatory,
+  });
 
   final ConsentState consent;
+  final bool mandatory;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -78,7 +88,8 @@ class _ConsentBody extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            'Avant de contribuer votre voix',
+            'Votre voix aide ZarmaIA',
+            textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 4),
@@ -122,14 +133,14 @@ class _ConsentBody extends ConsumerWidget {
           ],
           const SizedBox(height: 16),
           SizedBox(
-            height: 52,
-            child: FilledButton(
+            height: 68,
+            child: FilledButton.icon(
               key: const Key('accept-consent-button'),
               onPressed: submitting
                   ? null
                   : () =>
                       ref.read(consentStatusProvider.notifier).acceptCurrent(),
-              child: submitting
+              icon: submitting
                   ? const SizedBox.square(
                       dimension: 24,
                       child: CircularProgressIndicator(
@@ -137,9 +148,22 @@ class _ConsentBody extends ConsumerWidget {
                         strokeWidth: 2,
                       ),
                     )
-                  : const Text('Accepter'),
+                  : const Icon(Icons.check_circle, size: 36),
+              label: const Text('J’accepte'),
             ),
           ),
+          if (mandatory) ...<Widget>[
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 60,
+              child: OutlinedButton.icon(
+                key: const Key('refuse-consent-button'),
+                onPressed: submitting ? null : SystemNavigator.pop,
+                icon: const Icon(Icons.close, size: 32),
+                label: const Text('Je refuse'),
+              ),
+            ),
+          ],
         ],
       ),
     );

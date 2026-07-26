@@ -31,9 +31,37 @@ def test_invariant_holds_chunk(chunk_start):
 
 
 def test_boundaries_and_million():
-    for n in (0, 999, 1_000, 99_999, 100_000, 999_999, MAX_VALUE):
+    for n in (0, 999, 1_000, 99_999, 100_000, 999_999, 1_000_000, MAX_VALUE):
         assert parse(normalize(generate(n))) == n
-    assert generate(MAX_VALUE) == "million"
+    assert generate(1_000_000) == "million"
+
+
+# --- Extension million (au-delà de 1 000 000, même mécanisme que `zambar`) ---
+# Pas de preuve exhaustive possible ici (~10^11 valeurs) : échantillonnage
+# ciblé + aléatoire, cf. RESOLVED_MAX dans validator.py.
+
+
+@pytest.mark.parametrize(
+    ("a", "b"),
+    [
+        (100_000_005, 105_000_000),
+        (1_000_000_005, 1_005_000_000),
+        (900_099_000, 999_000_000),
+    ],
+)
+def test_million_dala_pairs_no_longer_collide(a, b):
+    assert generate(a) != generate(b)
+    assert parse(normalize(generate(a))) == a
+    assert parse(normalize(generate(b))) == b
+
+
+def test_million_scale_random_sample_roundtrips():
+    import random
+
+    rng = random.Random(20260726)
+    for _ in range(5000):
+        n = rng.randint(1_000_001, MAX_VALUE)
+        assert parse(normalize(generate(n))) == n
 
 
 # --- Story 1.7 : désambiguïsation `dala` (paires qui collisionnaient avant) ---

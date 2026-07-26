@@ -76,7 +76,7 @@ class CalculationView {
         return 'Cette soustraction donnerait un nombre négatif : '
             'il n’y a pas de réponse à dire.';
       case 'RESULT_OVERFLOW':
-        return 'Le résultat dépasse un million : il ne peut pas être dit.';
+        return 'Le résultat dépasse 99 999 999 999 : il ne peut pas être dit.';
       case 'DIVISION_BY_ZERO':
         return 'On ne peut pas diviser par zéro.';
       case 'OPERAND_OUT_OF_RANGE':

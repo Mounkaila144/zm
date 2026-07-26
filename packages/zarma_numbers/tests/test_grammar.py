@@ -50,6 +50,19 @@ def grammar():
             "zambar zangou yega da wayyegga cindi yega da zangou yega da wayyegga cindi yega",
         ),  # noqa: E501
         (1_000_000, "million"),
+        (1_000_002, "million di hinka"),
+        (1_001_000, "million da zambar fo"),
+        (2_000_000, "million hinka"),
+        (2_500_000, "million hinka da zambar zangou gou"),
+        (15_000_000, "million iwey cindi gou"),
+        (100_000_005, "million zangou da dala gou"),
+        (105_000_000, "million zangou di gou"),
+        (1_000_000_005, "million zambar fo da dala gou"),
+        (
+            99_999_999_999,
+            "million zambar wayyegga cindi yega da zangou yega da wayyegga cindi yega "
+            "da zambar zangou yega da wayyegga cindi yega da zangou yega da wayyegga cindi yega",
+        ),  # noqa: E501
     ],
 )
 def test_canonical_forms_are_accepted(grammar, n, form):
@@ -57,7 +70,10 @@ def test_canonical_forms_are_accepted(grammar, n, form):
     assert grammar.accepts(form)
 
 
-@pytest.mark.parametrize("start", [0, 999, 1_000, 99_000, 100_000, 999_000])
+@pytest.mark.parametrize(
+    "start",
+    [0, 999, 1_000, 99_000, 100_000, 999_000, 999_500, 1_999_500, 999_999_500, MAX_VALUE - 1_000],
+)
 def test_generated_forms_accepted_on_chunks(grammar, start):
     for n in range(start, min(start + 1_000, MAX_VALUE) + 1):
         assert grammar.accepts(generate(n)), f"forme refusée pour n={n}"
@@ -77,8 +93,10 @@ def test_language_size_is_exactly_the_generator_range(grammar):
     """Comptage des chemins acceptants : l'automate ne sur-génère pas.
 
     L'automate est acyclique (langue finie) ; compter ses chaînes acceptées et
-    trouver 1 000 001 prouve, avec l'acceptation de chaque ``generate(n)`` et
-    l'injectivité du générateur (invariant), que les deux langues coïncident.
+    trouver ``MAX_VALUE + 1`` (10¹¹) prouve, avec l'acceptation de chaque
+    ``generate(n)`` et l'injectivité du générateur (invariant), que les deux
+    langues coïncident. Le comptage reste O(état) grâce au cache — c'est la
+    compacité de l'automate qui rend cette preuve praticable à cette échelle.
     """
 
     @cache
@@ -160,6 +178,17 @@ def test_dala_required_when_multiplier_is_a_multiple_of_hundred(grammar):
     assert grammar.accepts("zambar zangou hinka da dala fo")  # 200 001
 
 
+def test_dala_applies_identically_at_the_million_scale(grammar):
+    # Même mécanisme, une échelle au-dessus : multiplicateur multiple de 100
+    # (y compris via la branche zambar du multiplicateur) → marqueur requis.
+    assert grammar.accepts("million zangou da dala gou")  # 100 000 005
+    assert grammar.accepts("million zangou di gou")  # 105 000 000
+    assert grammar.accepts("million zambar fo da dala gou")  # 1 000 000 005
+    assert grammar.accepts("million zambar fo da zangou da dala gou")  # 1 100 000 005
+    assert not grammar.accepts("million hinka da dala fo")  # multiplicateur 2 : jamais marqué
+    assert not grammar.accepts("million da dala fo")  # échelle nue : jamais marquée
+
+
 @pytest.mark.parametrize(
     "form",
     [
@@ -194,6 +223,11 @@ def test_dala_is_refused_outside_its_case(grammar, form):
         "zangou di waranka",  # `di` devant 20 : la distribution l'interdit
         "zangou da gou",  # `da` devant 5 : idem
         "wey",  # forme élidée hors contexte `di`
+        "million fo",  # multiplicateur 1 : toujours omis (« million » seul)
+        "million yaamo",  # zéro interdit en composition
+        "million afo",  # forme isolée interdite en composition
+        "million zambar",  # multiplicateur zambar incomplet
+        "million million",  # l'échelle ne se répète pas
     ],
 )
 def test_invalid_sequences_are_refused(grammar, form):
@@ -288,8 +322,10 @@ def test_grammar_version_comes_from_the_lexicon(grammar):
 
 
 def test_automaton_stays_compact(grammar):
-    # Un trie exhaustif des 1 000 001 formes serait ingérable : l'automate
-    # partage ses sous-structures (AC2 — pas d'énumération).
+    # Un trie exhaustif des 10¹¹ formes serait impossible : la couche million
+    # réutilise la branche zambar comme sous-automate partagé (aucune
+    # ré-énumération de la sous-langue below-million), et le DFA final est
+    # minimisé (AC2 — pas d'énumération).
     assert grammar.state_count < 10_000
     assert grammar.tokens
 

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zarma_mobile/features/contribution/application/consent_controller.dart';
 import 'package:zarma_mobile/models/recognition_result.dart';
 import 'package:zarma_mobile/network/api_client.dart';
 import 'package:zarma_mobile/recording/audio_recording_models.dart';
@@ -12,6 +13,8 @@ enum RecognitionFailureType {
   invalidAudio,
   rateLimited,
   serviceUnavailable,
+  consentRequired,
+  updateRequired,
   invalidResponse,
   badCertificate,
   unknown,
@@ -47,9 +50,10 @@ abstract interface class RecognitionRepository {
 }
 
 class DioRecognitionRepository implements RecognitionRepository {
-  const DioRecognitionRepository(this._dio);
+  const DioRecognitionRepository(this._dio, {this.consentId = ''});
 
   final Dio _dio;
+  final String consentId;
 
   @override
   Future<RecognitionResult> recognize({
@@ -66,6 +70,7 @@ class DioRecognitionRepository implements RecognitionRepository {
       final FormData body = FormData.fromMap(<String, dynamic>{
         'audio': audio,
         'anon_id': anonId,
+        'consent_id': consentId,
       });
       final Response<dynamic> response = await _dio.post<dynamic>(
         '/recognize',
@@ -100,7 +105,10 @@ class DioRecognitionRepository implements RecognitionRepository {
 }
 
 final recognitionRepositoryProvider = Provider<RecognitionRepository>((ref) {
-  return DioRecognitionRepository(ref.watch(dioProvider));
+  return DioRecognitionRepository(
+    ref.watch(dioProvider),
+    consentId: ref.watch(consentStatusProvider).acceptance?.id ?? '',
+  );
 });
 
 RecognitionFailure _recognitionFailure(NetworkFailure failure) {
@@ -127,6 +135,12 @@ RecognitionFailure _recognitionFailure(NetworkFailure failure) {
   } else if (status == 400 || status == 413 || status == 422) {
     type = RecognitionFailureType.invalidAudio;
     message = 'L’enregistrement n’a pas pu être traité.';
+  } else if (status == 403 || code == 'CONSENT_INVALID') {
+    type = RecognitionFailureType.consentRequired;
+    message = 'Votre accord doit être renouvelé.';
+  } else if (status == 426 || code == 'APP_UPDATE_REQUIRED') {
+    type = RecognitionFailureType.updateRequired;
+    message = 'Une mise à jour de l’application est obligatoire.';
   } else if (status == 429 || code == 'RATE_LIMITED') {
     type = RecognitionFailureType.rateLimited;
     message = 'Trop de demandes. Patientez avant de recommencer.';

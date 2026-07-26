@@ -77,8 +77,7 @@ class ManifestResult:
                 counts[str(entry["split"])] = counts.get(str(entry["split"]), 0) + 1
             per_split = ", ".join(f"{name}={counts[name]}" for name in sorted(counts))
             return (
-                f"Manifest écrit : {len(self.entries)} entrée(s) [{per_split}] "
-                f"(seed={self.seed})."
+                f"Manifest écrit : {len(self.entries)} entrée(s) [{per_split}] (seed={self.seed})."
             )
         detail = f" ; {len(self.errors)} entrée(s) invalide(s)" if self.errors else ""
         return f"Manifest NON écrit (fail-closed){detail}."
@@ -126,6 +125,8 @@ def _verify_metadata(row: DatasetManifestRow) -> str | None:
         return "speaker_key_missing"
     if row.expected_number is None or not (0 <= row.expected_number <= 1_000_000):
         return "expected_number_invalid"
+    if not row.expected_prompt.strip():
+        return "expected_prompt_missing"
     return None
 
 
@@ -158,6 +159,8 @@ def _entry(row: DatasetManifestRow, split: str) -> dict[str, object]:
     return {
         "audio_path": row.audio_ref,  # référence opaque relative (jamais absolue)
         "expected_number": row.expected_number,
+        "transcript": row.expected_prompt,
+        "source": row.source,
         "speaker_key": row.speaker_key,
         "region": row.region,  # None si inconnue
         "split": split,

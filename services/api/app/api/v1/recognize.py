@@ -13,9 +13,19 @@ from pydantic import BaseModel, Field
 from app.asr.base import AsrResult, AudioInput, SpeechRecognizer
 from app.asr.factory import get_recognizer
 from app.config import Settings, get_settings
+from app.core.consent import InvalidConsentError, require_valid_consent
 from app.core.errors import ApiError, api_error_response, request_id_from
 from app.core.rate_limit import limiter, recognize_limit
-from app.db.repositories import RecognitionRepo, get_recognition_repo
+from app.db.repositories import (
+    ConsentRepo,
+    ContributionConsentInvalidError,
+    ContributionCreate,
+    ContributionRepo,
+    RecognitionRepo,
+    get_consent_repo,
+    get_contribution_repo,
+    get_recognition_repo,
+)
 from app.pipeline.audio import (
     MAX_AUDIO_SIZE,
     AudioValidationError,
@@ -23,6 +33,7 @@ from app.pipeline.audio import (
     validate_and_decode,
 )
 from app.pipeline.recognition import run_recognition_pipeline
+from app.storage.audio_store import AudioStorageError, AudioStore, get_audio_store
 
 router = APIRouter(tags=["recognize"])
 
@@ -198,7 +209,17 @@ async def recognize(
     anon_id: Annotated[UUID, Form(description="Anonymous device UUID")],
     recognizer: Annotated[SpeechRecognizer, Depends(get_recognizer)],
     repo: Annotated[RecognitionRepo, Depends(get_recognition_repo)],
+    consent_repo: Annotated[ConsentRepo, Depends(get_consent_repo)],
+    contribution_repo: Annotated[
+        ContributionRepo,
+        Depends(get_contribution_repo),
+    ],
+    store: Annotated[AudioStore, Depends(get_audio_store)],
     settings: Annotated[Settings, Depends(get_settings)],
+    consent_id: Annotated[
+        UUID | None,
+        Form(description="Current consent UUID"),
+    ] = None,
 ) -> RecognitionResponse | JSONResponse:
     """Valide puis exécute ASR → normalisation → parsing sous timeout."""
 
@@ -206,10 +227,21 @@ async def recognize(
     request_id = request_id_from(request)
     _request = RecognizeRequest(anon_id=anon_id)
 
+    audio_ref: str | None = None
     try:
         async with asyncio.timeout(TIMEOUT_SECONDS):
+            if settings.REQUIRE_TRAINING_CONSENT:
+                if consent_id is None:
+                    raise InvalidConsentError
+                await require_valid_consent(
+                    repo=consent_repo,
+                    consent_id=consent_id,
+                    anon_id=anon_id,
+                )
             decoded_audio = await validate_and_decode(audio)
-            return await _run_pipeline(
+            if consent_id is not None:
+                audio_ref = await store.save(decoded_audio)
+            response = await _run_pipeline(
                 audio=decoded_audio,
                 recognizer=recognizer,
                 repo=repo,
@@ -217,6 +249,43 @@ async def recognize(
                 settings=settings,
                 request_start=request_start,
             )
+            if consent_id is None or audio_ref is None:
+                return response
+            expression_result = (
+                response.expression.result if response.expression is not None else None
+            )
+            expected_number = (
+                response.recognized_number
+                if response.recognized_number is not None
+                else expression_result or 0
+            )
+            expected_prompt = (
+                response.normalized_text.strip() or response.zarma_text.strip() or "[à revoir]"
+            )
+            await contribution_repo.save(
+                ContributionCreate(
+                    anon_id=anon_id,
+                    consent_id=consent_id,
+                    expected_number=expected_number,
+                    expected_prompt=expected_prompt,
+                    audio_ref=audio_ref,
+                    region=None,
+                    device_info=None,
+                    model_version=response.model_version,
+                    grammar_version=response.grammar_version,
+                    recognition_id=response.id,
+                    source="calculation",
+                )
+            )
+            audio_ref = None
+            return response
+    except (InvalidConsentError, ContributionConsentInvalidError):
+        return api_error_response(
+            status_code=status.HTTP_403_FORBIDDEN,
+            code="CONSENT_INVALID",
+            message="Valid consent required",
+            request_id=request_id,
+        )
     except AudioValidationError as exc:
         return api_error_response(
             status_code=exc.status_code,
@@ -231,6 +300,13 @@ async def recognize(
             message="Recognition processing timed out",
             request_id=request_id,
         )
+    except AudioStorageError:
+        return api_error_response(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            code="STORAGE_UNAVAILABLE",
+            message="Audio storage is unavailable",
+            request_id=request_id,
+        )
     except Exception:
         return api_error_response(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -239,4 +315,9 @@ async def recognize(
             request_id=request_id,
         )
     finally:
+        if audio_ref is not None:
+            try:
+                await store.delete(audio_ref)
+            except AudioStorageError:
+                pass
         await audio.close()

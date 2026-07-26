@@ -30,7 +30,9 @@ class CorrectionController extends StateNotifier<CorrectionState> {
         _cancelTokenFactory = cancelTokenFactory,
         super(const CorrectionState());
 
-  static const int maxValue = 1000000;
+  // Doit rester synchronisé avec `MAX_VALUE` de `zarma_numbers` (extension
+  // million, story au-delà de 1.7) : 99 999 millions + un reste complet.
+  static const int maxValue = 99999999999;
 
   final ZarmaGeneratorRepository _repository;
   final CancelTokenFactory _cancelTokenFactory;
@@ -57,7 +59,7 @@ class CorrectionController extends StateNotifier<CorrectionState> {
           GenerationFailure(
             type: GenerationFailureType.outOfRange,
             message:
-                'Nombre hors plage. Choisissez un nombre entre 0 et 1 000 000.',
+                'Nombre hors plage. Choisissez un nombre entre 0 et 99 999 999 999.',
           ),
           StackTrace.empty,
         ),

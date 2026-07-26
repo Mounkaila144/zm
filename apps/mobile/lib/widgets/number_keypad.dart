@@ -4,7 +4,12 @@ import 'package:flutter/services.dart';
 /// Champ de saisie numérique de la correction (clavier numérique système).
 ///
 /// Purement présentatif : n'applique que des contraintes de forme (chiffres,
-/// longueur max 7 = taille de 1 000 000). Aucune règle numérique métier ici.
+/// longueur max 12). `MAX_VALUE` (99 999 999 999) tient sur 11 chiffres et
+/// est **lui-même** le plus grand nombre à 11 chiffres : plafonner ici à 11
+/// pile rendrait le contrôle numérique de `CorrectionController` inatteignable
+/// (tout ce qui se tape serait automatiquement valide, et un chiffre de plus
+/// serait tronqué en silence, sans message). La marge d'un chiffre laisse le
+/// contrôle numérique — la vraie règle métier — produire un message clair.
 class NumberKeypad extends StatelessWidget {
   const NumberKeypad({
     super.key,
@@ -33,7 +38,7 @@ class NumberKeypad extends StatelessWidget {
         style: Theme.of(context).textTheme.displaySmall,
         inputFormatters: <TextInputFormatter>[
           FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(7),
+          LengthLimitingTextInputFormatter(12),
         ],
         decoration: const InputDecoration(
           hintText: 'Ex. 235',

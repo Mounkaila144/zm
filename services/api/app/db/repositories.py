@@ -106,6 +106,17 @@ class FeedbackRepo:
             model_version=recognition.model_version,
             grammar_version=recognition.grammar_version,
         )
+        contribution = await self._session.scalar(
+            select(Contribution).where(
+                Contribution.recognition_id == recognition.id,
+                Contribution.status != "withdrawn",
+            )
+        )
+        if contribution is not None:
+            if request.feedback_type == "confirmed":
+                contribution.status = "validated"
+            elif request.feedback_type in {"rejected", "repeat_requested"}:
+                contribution.status = "rejected"
         self._session.add(row)
         await self._session.commit()
         await self._session.refresh(row)
@@ -201,6 +212,8 @@ class ContributionCreate:
     device_info: str | None
     model_version: str
     grammar_version: str
+    recognition_id: UUID | None = None
+    source: str = "prompted"
 
 
 @dataclass(frozen=True, slots=True)
@@ -235,6 +248,8 @@ class DatasetManifestRow:
     id: UUID
     audio_ref: str
     expected_number: int
+    expected_prompt: str
+    source: str
     speaker_key: str
     region: str | None
 
@@ -278,6 +293,8 @@ class ContributionRepo:
         row = Contribution(
             anon_id=str(contribution.anon_id),
             consent_id=contribution.consent_id,
+            recognition_id=contribution.recognition_id,
+            source=contribution.source,
             expected_number=contribution.expected_number,
             expected_prompt=contribution.expected_prompt,
             audio_ref=contribution.audio_ref,
@@ -430,6 +447,8 @@ class ContributionRepo:
                 Contribution.id,
                 Contribution.audio_ref,
                 Contribution.expected_number,
+                Contribution.expected_prompt,
+                Contribution.source,
                 Contribution.speaker_key,
                 Contribution.region,
             )
@@ -442,6 +461,8 @@ class ContributionRepo:
                 id=row.id,
                 audio_ref=row.audio_ref,
                 expected_number=row.expected_number,
+                expected_prompt=row.expected_prompt,
+                source=row.source,
                 speaker_key=row.speaker_key,
                 region=row.region,
             )

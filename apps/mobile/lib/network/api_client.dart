@@ -8,6 +8,9 @@ Dio createDio(AppConfig config) {
   return Dio(
     BaseOptions(
       baseUrl: config.apiBaseUrl,
+      headers: const <String, dynamic>{
+        'X-App-Build': AppConfig.buildNumber,
+      },
       connectTimeout: config.connectTimeout,
       sendTimeout: config.sendTimeout,
       receiveTimeout: config.receiveTimeout,

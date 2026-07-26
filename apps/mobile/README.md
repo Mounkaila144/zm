@@ -27,6 +27,16 @@ machine qui exécute l'API. Cette configuration ne doit contenir aucun token,
 aucune clé ASR et aucun autre secret. Les secrets restent exclusivement côté
 serveur ; aucun fichier `.env` mobile n'est requis ou versionné.
 
+Pour lancer en une ligne sur le premier téléphone branché en USB contre la
+production :
+
+```bash
+cd apps/mobile && flutter run -d "$(adb devices | awk 'NR==2 {print $1}')" --dart-define=API_BASE_URL=https://ia.ptrniger.com/api/v1
+```
+
+Le build Android courant est `2` (`version: 1.1.0+2` dans `pubspec.yaml`). Le
+numéro envoyé dans `X-App-Build` doit être incrémenté à chaque publication.
+
 ### Appareil branché en USB (recommandé)
 
 `adb reverse` fait passer l'API par le **câble** : rien ne sort sur le réseau, et
@@ -47,6 +57,41 @@ flutter run --dart-define=API_BASE_URL=http://localhost:8000/api/v1
 Le HTTP en clair n'est autorisé que par le manifeste **debug**
 (`android/app/src/debug/AndroidManifest.xml`) : un build release reste en HTTPS
 obligatoire (NFR3).
+
+## Consentement et collecte des calculs
+
+Au premier lancement, l'application charge le texte de consentement courant
+depuis l'API. L'accueil reste inaccessible tant que la personne n'a pas appuyé
+sur « J'accepte » ; « Je refuse » ferme l'application. L'acceptation est
+versionnée côté serveur et l'identifiant anonyme de l'appareil est conservé
+localement afin que l'accord reste vérifiable après un redémarrage.
+
+Après accord, chaque WAV envoyé à `/recognize` porte l'identifiant du
+consentement. Le serveur conserve cet audio comme contribution de type
+`calculation`. Il ne devient exportable pour l'entraînement qu'après la
+confirmation du calcul par la personne ; un refus ou une demande de répétition
+l'exclut. Le retrait existant supprime aussi ces audios de calcul et rend
+l'accord invalide.
+
+## Mise à jour obligatoire
+
+Au démarrage, `GET /mobile/config` fournit le build minimal autorisé. Si le
+build installé est plus ancien, l'application ne montre que l'écran « Mettre à
+jour ». Une installation venant de Google Play utilise d'abord la mise à jour
+immédiate Play Core ; une installation USB ouvre la fiche Play Store. Le
+serveur protège aussi `/recognize` par `X-App-Build` et répond `426
+APP_UPDATE_REQUIRED` aux anciens builds.
+
+Pour imposer une nouvelle version après sa publication sur Google Play :
+
+1. publier le nouveau build, par exemple `1.2.0+3` ;
+2. régler `MOBILE_LATEST_BUILD=3` sur le serveur ;
+3. vérifier que la version est disponible sur Play ;
+4. régler ensuite `MOBILE_MIN_SUPPORTED_BUILD=3` et redémarrer l'API.
+
+Ne jamais augmenter le minimum avant que la version correspondante soit
+réellement distribuée : les utilisateurs seraient bloqués sans mise à jour
+installable.
 
 ## Parcours vocal simplifié
 

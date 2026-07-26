@@ -219,7 +219,8 @@ class RecognitionResult {
 
     final RecognizedExpression? expression = expressionRaw == null
         ? null
-        : RecognizedExpression.fromLiveJson(expressionRaw as Map<String, dynamic>);
+        : RecognizedExpression.fromLiveJson(
+            expressionRaw as Map<String, dynamic>);
 
     final Decision decision = _liveDecision(decisionRaw);
     // Un `accept` doit porter quelque chose de montrable — un nombre, ou une

@@ -1,30 +1,43 @@
-"""Générateur ``nombre → zarma`` : forme canonique d'un entier de 0 à 1 000 000.
+"""Générateur ``nombre → zarma`` : forme canonique d'un entier de 0 à 99 999 999 999.
 
 Toutes les formes proviennent du ``Lexicon`` (story 1.3) — **aucune forme n'est
 codée en dur** ici. Règle absolue : **jamais de forme inventée**. Si une brique
-nécessaire est ``unresolved`` (``canonical: null``, ex. le million), le
-générateur refuse explicitement (``UnresolvedFormError``).
+nécessaire est ``unresolved`` (``canonical: null``), le générateur refuse
+explicitement (``UnresolvedFormError``).
 
-Grammaire de composition (documentée en 1.2) :
+Grammaire de composition (documentée en 1.2, étendue au-delà du million par
+**stricte analogie structurelle avec ``zambar``** — même mécanisme
+multiplicateur/reste/``dala``, aucune règle nouvelle inventée) :
 
     0          → yaamo
     1..9       → unité (forme isolée)
     10..99     → dizaine [cindi unité_combinée]
     100..999   → zangou [unité_combinée] [nda reste_1_99]
     1 000..999 999
-               → zambar <multiplicateur 1..999> [nda reste_1_999]
-    1 000 000  → forme million NON RÉSOLUE → refus explicite
+               → zambar <multiplicateur 1..999> [nda [dala] reste_1_999]
+    1 000 000..99 999 999 999
+               → million [<multiplicateur 2..99 999>] [nda [dala] reste_0_999 999]
+               (``million`` seul = 1 000 000, forme déjà résolue ; le
+               multiplicateur/reste réutilise tel quel le mécanisme ``zambar``)
+
+⚠️ Au-delà de ``1 000 000``, seule la valeur exacte et le multiplicateur simple
+(``million hinka`` = 2 000 000) ont été soumis à un locuteur natif (§ story
+1.7). La composition avec reste à cette échelle est une **extension technique
+non validée linguistiquement** — cf. ``docs/`` pour le statut de gouvernance.
 """
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from functools import lru_cache
 
 from .exceptions import OutOfRangeError, UnresolvedFormError
 from .loader import Lexicon, load_lexicon
 
 MIN_VALUE = 0
-MAX_VALUE = 1_000_000
+#: 99 999 millions + un reste complet (< 1 000 000) : borne du multiplicateur
+#: million avant qu'une échelle supérieure (non lexicalisée) ne soit requise.
+MAX_VALUE = 99_999 * 1_000_000 + 999_999
 
 
 @lru_cache(maxsize=1)
@@ -34,37 +47,31 @@ def _lexicon() -> Lexicon:
 
 
 def generate(n: int) -> str:
-    """Retourne la forme zarma canonique de ``n`` (entier de 0 à 1 000 000).
+    """Retourne la forme zarma canonique de ``n`` (entier de 0 à ``MAX_VALUE``).
 
     :raises TypeError: si ``n`` n'est pas un entier (pas de coercition silencieuse).
-    :raises OutOfRangeError: si ``n`` est hors de ``[0, 1 000 000]``.
+    :raises OutOfRangeError: si ``n`` est hors de ``[0, MAX_VALUE]``.
     :raises UnresolvedFormError: si la composition exige une forme non résolue
         dans le lexique (ex. le million).
     """
     if isinstance(n, bool) or not isinstance(n, int):
         raise TypeError(f"generate() attend un entier, reçu {type(n).__name__}.")
     if n < MIN_VALUE or n > MAX_VALUE:
-        raise OutOfRangeError(f"Nombre hors plage [0, 1 000 000] : {n}.")
+        raise OutOfRangeError(f"Nombre hors plage [0, {MAX_VALUE}] : {n}.")
 
     lex = _lexicon()
 
     if n == 0:
         return lex.zero.canonical
 
-    if n == MAX_VALUE:
-        million = lex.scales.get("million")
-        if million is None or million.canonical is None:
-            raise UnresolvedFormError(
-                "Forme du million non résolue dans le lexique : génération refusée.",
-                code="UNRESOLVED_MILLION_FORM",
-            )
-        return million.canonical
-
     if 1 <= n <= 9:
         # Nombre-unité seul → forme ISOLÉE.
         return lex.units[n].isolated
 
-    return _compose_below_million(n, lex)
+    if n < 1_000_000:
+        return _compose_below_million(n, lex)
+
+    return _compose_million_and_above(n, lex)
 
 
 def generate_combined(n: int) -> str:
@@ -81,7 +88,7 @@ def generate_combined(n: int) -> str:
     if isinstance(n, bool) or not isinstance(n, int):
         raise TypeError(f"generate_combined() attend un entier, reçu {type(n).__name__}.")
     if n < MIN_VALUE or n > MAX_VALUE:
-        raise OutOfRangeError(f"Nombre hors plage [0, 1 000 000] : {n}.")
+        raise OutOfRangeError(f"Nombre hors plage [0, {MAX_VALUE}] : {n}.")
     if 1 <= n <= 9:
         return _lexicon().units[n].combined
     return generate(n)
@@ -169,6 +176,48 @@ def _below_1000(n: int, lex: Lexicon) -> str:
     return " ".join(parts)
 
 
+def _compose_scaled(
+    n: int,
+    lex: Lexicon,
+    *,
+    scale_value: int,
+    scale_canonical: str,
+    sub_compose: Callable[[int, Lexicon], str],
+    omit_bare_multiplier: bool = False,
+) -> str:
+    """Compose ``<échelle> [<multiplicateur>] [<connecteur> [dala] <reste>]``.
+
+    Grammaire **identique** pour ``zambar`` (mille) et ``million`` — seule
+    l'échelle (``scale_value``/``scale_canonical``) et le composeur du
+    multiplicateur/reste (``sub_compose``) changent. Aucune règle nouvelle :
+    le marqueur ``dala`` est déclenché par la même condition que pour
+    ``zambar`` (multiplicateur multiple de 100, ≥ 100) — voir le module
+    docstring pour le statut de validation au-delà du million.
+    """
+    multiplier = n // scale_value
+    remainder = n % scale_value
+    parts = [scale_canonical]
+    if not (omit_bare_multiplier and multiplier == 1):
+        parts.append(sub_compose(multiplier, lex))
+    if remainder > 0:
+        # Désambiguïsation « dala » : quand le multiplicateur est un multiple
+        # de 100 (≥ 100), le reste peut être absorbé par le multiplicateur
+        # (ex. 100 005 vs 105 000). Le marqueur `dala` lève l'ambiguïté.
+        marker = None
+        if multiplier % 100 == 0 and multiplier >= 100:
+            remainder_marker = lex.connectors.get("remainder")
+            if remainder_marker is not None and remainder_marker.canonical is not None:
+                marker = remainder_marker.canonical
+        rendered = sub_compose(remainder, lex)
+        if marker is not None:
+            # `dala` s'intercale : le connecteur porte sur lui, jamais sur le reste,
+            # donc ni sélection `di` ni élision ne s'appliquent ici.
+            parts.append(f"{lex.connectors['groups'].canonical} {marker} {rendered}")
+        else:
+            parts.append(_join_group(lex, remainder, rendered))
+    return " ".join(parts)
+
+
 def _compose_below_million(n: int, lex: Lexicon) -> str:
     """Compose 10..999 999 (les unités seules 1..9 sont gérées en amont)."""
     if n < 1000:
@@ -179,26 +228,39 @@ def _compose_below_million(n: int, lex: Lexicon) -> str:
             "Forme du millier non résolue dans le lexique.",
             code="UNRESOLVED_THOUSAND_FORM",
         )
-    thousands = n // 1000
-    remainder = n % 1000
-    parts = [thousand.canonical, _below_1000(thousands, lex)]
-    if remainder > 0:
-        # Désambiguïsation « dala » : quand le multiplicateur des milliers est un
-        # multiple de 100 (≥ 100), le reste peut être absorbé par le multiplicateur
-        # (ex. 100 005 vs 105 000). Le marqueur `dala` lève l'ambiguïté.
-        marker = None
-        if thousands % 100 == 0 and thousands >= 100:
-            remainder_marker = lex.connectors.get("remainder")
-            if remainder_marker is not None and remainder_marker.canonical is not None:
-                marker = remainder_marker.canonical
-        rendered = _below_1000(remainder, lex)
-        if marker is not None:
-            # `dala` s'intercale : le connecteur porte sur lui, jamais sur le reste,
-            # donc ni sélection `di` ni élision ne s'appliquent ici.
-            parts.append(f"{lex.connectors['groups'].canonical} {marker} {rendered}")
-        else:
-            parts.append(_join_group(lex, remainder, rendered))
-    return " ".join(parts)
+    return _compose_scaled(
+        n,
+        lex,
+        scale_value=1000,
+        scale_canonical=thousand.canonical,
+        sub_compose=_below_1000,
+    )
+
+
+def _compose_million_and_above(n: int, lex: Lexicon) -> str:
+    """Compose ``1 000 000..MAX_VALUE`` — même mécanisme que ``zambar``.
+
+    Le multiplicateur et le reste peuvent tous deux dépasser 999 (jusqu'à
+    999 999), d'où l'appel à ``_compose_below_million`` plutôt qu'à
+    ``_below_1000`` : cette fonction gère déjà correctement sa propre
+    échelle interne (milliers + `dala`), y compris pour un multiplicateur
+    comme 1000..99 999.
+    """
+    million = lex.scales.get("million")
+    if million is None or million.canonical is None:
+        raise UnresolvedFormError(
+            "Forme du million non résolue dans le lexique : génération refusée.",
+            code="UNRESOLVED_MILLION_FORM",
+        )
+    return _compose_scaled(
+        n,
+        lex,
+        scale_value=1_000_000,
+        scale_canonical=million.canonical,
+        sub_compose=_compose_below_million,
+        # 1 000 000 seul = "million" (forme déjà résolue), pas "million fo".
+        omit_bare_multiplier=True,
+    )
 
 
 __all__ = ["generate", "generate_combined", "MIN_VALUE", "MAX_VALUE"]

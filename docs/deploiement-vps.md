@@ -163,6 +163,11 @@ ASR_ENDPOINT_URL=http://127.0.0.1:8001
 ASR_ENDPOINT_TOKEN=$TOKEN
 ASR_TIMEOUT_SECONDS=30
 AUDIO_STORAGE_DIR=/opt/zarma/storage/audio
+MOBILE_MIN_SUPPORTED_BUILD=2
+MOBILE_LATEST_BUILD=2
+MOBILE_ENFORCE_MIN_BUILD=true
+REQUIRE_TRAINING_CONSENT=true
+MOBILE_PLAY_STORE_URL=https://play.google.com/store/apps/details?id=ne.zarma.zarma_mobile
 RATE_LIMIT_RECOGNIZE=10/minute
 LOG_LEVEL=INFO
 EOF
@@ -217,14 +222,29 @@ flutter build apk --release \
     --dart-define=API_BASE_URL=https://TON_DOMAINE/api/v1
 ```
 
+Le `versionCode` du build (`+2`, `+3`, etc. dans `pubspec.yaml`) doit
+correspondre aux valeurs `MOBILE_*_BUILD`. Publier d'abord la nouvelle version
+sur Google Play, attendre qu'elle soit disponible, puis augmenter
+`MOBILE_MIN_SUPPORTED_BUILD` et redémarrer `zarma-api`. L'augmenter avant la
+publication bloquerait tous les anciens clients sans issue.
+
 ---
 
 ## Vérifier que ça marche
 
 ```bash
-# Une reconnaissance réelle, de bout en bout
+# Accepter d'abord le consentement courant pour cet identifiant de test.
+ANON_ID=00000000-0000-4000-8000-000000000001
+CONSENT_ID=$(curl -s https://TON_DOMAINE/api/v1/consent \
+  -H 'Content-Type: application/json' \
+  -d "{\"anon_id\":\"$ANON_ID\",\"consent_version\":\"2.0.0\"}" |
+  python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+
+# Une reconnaissance réelle, de bout en bout.
 curl -F "audio=@un_enregistrement.wav;type=audio/wav" \
-     -F "anon_id=00000000-0000-4000-8000-000000000001" \
+     -F "anon_id=$ANON_ID" \
+     -F "consent_id=$CONSENT_ID" \
+     -H "X-App-Build: 2" \
      https://TON_DOMAINE/api/v1/recognize
 
 # Les temps, ventilés (modèle vs décodage)

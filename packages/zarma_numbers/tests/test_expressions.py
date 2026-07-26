@@ -263,8 +263,8 @@ def test_exact_results(left, symbol, right, value):
     ("left", "symbol", "right", "code"),
     [
         (3, "-", 5, "NEGATIVE_RESULT"),
-        (1_000_000, "+", 1, "RESULT_OVERFLOW"),
-        (2_000, "*", 2_000, "RESULT_OVERFLOW"),
+        (MAX_VALUE, "+", 1, "RESULT_OVERFLOW"),
+        (100_000, "*", 1_000_000, "RESULT_OVERFLOW"),
         (5, "/", 0, "DIVISION_BY_ZERO"),
     ],
 )

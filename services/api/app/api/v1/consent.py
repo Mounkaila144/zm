@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from pydantic import BaseModel, ConfigDict, Field
 from structlog import get_logger
 
@@ -21,13 +21,6 @@ from app.db.repositories import ConsentRepo, get_consent_repo
 
 router = APIRouter(tags=["consent"])
 log = get_logger("zarma.api")
-
-
-class ConsentContentResponse(BaseModel):
-    """Texte et version de consentement courants servis au client."""
-
-    consent_version: str
-    text: str
 
 
 class ConsentAcceptRequest(BaseModel):
@@ -49,19 +42,36 @@ class ConsentAcceptResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ConsentContentResponse(BaseModel):
+    """Texte courant et éventuelle acceptation encore valable."""
+
+    consent_version: str
+    text: str
+    acceptance: ConsentAcceptResponse | None = None
+
+
 @router.get(
     "/consent",
     response_model=ConsentContentResponse,
     summary="Texte et version de consentement courants",
 )
-async def get_consent() -> ConsentContentResponse:
-    """Retourne le texte de consentement versionné courant (usage, anonymat,
-    conservation, retrait)."""
-
+async def get_consent(
+    repo: Annotated[ConsentRepo, Depends(get_consent_repo)],
+    anon_id: Annotated[UUID | None, Query()] = None,
+) -> ConsentContentResponse:
+    """Retourne le texte courant et l'accord valable de cet appareil."""
     content = current_consent()
+    acceptance = await repo.latest_for(anon_id) if anon_id is not None else None
+    if acceptance is not None and (
+        acceptance.withdrawn or acceptance.consent_version != content.consent_version
+    ):
+        acceptance = None
     return ConsentContentResponse(
         consent_version=content.consent_version,
         text=content.text,
+        acceptance=(
+            ConsentAcceptResponse.model_validate(acceptance) if acceptance is not None else None
+        ),
     )
 
 

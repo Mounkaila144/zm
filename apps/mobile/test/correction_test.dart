@@ -102,7 +102,7 @@ void main() {
     );
 
     await _pumpCorrection(tester, generator: generator);
-    await tester.enterText(find.byType(NumberKeypad), '2000000');
+    await tester.enterText(find.byType(NumberKeypad), '100000000000');
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
 

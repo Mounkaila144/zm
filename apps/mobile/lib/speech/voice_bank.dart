@@ -103,7 +103,8 @@ class VoiceBank {
     String wordsPath = 'assets/voice/words/',
     String promptsPath = 'assets/voice/prompts/',
   }) async {
-    final AssetManifest manifest = await AssetManifest.loadFromAssetBundle(bundle);
+    final AssetManifest manifest =
+        await AssetManifest.loadFromAssetBundle(bundle);
     final Map<String, String> words = <String, String>{};
     final Map<String, String> prompts = <String, String>{};
 

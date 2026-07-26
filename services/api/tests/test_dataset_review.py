@@ -220,7 +220,15 @@ def test_manifest_filters_and_is_deterministic(
     for line in text_a.splitlines():
         record = json.loads(line)
         assert "/" not in record["audio_path"]
-        assert set(record) == {"audio_path", "expected_number", "speaker_key", "region", "split"}
+        assert set(record) == {
+            "audio_path",
+            "expected_number",
+            "transcript",
+            "source",
+            "speaker_key",
+            "region",
+            "split",
+        }
 
 
 def test_manifest_fails_closed_on_missing_audio(

@@ -67,13 +67,16 @@ Uint8List pcmFromWav(Uint8List bytes) {
       sampleRate = data.getUint32(body + 4, Endian.little);
       bits = data.getUint16(body + 14, Endian.little);
     } else if (id == 'data') {
-      if (channels != kChannels || sampleRate != kSampleRate || bits != kBitsPerSample) {
+      if (channels != kChannels ||
+          sampleRate != kSampleRate ||
+          bits != kBitsPerSample) {
         throw WavFormatException(
           'format non canonique : ${channels}ch ${sampleRate}Hz ${bits}bits '
           '(attendu ${kChannels}ch ${kSampleRate}Hz ${kBitsPerSample}bits)',
         );
       }
-      final int end = (body + size <= bytes.length) ? body + size : bytes.length;
+      final int end =
+          (body + size <= bytes.length) ? body + size : bytes.length;
       return Uint8List.sublistView(bytes, body, end);
     }
     // Les chunks sont alignés sur 2 octets.
@@ -89,13 +92,14 @@ Uint8List silencePcm(double seconds) {
 }
 
 /// Colle les segments PCM bout à bout, séparés d'un court silence.
-Uint8List joinPcm(List<Uint8List> segments, {double gapSeconds = kWordGapSeconds}) {
+Uint8List joinPcm(List<Uint8List> segments,
+    {double gapSeconds = kWordGapSeconds}) {
   if (segments.isEmpty) {
     return Uint8List(0);
   }
   final Uint8List gap = silencePcm(gapSeconds);
-  final int total =
-      segments.fold<int>(0, (sum, s) => sum + s.length) + gap.length * (segments.length - 1);
+  final int total = segments.fold<int>(0, (sum, s) => sum + s.length) +
+      gap.length * (segments.length - 1);
 
   final Uint8List out = Uint8List(total);
   int cursor = 0;

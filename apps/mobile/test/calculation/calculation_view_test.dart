@@ -73,7 +73,7 @@ void main() {
     test('chaque code de refus a un message compréhensible', () {
       const Map<String, String> expected = <String, String>{
         'NEGATIVE_RESULT': 'négatif',
-        'RESULT_OVERFLOW': 'million',
+        'RESULT_OVERFLOW': '99 999 999 999',
         'DIVISION_BY_ZERO': 'zéro',
         'OPERAND_OUT_OF_RANGE': 'dehors',
       };

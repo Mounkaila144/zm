@@ -17,7 +17,10 @@ void main() {
 
   setUp(() async {
     dio = MockDio();
-    repository = DioRecognitionRepository(dio);
+    repository = DioRecognitionRepository(
+      dio,
+      consentId: '11111111-1111-4111-8111-111111111111',
+    );
     directory = await Directory.systemTemp.createTemp('recognition_repo_');
     audioFile = File('${directory.path}/take.wav');
     await audioFile.writeAsBytes(<int>[82, 73, 70, 70]);
@@ -58,11 +61,12 @@ void main() {
       ),
     ).captured;
     final FormData body = captured[0] as FormData;
-    expect(body.fields, hasLength(1));
-    expect(body.fields.single.key, 'anon_id');
+    final Map<String, String> fields =
+        Map<String, String>.fromEntries(body.fields);
+    expect(fields['anon_id'], '00000000-0000-4000-8000-0000000000aa');
     expect(
-      body.fields.single.value,
-      '00000000-0000-4000-8000-0000000000aa',
+      fields['consent_id'],
+      '11111111-1111-4111-8111-111111111111',
     );
     expect(body.files.single.key, 'audio');
     expect(body.files.single.value.filename, 'take.wav');

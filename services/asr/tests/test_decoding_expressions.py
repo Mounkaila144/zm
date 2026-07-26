@@ -123,9 +123,14 @@ def test_audio_too_short_makes_the_decoder_abstain(decoder):
 def test_duration_constraint_is_configurable(decoding, grammar):
     """``min_frames_per_token`` élague les candidats trop longs pour l'audio.
 
-    Deux effets vérifiés sur les **mêmes** logits : durcir le seuil raccourcit
-    l'hypothèse retenue, et le pousser au-delà de ce que l'audio peut porter
-    fait s'abstenir le décodeur au lieu de forcer une opération.
+    Deux effets vérifiés sur les **mêmes** logits : durcir le seuil élague la
+    transcription exacte (jugée trop longue pour l'audio), donc l'hypothèse
+    retenue change et colle moins bien aux logits ; et pousser le seuil au-delà
+    de ce que l'audio peut porter fait s'abstenir le décodeur au lieu de forcer
+    une opération. (Depuis l'extension à l'échelle million, la langue offre des
+    complétions minimales courtes un peu partout : le seuil intermédiaire ne
+    garantit plus une hypothèse *plus courte*, seulement une hypothèse moins
+    vraisemblable — c'est le re-score exact qui l'atteste.)
     """
     lexicon = toy_token_lexicon(decoding, grammar)
     logits = clean_logits(render_expression(Expression(23, "+", 15)))
@@ -140,7 +145,8 @@ def test_duration_constraint_is_configurable(decoding, grammar):
     assert permissive is not None
     assert permissive.text == render_expression(Expression(23, "+", 15))
     assert strict is not None
-    assert len(strict.token_ids) < len(permissive.token_ids)
+    assert strict.text != permissive.text
+    assert strict.neg_log_likelihood > permissive.neg_log_likelihood
     assert best_with(12.0) is None
 
 

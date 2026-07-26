@@ -18,32 +18,34 @@ from typing import NamedTuple
 
 #: Version du texte de consentement courant. Incrémenter à chaque modification
 #: de ``CONSENT_TEXT`` (SemVer simplifié).
-CONSENT_VERSION = "1.0.0"
+CONSENT_VERSION = "2.0.0"
 
 #: Texte présenté avant toute contribution. Couvre les quatre points requis
 #: (AC1) : usage, anonymat, conservation, retrait.
 CONSENT_TEXT = """\
-Contribution de votre voix — Zarma
+Note de confidentialité — ZarmaIA
 
-Usage : votre enregistrement vocal sert uniquement à améliorer la \
-reconnaissance des nombres en zarma (constitution d'un jeu de données \
-d'apprentissage et d'évaluation). Il n'est jamais utilisé à d'autres fins.
+Usage : l'application enregistre votre voix lorsque vous dites un nombre ou \
+un calcul. L'enregistrement est envoyé au serveur pour reconnaître votre \
+demande et vous donner une réponse.
 
-Anonymat : votre contribution est anonyme. Elle est associée à un identifiant \
-technique aléatoire de votre appareil, sans nom, numéro de téléphone ni aucune \
-donnée personnelle permettant de vous identifier.
+Amélioration des modèles : si vous acceptez, chaque enregistrement de calcul \
+est conservé de façon sécurisée afin d'entraîner, tester et améliorer les \
+prochains modèles de reconnaissance vocale en zarma.
 
-Conservation : par défaut, l'audio d'une simple reconnaissance n'est jamais \
-conservé — il est supprimé après traitement. Seuls les enregistrements que \
-vous choisissez de contribuer, après acceptation de ce consentement, sont \
-conservés de façon sécurisée.
+Anonymat : les enregistrements sont associés uniquement à un identifiant \
+technique aléatoire. Aucun nom, numéro de téléphone, contact ou position GPS \
+n'est collecté.
 
-Retrait : vous pouvez à tout moment retirer votre consentement. Vos \
-enregistrements consentis sont alors supprimés et les métadonnées associées \
-anonymisées.
+Conservation et Retrait : vous pouvez retirer votre accord. Les fichiers audio \
+encore actifs seront alors supprimés et leurs métadonnées anonymisées. Après \
+un retrait, l'application demandera un nouvel accord avant de pouvoir être \
+utilisée.
 
-En appuyant sur « Accepter », vous confirmez avoir compris et accepté ces \
-conditions pour la version indiquée de ce texte.
+En appuyant sur « J'accepte », vous autorisez le traitement et la conservation \
+de vos enregistrements vocaux pour le fonctionnement de l'application et \
+l'amélioration des modèles. Si vous refusez, aucun enregistrement n'est envoyé \
+et l'application ne peut pas être utilisée.
 """
 
 

@@ -15,6 +15,7 @@ from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from zarma_numbers import (
+    MAX_VALUE,
     Lexicon,
     OutOfRangeError,
     UnresolvedFormError,
@@ -109,7 +110,10 @@ def grammar_generate(
         return api_error_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             code="OUT_OF_RANGE",
-            message="Nombre hors plage. Utilisez un nombre entre 0 et 1 000 000.",
+            # Borne issue du moteur (source unique), jamais recopiée en dur.
+            message=f"Nombre hors plage. Utilisez un nombre entre 0 et {MAX_VALUE:,}.".replace(
+                ",", " "
+            ),
             request_id=request_id,
         )
     except UnresolvedFormError:

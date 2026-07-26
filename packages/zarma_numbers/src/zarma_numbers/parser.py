@@ -9,18 +9,16 @@ interne portant un code). Aucun fuzzy matching : les paires proches
 
 Grammaire (miroir exact de ``generator.py``) :
 
-    number        = zero | below_thousand | thousands
+    number        = zero | below_million | millions
     below_100     = unit | tens [cindi unit]
     below_1000    = hundred_group [nda below_100] | below_100
     hundred_group = zangou [unit_multiplier]
-    thousands     = zambar below_1000 [nda below_1000]
+    below_million = zambar below_1000 [nda [dala] below_1000] | below_1000
+    millions      = million [below_million] [nda [dala] below_million]
 
-Note d'ambiguïté : pour ``n ≥ 100 000`` le multiplicateur des milliers peut
-contenir des centaines et un ``nda`` interne qui entre en collision avec le
-séparateur multiplicateur/reste (ex. ``100 005`` et ``105 000`` produisent la
-même chaîne). Ce sont précisément des formes **grandes échelles non résolues**
-(cf. lexique) ; l'invariant (``validator.py``) est prouvé sur la plage résolue
-non ambiguë ``0``–``99 999`` et trace le reste.
+``millions`` réutilise **le même mécanisme** que ``below_million`` (multiplicateur
++ reste + marqueur ``dala``), juste une échelle au-dessus — aucune règle
+nouvelle, par symétrie stricte avec ``generator.py``.
 """
 
 from __future__ import annotations
@@ -173,29 +171,76 @@ def _parse_below_1000(cur: _Cursor, tab: _Tables) -> int:
     return _parse_below_100(cur, tab)
 
 
-def _parse_number(cur: _Cursor, tab: _Tables) -> int:
-    if tab.million is not None and cur.peek() == tab.million:
-        cur.advance()
-        # Multiplicateur unité optionnel (ex. « million fo » = 1×, « million hinka » = 2×).
-        multiplier = 1
-        nxt = cur.peek()
-        if nxt in tab.units:
-            multiplier = tab.units[nxt]
+#: Tokens qui peuvent démarrer un ``below_1000`` (dizaine/unité/centaine).
+def _starts_below_1000(token: str | None, tab: _Tables) -> bool:
+    return token is not None and (token in tab.units or token in tab.tens or token == tab.hundred)
+
+
+#: Tokens qui peuvent démarrer un ``below_million`` (idem + le millier).
+def _starts_below_million(token: str | None, tab: _Tables) -> bool:
+    return _starts_below_1000(token, tab) or token == tab.thousand
+
+
+def _parse_scaled_remainder(
+    cur: _Cursor, tab: _Tables, multiplier: int, parse_remainder, starts_remainder
+) -> int:
+    """Consomme ``[nda [dala] <reste>]`` pour **ce** niveau, à la condition —
+    et seulement à la condition — que ``multiplier`` déclenche ``dala`` côté
+    générateur (``multiplier % 100 == 0 and multiplier >= 100``, cf.
+    ``_compose_scaled``). Sans ce contrôle, un ``nda dala`` destiné au niveau
+    *supérieur* (ex. le reste du million, après un multiplicateur en milliers
+    qui n'a lui-même aucun besoin de marqueur) serait happé à tort par le
+    niveau *interne* (le multiplicateur des milliers) — deux échelles peuvent
+    être imbriquées et chacune ne doit consommer que son propre marqueur.
+    """
+    if cur.peek() not in tab.nda:
+        return 0
+    marker_expected = multiplier % 100 == 0 and multiplier >= 100
+    saved = cur.i
+    cur.advance()
+    if marker_expected:
+        if cur.peek() in tab.dala:
             cur.advance()
-        return 1_000_000 * multiplier
+            return parse_remainder(cur, tab)
+        cur.i = saved
+        return 0
+    if cur.peek() in tab.dala:
+        # `dala` présent mais pas requis pour CE multiplicateur → appartient
+        # nécessairement à un niveau englobant.
+        cur.i = saved
+        return 0
+    if starts_remainder(cur.peek(), tab):
+        return parse_remainder(cur, tab)
+    cur.i = saved
+    return 0
+
+
+def _parse_below_million(cur: _Cursor, tab: _Tables) -> int:
     if cur.peek() == tab.thousand:
         cur.advance()
         if cur.peek() is None:
             raise ParseError("'zambar' sans multiplicateur.", code="MISSING_MULTIPLIER")
-        value = 1000 * _parse_below_1000(cur, tab)
-        if cur.peek() in tab.nda:
-            cur.advance()
-            # Marqueur de reste « dala » optionnel (désambiguïsation ≥ 100 000).
-            if cur.peek() in tab.dala:
-                cur.advance()
-            value += _parse_below_1000(cur, tab)
+        thousands = _parse_below_1000(cur, tab)
+        value = 1000 * thousands
+        value += _parse_scaled_remainder(cur, tab, thousands, _parse_below_1000, _starts_below_1000)
         return value
     return _parse_below_1000(cur, tab)
+
+
+def _parse_number(cur: _Cursor, tab: _Tables) -> int:
+    if tab.million is not None and cur.peek() == tab.million:
+        cur.advance()
+        # Multiplicateur optionnel (ex. « million hinka » = 2×, « million zambar
+        # wey » = 10 000×) — même grammaire que le multiplicateur des milliers.
+        multiplier = 1
+        if _starts_below_million(cur.peek(), tab):
+            multiplier = _parse_below_million(cur, tab)
+        value = 1_000_000 * multiplier
+        value += _parse_scaled_remainder(
+            cur, tab, multiplier, _parse_below_million, _starts_below_million
+        )
+        return value
+    return _parse_below_million(cur, tab)
 
 
 def _raise_for_token(token: str, tab: _Tables) -> None:

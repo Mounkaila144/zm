@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from app.main import app
 from fastapi.testclient import TestClient
-from zarma_numbers import generate, load_lexicon
+from zarma_numbers import MAX_VALUE, generate, load_lexicon
 
 client = TestClient(app)
 
@@ -32,9 +32,9 @@ def test_generate_accepts_lower_and_upper_bounds() -> None:
     assert lower.status_code == 200
     assert lower.json()["zarma_text"] == generate(0)
 
-    upper = client.get("/api/v1/grammar/generate/1000000")
+    upper = client.get(f"/api/v1/grammar/generate/{MAX_VALUE}")
     assert upper.status_code == 200
-    assert upper.json()["zarma_text"] == generate(1_000_000)
+    assert upper.json()["zarma_text"] == generate(MAX_VALUE)
 
 
 def test_generate_rejects_negative_number() -> None:
@@ -42,11 +42,12 @@ def test_generate_rejects_negative_number() -> None:
     assert resp.status_code == 400
     error = resp.json()["error"]
     assert error["code"] == "OUT_OF_RANGE"
-    assert "1 000 000" in error["message"]
+    # La borne annoncée provient du moteur (source unique), pas d'une copie.
+    assert "99 999 999 999" in error["message"]
 
 
 def test_generate_rejects_above_maximum() -> None:
-    resp = client.get("/api/v1/grammar/generate/1000001")
+    resp = client.get(f"/api/v1/grammar/generate/{MAX_VALUE + 1}")
     assert resp.status_code == 400
     assert resp.json()["error"]["code"] == "OUT_OF_RANGE"
 

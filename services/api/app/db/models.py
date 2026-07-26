@@ -100,7 +100,7 @@ class Feedback(Base):
     __tablename__ = "feedbacks"
     __table_args__ = (
         CheckConstraint(
-            "feedback_type IN " "('confirmed', 'corrected', 'rejected', 'repeat_requested')",
+            "feedback_type IN ('confirmed', 'corrected', 'rejected', 'repeat_requested')",
             name="ck_feedbacks_type",
         ),
     )
@@ -166,6 +166,10 @@ class Contribution(Base):
             "status IN ('pending', 'validated', 'rejected', 'withdrawn')",
             name="ck_contributions_status",
         ),
+        CheckConstraint(
+            "source IN ('prompted', 'calculation')",
+            name="ck_contributions_source",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
@@ -174,6 +178,18 @@ class Contribution(Base):
         Uuid(as_uuid=True),
         ForeignKey("consents.id"),
         nullable=False,
+    )
+    recognition_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("recognitions.id", ondelete="SET NULL"),
+        nullable=True,
+        unique=True,
+    )
+    source: Mapped[str] = mapped_column(
+        String(_ENUM_LEN),
+        nullable=False,
+        default="prompted",
+        server_default="prompted",
     )
     expected_number: Mapped[int] = mapped_column(BigInteger, nullable=False)
     expected_prompt: Mapped[str] = mapped_column(Text, nullable=False)

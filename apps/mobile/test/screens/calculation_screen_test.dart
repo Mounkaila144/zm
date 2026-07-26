@@ -295,13 +295,20 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        onGenerateRoute: AppRoutes.onGenerateRoute,
-        initialRoute: AppRoutes.home,
-        routes: AppRoutes.routes,
+        home: Builder(
+          builder: (BuildContext context) => FilledButton(
+            onPressed: () => Navigator.of(context).push(route!),
+            child: const Text('ouvrir la route'),
+          ),
+        ),
       ),
     );
+    await tester.tap(find.text('ouvrir la route'));
+    await tester.pumpAndSettle();
     // L'écran de calcul n'est jamais atteint sans expression : la route
     // bascule sur l'écran d'arguments invalides plutôt que d'afficher du vide.
     expect(find.byKey(const Key('calculation-screen')), findsNothing);
+    expect(find.byKey(const Key('invalid-route-arguments-screen')),
+        findsOneWidget);
   });
 }

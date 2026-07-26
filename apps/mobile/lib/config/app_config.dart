@@ -17,6 +17,8 @@ class AppConfig {
     );
   }
 
+  static const int buildNumber = 2;
+
   final String apiBaseUrl;
   final Duration connectTimeout;
   final Duration sendTimeout;

@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zarma_mobile/config/anon_id.dart';
 import 'package:zarma_mobile/features/contribution/data/consent_repository.dart';
-import 'package:zarma_mobile/recognition/recognition_controller.dart';
 
 enum ConsentPhase { idle, loading, ready, submitting, error }
 
@@ -42,10 +41,11 @@ class ConsentController extends StateNotifier<ConsentState> {
     required String anonId,
     required CancelToken Function() cancelTokenFactory,
     bool loadOnCreate = true,
+    ConsentState? initialState,
   })  : _repository = repository,
         _anonId = anonId,
         _cancelTokenFactory = cancelTokenFactory,
-        super(const ConsentState()) {
+        super(initialState ?? const ConsentState()) {
     if (loadOnCreate) {
       unawaited(loadCurrent());
     }
@@ -77,7 +77,7 @@ class ConsentController extends StateNotifier<ConsentState> {
       state = ConsentState(
         phase: ConsentPhase.ready,
         content: content,
-        acceptance: state.acceptance,
+        acceptance: content.acceptance,
       );
     } on ConsentFailure catch (failure) {
       if (!mounted || failure.isCancelled) {
@@ -153,6 +153,6 @@ final consentStatusProvider =
   return ConsentController(
     repository: ref.watch(consentRepositoryProvider),
     anonId: ref.watch(anonIdProvider),
-    cancelTokenFactory: ref.watch(cancelTokenFactoryProvider),
+    cancelTokenFactory: CancelToken.new,
   );
 });

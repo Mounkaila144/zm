@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
+
+const String _anonIdFileName = 'anonymous-device-id';
 
 /// Génère un identifiant anonyme au format UUID v4 (NFR7 — anonymat).
 ///
@@ -16,11 +20,29 @@ String generateAnonId([Random? random]) {
       '${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}';
 }
 
+Future<String> loadOrCreateAnonId() async {
+  final Directory supportDirectory = await getApplicationSupportDirectory();
+  final File identifierFile = File(
+    '${supportDirectory.path}${Platform.pathSeparator}$_anonIdFileName',
+  );
+  if (await identifierFile.exists()) {
+    final String existing = (await identifierFile.readAsString()).trim();
+    if (_uuidV4.hasMatch(existing)) {
+      return existing;
+    }
+  }
+  final String created = generateAnonId();
+  await identifierFile.writeAsString(created, flush: true);
+  return created;
+}
+
+final RegExp _uuidV4 = RegExp(
+  r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+);
+
 /// Identifiant anonyme du device injecté dans les appels API isolés par
 /// utilisateur (ex. `/history`). Surchargeable en test via `overrideWithValue`.
 ///
-/// La persistance durable de cet identifiant relève d'une story de fondation
-/// dédiée ; ici il sert de point d'injection unique.
 final Provider<String> anonIdProvider = Provider<String>((ref) {
   return generateAnonId();
 });

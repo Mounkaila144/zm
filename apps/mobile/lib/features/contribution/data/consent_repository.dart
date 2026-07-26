@@ -1,11 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zarma_mobile/config/anon_id.dart';
 import 'package:zarma_mobile/network/api_client.dart';
 
 class ConsentContent {
   const ConsentContent({
     required this.consentVersion,
     required this.text,
+    this.acceptance,
   });
 
   factory ConsentContent.fromJson(Map<String, dynamic> json) {
@@ -17,11 +19,22 @@ class ConsentContent {
         text.trim().isEmpty) {
       throw const ConsentContractException();
     }
-    return ConsentContent(consentVersion: version, text: text);
+    final Object? acceptanceRaw = json['acceptance'];
+    final ConsentAcceptance? acceptance = acceptanceRaw == null
+        ? null
+        : acceptanceRaw is Map<String, dynamic>
+            ? ConsentAcceptance.fromJson(acceptanceRaw)
+            : throw const ConsentContractException();
+    return ConsentContent(
+      consentVersion: version,
+      text: text,
+      acceptance: acceptance,
+    );
   }
 
   final String consentVersion;
   final String text;
+  final ConsentAcceptance? acceptance;
 }
 
 class ConsentAcceptance {
@@ -107,9 +120,10 @@ abstract interface class ConsentRepository {
 }
 
 class DioConsentRepository implements ConsentRepository {
-  const DioConsentRepository(this._dio);
+  const DioConsentRepository(this._dio, {this.anonId});
 
   final Dio _dio;
+  final String? anonId;
 
   @override
   Future<ConsentContent> fetchCurrent({
@@ -118,6 +132,8 @@ class DioConsentRepository implements ConsentRepository {
     try {
       final Response<dynamic> response = await _dio.get<dynamic>(
         '/consent',
+        queryParameters:
+            anonId == null ? null : <String, dynamic>{'anon_id': anonId},
         cancelToken: cancelToken,
       );
       return ConsentContent.fromJson(_jsonObject(response.data));
@@ -167,7 +183,10 @@ class DioConsentRepository implements ConsentRepository {
 
 final Provider<ConsentRepository> consentRepositoryProvider =
     Provider<ConsentRepository>((ref) {
-  return DioConsentRepository(ref.watch(dioProvider));
+  return DioConsentRepository(
+    ref.watch(dioProvider),
+    anonId: ref.watch(anonIdProvider),
+  );
 });
 
 Map<String, dynamic> _jsonObject(Object? value) {

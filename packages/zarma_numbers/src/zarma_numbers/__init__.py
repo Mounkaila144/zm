@@ -30,7 +30,7 @@ from .expressions import (
     render_result,
     supported_operators,
 )
-from .generator import generate, generate_combined
+from .generator import MAX_VALUE, MIN_VALUE, generate, generate_combined
 from .grammar import (
     NumberGrammar,
     build_expression_grammar,
@@ -52,6 +52,8 @@ __all__ = [
     "load_lexicon",
     "generate",
     "generate_combined",
+    "MAX_VALUE",
+    "MIN_VALUE",
     "normalize",
     "normalize_with_trace",
     "NormalizationResult",

@@ -7,10 +7,10 @@ import 'package:zarma_mobile/screens/calculation_screen.dart';
 import 'package:zarma_mobile/screens/confirmation_screen.dart';
 import 'package:zarma_mobile/screens/correction_screen.dart';
 import 'package:zarma_mobile/screens/history_screen.dart';
-import 'package:zarma_mobile/screens/home_screen.dart';
 import 'package:zarma_mobile/screens/processing_screen.dart';
 import 'package:zarma_mobile/screens/recording_screen.dart';
 import 'package:zarma_mobile/screens/result_screen.dart';
+import 'package:zarma_mobile/screens/startup_gate.dart';
 import 'package:zarma_mobile/widgets/brand_app_bar.dart';
 import 'package:zarma_mobile/widgets/brand_footer.dart';
 
@@ -29,7 +29,7 @@ abstract final class AppRoutes {
   static const String contribute = '/contribute';
 
   static final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-    home: (_) => const HomeScreen(),
+    home: (_) => const StartupGate(),
     recording: (_) => const RecordingScreen(),
     history: (_) => const HistoryScreen(),
     contribute: (_) => const ContributionRoute(),

@@ -9,8 +9,9 @@ Service API **FastAPI** du système Zarma — serveur traditionnel conteneurisé
 |---------|-------|-------------|
 | GET | `/health` | Sonde de santé → `{ "status": "ok" }` |
 | GET | `/api/v1/models` | Recognizers ASR : `{ active, available }` |
+| GET | `/api/v1/mobile/config` | Build Android minimal, dernier build et fiche Play Store |
 | GET | `/api/v1/grammar/version` | Version de grammaire (issue du lexique) : `{ grammar_version, validated_count, unresolved_items }` |
-| POST | `/api/v1/recognize` | Reconnaissance audio sécurisée, persistée avec son `id` |
+| POST | `/api/v1/recognize` | Reconnaissance et conservation consentie du WAV de calcul |
 | GET | `/api/v1/history?anon_id=…` | Historique isolé d'un identifiant anonyme |
 | POST | `/api/v1/feedback` | Confirmation ou correction liée à une reconnaissance |
 | GET / POST | `/api/v1/consent` | Texte courant et acceptation versionnée du consentement |
@@ -45,8 +46,9 @@ chiffrement, de rétention et de retrait que les données actives. Une
 implémentation objet future peut remplacer le filesystem via l'interface
 `AudioStore`.
 
-La migration `20260724_0003` crée uniquement les métadonnées et index de
-`contributions`. L'appliquer avant de recevoir des uploads :
+Les migrations `20260724_0003` et `20260726_0006` créent les métadonnées de
+contribution puis associent les WAV de calcul à leur reconnaissance. Les
+appliquer avant de recevoir des uploads :
 
 ```bash
 uv run alembic -c services/api/alembic.ini upgrade head
@@ -56,6 +58,25 @@ uv run alembic -c services/api/alembic.ini check
 Le contrat MVP n'a pas de clé d'idempotence : si le serveur accepte un upload
 mais que le reçu réseau est perdu, une nouvelle tentative peut créer une
 contribution distincte.
+
+Avec `REQUIRE_TRAINING_CONSENT=true`, `/recognize` exige un `consent_id`
+actuellement valable pour le même `anon_id`. Le WAV est conservé avec
+`source=calculation` et `status=pending`. Un feedback `confirmed` le passe à
+`validated`, donc éligible aux exports d'entraînement ; `rejected` et
+`repeat_requested` le passent à `rejected`. Une correction reste en revue
+(`pending`) afin de ne pas exporter un libellé potentiellement faux.
+
+### Politique de version mobile
+
+`MOBILE_MIN_SUPPORTED_BUILD` est la version minimale autorisée,
+`MOBILE_LATEST_BUILD` la dernière version publiée et
+`MOBILE_PLAY_STORE_URL` la fiche de téléchargement. Quand
+`MOBILE_ENFORCE_MIN_BUILD=true`, `/recognize` refuse avec HTTP 426 toute requête
+dont l'en-tête `X-App-Build` est absent, invalide ou inférieur au minimum.
+
+La séquence sûre consiste à publier le nouveau build, renseigner
+`MOBILE_LATEST_BUILD`, attendre sa disponibilité Play Store, puis seulement
+augmenter `MOBILE_MIN_SUPPORTED_BUILD`.
 
 ### Retrait et exclusion des exports
 

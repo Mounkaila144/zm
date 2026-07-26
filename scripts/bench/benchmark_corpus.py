@@ -266,12 +266,15 @@ _SHORT_OPERANDS: tuple[tuple[int, int], ...] = ((2, 3), (12, 7), (23, 15), (40, 
 _LONG_OPERANDS: tuple[tuple[int, int], ...] = ((105, 7), (372, 28), (1_234, 6), (12_345, 5))
 
 #: Couples choisis pour tomber **hors domaine** — ils testent le refus.
-#: Le symbole est imposé : c'est lui qui provoque le cas.
+#: Le symbole est imposé : c'est lui qui provoque le cas. Le dépassement est
+#: exprimé relativement à ``MAX_VALUE`` (source unique, jamais recopié en dur) :
+#: un couple qui dépassait l'ancienne borne (1 000 000) ne dépasse plus la
+#: borne étendue (99 999 999 999) et cesserait silencieusement de tester le refus.
 _OUT_OF_DOMAIN: tuple[tuple[str, int, int], ...] = (
     ("-", 3, 5),  # résultat négatif
     ("-", 12, 40),  # résultat négatif, opérandes plus longs
-    ("*", 2_000, 2_000),  # dépassement
-    ("+", 999_999, 100),  # dépassement par l'addition
+    ("*", 100_000, 1_000_000),  # dépassement (10^11 > MAX_VALUE)
+    ("+", zarma_numbers.MAX_VALUE, 1),  # dépassement par l'addition, à la borne
 )
 
 

@@ -2,7 +2,7 @@
 
 import pytest
 from zarma_numbers.exceptions import OutOfRangeError
-from zarma_numbers.generator import generate
+from zarma_numbers.generator import MAX_VALUE, generate
 
 # --- AC1/AC2 : cas nominaux exacts (formes de la spec) ---
 
@@ -93,10 +93,43 @@ def test_dala_disambiguates_large_scale():
     assert generate(100_005) != generate(105_000)
 
 
+# --- Extension million : même mécanisme que `zambar`, une échelle au-dessus ---
+
+
+def test_million_multiplier_reuses_zambar_pattern():
+    # "million <multiplicateur>" — même grammaire que "zambar <multiplicateur>",
+    # le multiplicateur pouvant lui-même être un below_million complet.
+    assert generate(2_000_000) == "million hinka"
+    assert generate(15_000_000) == "million iwey cindi gou"
+    assert generate(100_000_000) == "million zangou"
+
+
+def test_million_remainder_reuses_zambar_pattern():
+    # "million <connecteur> <reste>" — même sélection da/di (élision) que `zambar`,
+    # le multiplicateur (1) étant omis (forme "million" déjà résolue).
+    assert generate(1_000_002) == "million di hinka"
+    assert generate(1_000_500) == "million da zangou gou"
+
+
+def test_million_dala_disambiguates_large_scale():
+    # Même condition de déclenchement que pour `zambar` (multiplicateur multiple
+    # de 100, >= 100), une échelle au-dessus : ex. 100 million pile vs 100 million
+    # + 5 (ambiguïté potentielle avec 105 millions).
+    assert generate(100_000_005) == "million zangou da dala gou"
+    assert generate(105_000_000) == "million zangou di gou"
+    assert generate(100_000_005) != generate(105_000_000)
+
+
+def test_max_value_is_99999_million_plus_full_remainder():
+    # Borne : 99 999 millions + un reste complet (< 1 000 000) — au-delà, une
+    # échelle supérieure (milliard) non lexicalisée serait requise.
+    assert MAX_VALUE == 99_999 * 1_000_000 + 999_999
+
+
 # --- AC3 : entrées hors plage / invalides ---
 
 
-@pytest.mark.parametrize("n", [-1, -100, 1_000_001, 5_000_000])
+@pytest.mark.parametrize("n", [-1, -100, MAX_VALUE + 1, MAX_VALUE + 1_000_000])
 def test_out_of_range_is_refused(n):
     with pytest.raises(OutOfRangeError) as excinfo:
         generate(n)

@@ -27,6 +27,7 @@ from app.api.v1 import (
     health,
     history,
     metrics,
+    mobile,
     models,
     recognize,
     recordings,
@@ -70,6 +71,7 @@ def create_app() -> FastAPI:
     app.state.limiter = limiter
     app.add_middleware(SlowAPIMiddleware)
     app.middleware("http")(request_id_middleware)
+    app.middleware("http")(mobile.mobile_version_middleware)
     app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(HTTPException, http_exception_handler)
@@ -81,6 +83,7 @@ def create_app() -> FastAPI:
     # Endpoints métier versionnés sous /api/v1.
     v1 = APIRouter(prefix="/api/v1")
     v1.include_router(models.router)
+    v1.include_router(mobile.router)
     v1.include_router(grammar.router)
     v1.include_router(recognize.router)
     v1.include_router(history.router)

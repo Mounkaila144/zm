@@ -6,6 +6,7 @@ import asyncio
 from collections.abc import Iterator
 
 import pytest
+from app.config import get_settings
 from app.core.rate_limit import limiter
 from app.db.models import Base
 from app.db.session import get_session
@@ -28,6 +29,19 @@ def reset_rate_limiter() -> Iterator[None]:
         yield
     finally:
         limiter.reset()
+
+
+@pytest.fixture(autouse=True)
+def legacy_request_compatibility(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Isole les tests historiques des deux nouvelles gardes de production."""
+
+    monkeypatch.setenv("MOBILE_ENFORCE_MIN_BUILD", "false")
+    monkeypatch.setenv("REQUIRE_TRAINING_CONSENT", "false")
+    get_settings.cache_clear()
+    try:
+        yield
+    finally:
+        get_settings.cache_clear()
 
 
 @pytest.fixture
