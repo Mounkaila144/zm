@@ -89,6 +89,19 @@ def expression_candidates_from_asr(asr: AsrResult) -> list[NumericCandidate]:
 
 
 def _variant_signal(text: str) -> float:
+    """Part des tokens couverts par une forme connue du lexique.
+
+    Le balayage est **par phrase, pas par token** : les formes longues des
+    opérateurs sont des locutions de deux mots (``kanga itonton``,
+    ``kan ifaysor``). Comparées token à token, ni ``kanga`` ni ``kan`` ni
+    ``ifaysor`` n'appartiennent au lexique, et le signal s'effondre sur les
+    énoncés que le locuteur prononce réellement — mesuré à 0,80 et 0,50 au lieu
+    de 1,00. On apparie donc la plus longue forme connue à chaque position.
+
+    Les découper en variantes d'un mot dans le lexique serait faux : ``kanga``
+    seul n'est pas un opérateur, et la grammaire accepterait alors
+    « zambar iddu kanga waranka » comme une addition.
+    """
     trace = zarma_numbers.normalize_with_trace(text)
     tokens = trace.normalized.split()
     if not tokens:
@@ -96,8 +109,20 @@ def _variant_signal(text: str) -> float:
 
     lexicon = zarma_numbers.load_lexicon()
     variants = lexicon.linguistic_variant_map()
-    known_tokens = set(variants) | set(variants.values())
-    return sum(token in known_tokens for token in tokens) / len(tokens)
+    known = set(variants) | set(variants.values())
+    longest = max((len(form.split()) for form in known), default=1)
+
+    covered = 0
+    index = 0
+    while index < len(tokens):
+        for span in range(min(longest, len(tokens) - index), 0, -1):
+            if " ".join(tokens[index : index + span]) in known:
+                covered += span
+                index += span
+                break
+        else:
+            index += 1
+    return covered / len(tokens)
 
 
 def _margin_signal(candidates: list[NumericCandidate]) -> float:
