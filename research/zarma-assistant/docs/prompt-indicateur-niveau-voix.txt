@@ -1,0 +1,148 @@
+Tu travailles dans /Users/pc/project/zarma/entrainement/corpus_recorder,
+l'application Flutter de collecte de corpus vocal zarma.
+
+CONTEXTE
+
+L'application a servi à collecter un corpus de reconnaissance vocale (10
+locuteurs, 319 clips, en une journée — elle fonctionne bien). Elle va
+maintenant servir à une campagne différente : enregistrer ~400 énoncés
+d'UN SEUL locuteur pour entraîner une synthèse vocale (TTS).
+
+Les exigences ne sont pas les mêmes, et deux mesures faites sur la
+campagne précédente le montrent :
+
+  fréquence d'échantillonnage : 16 000 Hz
+  rapport signal/bruit        : 24 dB de médiane (min 13, max 100)
+  RMS médian des clips        : 0,044
+  pic médian                  : 0,267 sur 1,0
+  bruit de fond               : −49 dBFS
+
+Pour la reconnaissance, c'est très bien — on ajoute même du bruit à
+l'entraînement, exprès. Pour une synthèse, c'est insuffisant : elle
+REPRODUIT ce qu'elle entend, souffle compris. Il lui faut 35 à 40 dB.
+
+Le bruit de fond n'est pas le coupable : c'est le NIVEAU DE VOIX qui est
+trop bas, avec un pic médian à 0,267 alors que la marge va jusqu'à 1,0.
+
+
+TROIS AJOUTS DEMANDÉS
+
+
+1. FRÉQUENCE D'ÉCHANTILLONNAGE — 24 kHz
+
+   Dans lib/audio_service.dart :
+
+       static const RecordConfig recordingConfig = RecordConfig(
+         encoder: AudioEncoder.wav,
+         sampleRate: 16000,     <- passer à 24000
+         numChannels: 1,
+       );
+
+   Les modèles de synthèse travaillent en 22,05 ou 24 kHz. Un corpus à
+   16 kHz est un PLAFOND DÉFINITIF : la voix restera sourde, quel que
+   soit le modèle et quelle que soit la durée enregistrée.
+
+   ⚠️ Le réglage demandé n'est pas toujours celui que le matériel
+   applique. Vérifier sur un fichier RÉELLEMENT produit par
+   l'application, pas dans le code :
+
+       ffprobe -v error -show_entries stream=sample_rate,channels \
+               -of csv=p=0 <fichier>.wav
+       # doit afficher : 24000,1
+
+   Si le matériel ne suit pas, le signaler plutôt que de laisser croire
+   que c'est fait.
+
+   Prévoir que la fréquence soit un paramètre, pas une constante figée :
+   la campagne ASR reste en 16 kHz.
+
+
+2. INDICATEUR DE NIVEAU DE VOIX EN TEMPS RÉEL
+
+   Pendant l'enregistrement, afficher trois informations :
+
+   a) Le niveau instantané (barre ou VU-mètre).
+
+   b) Une BANDE CIBLE matérialisée : RMS entre 0,10 et 0,20, pic ne
+      dépassant jamais 0,7. Cela fait gagner 7 à 13 dB de rapport
+      signal/bruit par rapport à la campagne précédente, sans jamais
+      approcher la saturation.
+
+   c) La MOYENNE DE LA SÉANCE en cours, sous forme de repère sur la même
+      échelle.
+
+   Le point (c) est le plus important et le moins évident. Pour une
+   synthèse, ce n'est pas la cible absolue qui compte, c'est la
+   CONSTANCE : un locuteur commence sa séance avec de l'énergie et
+   s'éloigne du micro quand il fatigue. Le modèle apprend alors une voix
+   instable et en produira une aussi. La barre de moyenne permet de se
+   comparer à ses propres prises précédentes.
+
+   Moyen technique : le paquet `record` 5.2.1 est déjà une dépendance et
+   expose `AudioRecorder.onAmplitudeChanged(Duration)`, un Stream
+   d'`Amplitude` avec `current` et `max`. Aucune dépendance nouvelle.
+
+   ⚠️ CALIBRATION OBLIGATOIRE. `Amplitude.current` renvoie des dBFS dont
+   la définition exacte varie selon la plateforme Android. Les seuils
+   ci-dessus sont exprimés en amplitude linéaire, mesurée dans les
+   fichiers WAV produits. Il faut donc établir la correspondance entre ce
+   qu'affiche le flux et ce qui finit réellement dans le fichier :
+   enregistrer quelques phrases, mesurer le RMS du WAV obtenu, et ajuster.
+   Sans cette calibration, l'indicateur montrerait une zone qui ne
+   correspond à rien.
+
+
+3. CONTRÔLE DE DÉRIVE APRÈS CHAQUE PRISE
+
+   Si le niveau d'une prise s'écarte de plus de 3 dB de la moyenne de la
+   séance, le signaler et proposer de refaire.
+
+   C'est le garde-fou qui rattrape ce que l'œil ne voit pas : la dérive
+   lente est invisible sur le moment, mais évidente comparée aux 200
+   prises précédentes.
+
+   L'application a déjà un modèle de qualité (`QualityLevel` dans
+   lib/models.dart : good / warning / bad / missing) et un affichage de
+   pastille. S'y intégrer plutôt que d'inventer un mécanisme parallèle.
+
+
+CE QUI EXISTE ET NE DOIT PAS ÊTRE CASSÉ
+
+- lib/wav_analysis.dart calcule déjà `rms`, `peak`, `durationSeconds`,
+  `trailingSilenceSeconds` sur le fichier produit. Réutiliser.
+- Le contrôle qualité actuel a été calibré pour l'ASR, qui tolère
+  beaucoup plus de bruit. Ajouter les critères de la synthèse sans
+  supprimer les anciens : l'application doit continuer de servir aux deux
+  campagnes.
+- Le format de sortie (un WAV par consigne, nommé d'après l'identifiant,
+  plus manifest.csv, export ZIP par locuteur) ne change pas : il est
+  consommé tel quel par
+  research/zarma-assistant/scripts/build_asr_corpus.py.
+
+
+CE QU'IL NE FAUT PAS FAIRE
+
+- Aucune réduction de bruit, aucun filtre, aucune normalisation
+  automatique du niveau. Un débruiteur remplace le bruit par des
+  artefacts corrélés à la parole, que le modèle de synthèse apprendrait
+  comme faisant partie de la voix. La règle est : enregistrer propre, ne
+  pas nettoyer après. L'indicateur sert à AIDER le locuteur à bien
+  parler, jamais à corriger le signal.
+- Aucun élagage de silence à la prise. Il se fera en traitement, où l'on
+  voit ce qu'on coupe.
+- Aucun réencodage.
+
+
+CRITÈRE DE RÉUSSITE
+
+Enregistrer trois phrases avec l'application modifiée, puis vérifier sur
+les fichiers produits :
+
+  - `ffprobe` affiche 24000,1
+  - le RMS mesuré tombe dans la bande annoncée par l'indicateur
+    (c'est le test de la calibration)
+  - une prise volontairement chuchotée déclenche l'avertissement de
+    dérive
+
+Documentation de référence sur la campagne :
+research/zarma-assistant/docs/corpus-synthese-vocale.md
