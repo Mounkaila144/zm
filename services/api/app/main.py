@@ -32,6 +32,7 @@ from app.api.v1 import (
     recognize,
     recordings,
 )
+from app.asr import grammar_guard
 from app.config import get_settings
 from app.core.errors import (
     http_exception_handler,
@@ -50,9 +51,13 @@ from app.db.session import engine
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     """Crée le schéma en développement ; staging/prod utilisent Alembic."""
 
-    if get_settings().APP_ENV == "development":
+    settings = get_settings()
+    if settings.APP_ENV == "development":
         async with engine.begin() as connection:
             await connection.run_sync(Base.metadata.create_all)
+    # Vérifie au démarrage que le service ASR et l'API partagent la même
+    # grammaire. Ne bloque jamais le démarrage (cf. ``grammar_guard.probe``).
+    await grammar_guard.probe(settings)
     yield
 
 

@@ -24,6 +24,7 @@ from time import perf_counter
 import httpx
 from structlog import get_logger
 
+from app.asr import grammar_guard
 from app.asr.base import AsrResult, AudioInput, Candidate
 from app.config import Settings
 
@@ -126,12 +127,18 @@ class _RemoteRecognizer:
             )
             for item in payload.get("candidates", [])
         ]
+        # Confronter les deux grammaires à chaque réponse : c'est le seul point
+        # du chemin où les deux processus se parlent. La garde journalise et
+        # n'interrompt jamais — cf. ``grammar_guard``.
+        grammar_version = str(payload.get("grammar_version") or "")
+        grammar_guard.check(grammar_version)
         return AsrResult(
             text=str(payload["text"]),
             acoustic_score=float(payload["acoustic_score"]),
             candidates=candidates,
             latency_ms=int(payload.get("latency_ms", 0)),
             model_version=str(payload.get("model_version") or self._MODEL_NAME),
+            grammar_version=grammar_version,
         )
 
 

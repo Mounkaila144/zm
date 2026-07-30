@@ -286,11 +286,16 @@ class LocalAsr:
         if blank_id != config.blank_id:
             config = replace(config, blank_id=blank_id)
 
+        from zarma_numbers import load_lexicon
         from zarma_numbers.grammar import (
             load_calculator_grammar,
             load_expression_grammar,
             load_grammar,
         )
+
+        # Lue **dans ce processus**, à côté de la grammaire qu'elle décrit : c'est
+        # cette valeur-là que l'API doit comparer à la sienne, pas celle du disque.
+        self._grammar_version = load_lexicon().grammar_version
 
         if grammar_kind == "calculator":
             grammar = load_calculator_grammar()
@@ -306,7 +311,8 @@ class LocalAsr:
         )
         self._decoder = ConstrainedCtcDecoder(grammar, lexicon, config)
         print(
-            f"  grammaire « {grammar.kind} » : {grammar.state_count} états, "
+            f"  grammaire « {grammar.kind} » v{self._grammar_version} : "
+            f"{grammar.state_count} états, "
             f"{len(grammar.tokens)} mots · séparateur {separator}",
             flush=True,
         )
@@ -346,6 +352,11 @@ class LocalAsr:
         """Identifiant du modèle chargé, tel qu'exposé dans les réponses."""
         return self._backend.name
 
+    @property
+    def grammar_version(self) -> str:
+        """Version du lexique chargée par ce processus (cf. ``build_transcribe_payload``)."""
+        return self._grammar_version
+
     def _logits(self, samples: np.ndarray, sample_rate: int) -> np.ndarray:
         """Logits CTC ``(T, V)`` — ils ne quittent jamais ce processus."""
         return self._backend.logits(samples, sample_rate)
@@ -378,6 +389,7 @@ class LocalAsr:
                 ),
                 model_version=self.model_name,
                 latency_ms=latency_ms,
+                grammar_version=self._grammar_version,
             )
             print(
                 f"  → «  » (audio muet) · audio {audio_seconds:.1f}s · "
@@ -398,7 +410,10 @@ class LocalAsr:
 
         latency_ms = int((time.perf_counter() - started) * 1000)
         payload = build_transcribe_payload(
-            result, model_version=self.model_name, latency_ms=latency_ms
+            result,
+            model_version=self.model_name,
+            latency_ms=latency_ms,
+            grammar_version=self._grammar_version,
         )
         trimmed_note = (
             f" · élagué {trimmed.trimmed_seconds:.1f}s" if trimmed.trimmed_seconds > 0.05 else ""
@@ -480,7 +495,14 @@ def _make_handler(
 
         def do_GET(self) -> None:  # noqa: N802 - imposé par BaseHTTPRequestHandler
             if self.path.rstrip("/") in ("", "/health"):
-                self._send(200, {"status": "ok", "model": asr.model_name})
+                self._send(
+                    200,
+                    {
+                        "status": "ok",
+                        "model": asr.model_name,
+                        "grammar_version": asr.grammar_version,
+                    },
+                )
             else:
                 self._send(404, {"error": "not_found"})
 

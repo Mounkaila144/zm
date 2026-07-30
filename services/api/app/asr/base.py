@@ -49,6 +49,12 @@ class AsrResult(BaseModel):
     )
     latency_ms: int = Field(..., description="ASR processing latency in milliseconds", ge=0)
     model_version: str = Field(..., description="ASR model version identifier")
+    #: Version du lexique chargée par le service ASR. Vide si le recognizer ne
+    #: la rapporte pas (mock, ou service antérieur à la vérification). Comparée
+    #: à celle de l'API par ``app.asr.grammar_guard`` : quand les deux processus
+    #: divergent, le décodeur émet des mots que l'analyseur ne lit plus et tout
+    #: devient ``repeat`` sans la moindre erreur visible.
+    grammar_version: str = Field(default="", description="ASR-side lexicon version")
 
     model_config = {"protected_namespaces": ()}
 

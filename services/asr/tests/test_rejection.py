@@ -250,6 +250,9 @@ def test_payload_never_exposes_logits(decoder, transcription):
         "candidates",
         "latency_ms",
         "model_version",
+        # Version du lexique de ce processus : l'API la compare à la sienne pour
+        # détecter une dérive entre les deux (cf. app/asr/grammar_guard.py).
+        "grammar_version",
         "decode_frames",
         "decode_latency_ms",
         "rejected",

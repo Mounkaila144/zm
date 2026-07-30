@@ -98,11 +98,16 @@ class OmnilingualAsr:
         }
 
         # --- Décodage contraint (story 5.6) : compilé une fois par conteneur ---
+        from zarma_numbers import load_lexicon
+
         from app.config import AsrSettings
         from app.decoding import ConstrainedCtcDecoder, build_token_lexicon
 
         self._settings = AsrSettings()
         self._decoder = None
+        # Version du lexique de **ce conteneur** : l'API la compare à la sienne
+        # pour détecter une dérive entre les deux processus (cf. transcription.py).
+        self._grammar_version = load_lexicon().grammar_version
         if self._settings.DECODE_CONSTRAINED:
             encoder = self._pipelines[CTC_MODEL].tokenizer.create_encoder()
 
@@ -181,7 +186,12 @@ class OmnilingualAsr:
             result = self._decoder.decode(self._logits(samples, sample_rate))
             latency_ms = int((time.perf_counter() - started) * 1000)
             return JSONResponse(
-                build_transcribe_payload(result, model_version=model, latency_ms=latency_ms)
+                build_transcribe_payload(
+                    result,
+                    model_version=model,
+                    latency_ms=latency_ms,
+                    grammar_version=self._grammar_version,
+                )
             )
 
         text, acoustic_score, candidates = self._transcribe_array(samples, sample_rate, model, lang)

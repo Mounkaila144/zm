@@ -8,6 +8,7 @@ versions (``grammar_version`` **issu du lexique**, source unique de vérité).
 from __future__ import annotations
 
 from app.api.v1.models import AVAILABLE_RECOGNIZERS
+from app.asr import grammar_guard
 from app.asr.base import SpeechRecognizer
 from app.asr.factory import get_recognizer
 from app.asr.mock import MockRecognizer
@@ -22,7 +23,31 @@ client = TestClient(app)
 def test_health_returns_ok() -> None:
     resp = client.get("/health")
     assert resp.status_code == 200
-    assert resp.json() == {"status": "ok"}
+    body = resp.json()
+    assert body["status"] == "ok"
+    assert body["grammar_version"] == load_lexicon().grammar_version
+    # Aucune requête ASR n'a eu lieu : rien à signaler.
+    assert body["grammar_drift"] is None
+
+
+def test_health_reports_grammar_drift_without_failing() -> None:
+    """Une dérive doit se voir sur la sonde, sans faire échouer la vivacité.
+
+    Un ``status`` dégradé provoquerait un redémarrage en boucle par systemd là
+    où le service répond parfaitement : la dérive est une anomalie de
+    configuration, pas une perte de vivacité.
+    """
+    grammar_guard.check("0.0.1-ancienne")
+    try:
+        body = client.get("/health").json()
+        assert body["status"] == "ok"
+        assert body["grammar_drift"] == {
+            "api_grammar_version": load_lexicon().grammar_version,
+            "asr_grammar_version": "0.0.1-ancienne",
+            "reason": "version_drift",
+        }
+    finally:
+        grammar_guard.reset()
 
 
 def test_models_active_and_available_match_settings() -> None:

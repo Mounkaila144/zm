@@ -43,12 +43,23 @@ def build_transcribe_payload(
     *,
     model_version: str,
     latency_ms: int,
+    grammar_version: str = "",
 ) -> dict[str, object]:
     """Assemble la réponse ``/transcribe`` à partir du décodage contraint.
 
     :param result: sortie du décodeur contraint (hypothèses + signal de rejet).
     :param model_version: identifiant du modèle acoustique (traçabilité, NFR12).
     :param latency_ms: latence **totale** du service (inférence + décodage).
+    :param grammar_version: version du lexique **réellement chargée** par ce
+        processus. Ce n'est pas de la simple traçabilité : le décodeur et
+        l'analyseur de l'API vivent dans deux processus distincts, chacun avec
+        sa copie de ``zarma_numbers`` en mémoire. Quand ils divergent, le
+        décodeur émet des mots que l'analyseur ne sait plus lire, et **chaque
+        énoncé devient un ``repeat`` sans qu'aucune erreur ne soit levée** :
+        les deux services répondent 200, leurs sondes de santé sont vertes, et
+        seule la lecture de la base révèle le problème. C'est arrivé en
+        production le 2026-07-30 (ASR redémarré, API non redémarrée), pour une
+        journée d'enquête. Transporter la version rend la panne visible.
     """
     if result.rejected:
         # Abstention explicite : le pipeline API décidera ``repeat`` (FR21).
@@ -58,6 +69,7 @@ def build_transcribe_payload(
             "candidates": [],
             "latency_ms": latency_ms,
             "model_version": model_version,
+            "grammar_version": grammar_version,
             "decode_frames": result.frame_count,
             "decode_latency_ms": result.latency_ms,
             "rejected": True,
@@ -76,6 +88,7 @@ def build_transcribe_payload(
         ],
         "latency_ms": latency_ms,
         "model_version": model_version,
+        "grammar_version": grammar_version,
         "decode_frames": result.frame_count,
         "decode_latency_ms": result.latency_ms,
         "rejected": False,
