@@ -1,7 +1,7 @@
 # Enregistrement du corpus de synthèse vocale — nombres zarma
 
 Liste prête à enregistrer : **`data/tts_prompts.csv`** — 400 énoncés,
-**environ 16 minutes de parole**, une séance.
+**environ 18 minutes de parole**, une séance.
 
 Régénérable par `scripts/generate_tts_prompts.py`.
 
@@ -62,9 +62,9 @@ Enregistrer 400 nombres au hasard donnerait cinquante fois `zangou` et jamais
 
 | | couverture obtenue |
 |---|---|
-| mots du vocabulaire | 39/39, chacun **au moins 4 fois** |
-| couples (mot, position) | 102 — début, milieu, fin, seul |
-| jonctions entre deux mots | 269 |
+| mots du vocabulaire | 41, chacun **au moins 4 fois** |
+| couples (mot, position) | 104 — début, milieu, fin, seul |
+| jonctions entre deux mots | 263 |
 
 **Pourquoi la position compte.** Un mot en fin d'énoncé porte une mélodie
 descendante ; au milieu, il enchaîne. Ce sont deux réalisations différentes du
@@ -90,18 +90,35 @@ souvent un mot unique — `igou` pour 5, `zangou` pour 100.
 
 ---
 
-## Ce qui n'a PAS besoin d'être enregistré ici
-
-**Les 6 formes longues d'opérateur** (`kanga`, `itonton`, `izabou`,
-`kalangaybor`, `kan`, `ifaysor`) sont absentes de la liste, volontairement.
-Ce sont des formes **d'entrée** : ce que les utilisateurs disent à la
-reconnaissance. L'application, elle, prononce toujours la forme canonique
-courte :
+## Les opérateurs sont en forme LONGUE
 
 ```
-entendu   « ihinka kanga itonton ihinza »
-prononcé  « ihinka tonton ihinza »
++   kanga itonton
+−   kanga izabou
+×   kalangaybor
+÷   kan ifaysor
 ```
+
+C'est ce que les gens disent, donc ce que l'application doit prononcer quand
+elle répète ce qu'elle a compris. Un utilisateur qui ne peut vérifier qu'à
+l'oreille doit entendre une formulation qu'il emploie lui-même.
+
+Les formes courtes (`tonton`, `zabou`, `ingaybor`, `inafaysor`) ne figurent
+donc pas dans cette liste. Elles restent dans la banque vocale existante — rien
+n'est perdu si l'on veut revenir en arrière.
+
+> **Conséquence à traiter avant la mise en service.** `render_expression()`
+> produit aujourd'hui la forme **courte** : c'est elle que l'application
+> reçoit. Enregistrer les formes longues ne suffit donc pas, il faut aussi que
+> la couche de synthèse les demande.
+>
+> Deux voies. Changer `canonical` dans `lexicon.yaml` — mais cela modifie
+> l'identité des expressions dans toute la pile, avec le retentissement sur les
+> tests que la correction précédente a déjà montré. Ou, plus simple et mieux
+> séparé : laisser la grammaire garder la forme courte comme **identité** (pour
+> l'analyse, la comparaison, le stockage) et faire traduire par la couche
+> vocale, dont c'est le rôle. `tonton` reste ce que le système *pense* ;
+> `kanga itonton` devient ce qu'il *dit*.
 
 **Les 3 phrases fixes** (`cannot_answer`, `confirm`, `repeat`) restent des
 enregistrements. Leur texte ne change jamais : les jouer telles quelles donne

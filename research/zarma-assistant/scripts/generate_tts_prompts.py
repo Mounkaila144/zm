@@ -16,7 +16,8 @@ Trois unités de couverture, chacune devant apparaître plusieurs fois :
 
 La sélection est gloutonne : à chaque tour on prend l'énoncé qui comble le plus
 de déficit restant. Aucune forme zarma n'est écrite à la main — tout vient de
-`generate()` et `render_expression()`.
+`generate()` et du lexique — y compris les formes longues d'opérateur, que
+l'application doit prononcer parce que ce sont celles que les gens emploient.
 
     cd /Users/pc/project/zarma
     research/zarma-assistant/.venv/bin/python \
@@ -33,10 +34,34 @@ from collections import Counter
 from pathlib import Path
 
 try:
-    from zarma_numbers import Expression, evaluate, generate, render_expression
+    from zarma_numbers import Expression, evaluate, generate, load_lexicon
 except ImportError:  # pragma: no cover
     sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "packages" / "zarma_numbers" / "src"))
-    from zarma_numbers import Expression, evaluate, generate, render_expression
+    from zarma_numbers import Expression, evaluate, generate, load_lexicon
+
+
+def _spoken_operators() -> dict[str, str]:
+    """Symbole -> forme **longue**, celle que l'application doit prononcer.
+
+    `render_expression()` produit la forme canonique courte (`tonton`), choisie
+    à l'époque pour ne pas invalider la banque vocale existante, qui ne
+    contenait que ces enregistrements-là. Cette contrainte disparaît puisqu'on
+    réenregistre : l'application doit dire ce que les gens disent, sinon un
+    utilisateur qui ne peut vérifier qu'à l'oreille entend une formulation
+    qu'il n'emploie jamais.
+
+    Les formes sont **lues dans le lexique**, jamais recopiées ici : c'est la
+    variante composée de plusieurs mots, ou à défaut la variante non canonique
+    (`kalangaybor` pour la multiplication, qui tient en un seul mot).
+    """
+    spoken: dict[str, str] = {}
+    for operator in load_lexicon().operators.values():
+        if operator.canonical is None:
+            continue
+        composees = [v for v in operator.variants if " " in v]
+        autres = [v for v in operator.variants if v != operator.canonical]
+        spoken[operator.symbol] = composees[0] if composees else max(autres, key=len)
+    return spoken
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 
@@ -54,6 +79,7 @@ _OPERANDS = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 17, 20, 23, 27, 30, 40,
 
 def _pool(rng: random.Random) -> list[tuple[str, str]]:
     """(identifiant, texte zarma) — le vivier où puiser."""
+    parles = _spoken_operators()
     seen: set[str] = set()
     out: list[tuple[str, str]] = []
 
@@ -84,9 +110,14 @@ def _pool(rng: random.Random) -> list[tuple[str, str]]:
                 expression = Expression(left=left, symbol=symbol, right=right)
                 try:
                     evaluate(expression)
-                    add(f"{left}{symbol}{right}", render_expression(expression))
-                except Exception:  # noqa: BLE001
+                except Exception:  # noqa: BLE001 - hors domaine
                     continue
+                # Forme longue de l'opérateur : c'est celle que l'application
+                # devra prononcer, donc celle que le modèle doit apprendre.
+                add(
+                    f"{left}{symbol}{right}",
+                    f"{generate(left)} {parles[symbol]} {generate(right)}",
+                )
 
     rng.shuffle(out)
     return out
