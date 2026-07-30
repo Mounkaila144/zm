@@ -57,6 +57,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -441,26 +442,58 @@ def evaluate_constrained(
     """
     try:
         from decoding import ConstrainedCtcDecoder, DecoderConfig, build_token_lexicon
-        from zarma_numbers import load_grammar, parse
+        from zarma_numbers import (
+            Expression,
+            evaluate,
+            load_expression_grammar,
+            load_grammar,
+            parse,
+            parse_expression,
+        )
     except ImportError as exc:
         print(f"  (décodage contraint ignoré : {exc})")
         return None
 
-    grammar = load_grammar()
-    lexicon = build_token_lexicon(
-        grammar,
-        tokenizer.encode,
-        separator=(tokenizer.vocab[SPACE_TOKEN],),
-        blank_id=BLANK_ID,
-        # Formes canoniques seules : le modèle n'a jamais vu que celles-là en
-        # cible d'entraînement, ajouter des variantes d'orthographe créerait des
-        # encodages qu'aucun apprentissage ne soutient.
-        include_pronunciations=False,
-    )
-    decoder = ConstrainedCtcDecoder(grammar, lexicon, DecoderConfig())
+    def build(grammar):
+        lexicon = build_token_lexicon(
+            grammar,
+            tokenizer.encode,
+            separator=(tokenizer.vocab[SPACE_TOKEN],),
+            blank_id=BLANK_ID,
+            # Les prononciations portent les formes longues des opérateurs
+            # (`kanga itonton`…), qui sont précisément ce que le modèle a appris
+            # et ce que les gens disent. Les exclure rendrait toute expression
+            # indécodable.
+            include_pronunciations=True,
+        )
+        return ConstrainedCtcDecoder(grammar, lexicon, DecoderConfig())
 
-    numbers = [u for u in utterances if not u.label.startswith("op")]
-    if not numbers:
+    # Une grammaire par type d'énoncé, comme dans l'application : le décodeur
+    # ne charge qu'une langue à la fois, et un nombre seul n'appartient pas à la
+    # langue des expressions (ni l'inverse).
+    decoders = {"nombre": build(load_grammar()), "expression": build(load_expression_grammar())}
+
+    def attendu(label: str) -> tuple[str, int] | None:
+        """(type d'énoncé, valeur attendue) — `None` si l'énoncé n'est pas une
+        saisie valide de la calculatrice. C'est le cas des mots d'opérateur
+        isolés : aucune des deux grammaires ne les accepte, et un utilisateur
+        qui dirait seulement « kanga itonton » ne demanderait aucun calcul."""
+        if label.isdigit():
+            return "nombre", int(label)
+        match = re.fullmatch(r"(\d+)([-+*/])(\d+)", label)
+        if match:
+            expression = Expression(
+                left=int(match.group(1)), symbol=match.group(2), right=int(match.group(3))
+            )
+            try:
+                return "expression", evaluate(expression).value
+            except Exception:  # noqa: BLE001 - hors domaine : hors évaluation
+                return None
+        return None
+
+    cibles = [(u, attendu(u.label)) for u in utterances]
+    cibles = [(u, c) for u, c in cibles if c is not None]
+    if not cibles:
         return None
 
     correct = 0
@@ -473,16 +506,27 @@ def evaluate_constrained(
     trace: list[dict] = []
     model.eval()
     with torch.no_grad():
-        for utterance in numbers:
+        for utterance, (genre, valeur_attendue) in cibles:
             audio = load_audio(utterance.path)
             audio = (audio - audio.mean()) / (audio.std() + 1e-7)
             # Une seule séquence à la fois : le décodeur lit des logits (T, V)
             # non rembourrés, et du remplissage fausserait le score CTC.
             logits = model(input_values=audio.unsqueeze(0).to(device)).logits
-            result = decoder.decode(logits[0].float().cpu().numpy())
+            result = decoders[genre].decode(logits[0].float().cpu().numpy())
             best = result.best
-            value = parse(best.text) if best is not None else None
-            juste = value is not None and value == int(utterance.label)
+
+            value = None
+            if best is not None:
+                if genre == "nombre":
+                    value = parse(best.text)
+                else:
+                    expression = parse_expression(best.text)
+                    if expression is not None:
+                        try:
+                            value = evaluate(expression).value
+                        except Exception:  # noqa: BLE001 - refus du domaine
+                            value = None
+            juste = value is not None and value == valeur_attendue
 
             # Écart de score entre la meilleure et la deuxième hypothèse. C'est
             # le signal qui manque à `confidence` : celle-ci compare le chemin
@@ -496,7 +540,9 @@ def evaluate_constrained(
             trace.append(
                 {
                     "etiquette": utterance.label,
+                    "genre": genre,
                     "attendu": utterance.text,
+                    "valeur_attendue": valeur_attendue,
                     "juste": juste,
                     "lu": value,
                     "confiance": round(result.confidence, 4),
@@ -523,9 +569,21 @@ def evaluate_constrained(
                         "marge": marge,
                     }
                 )
+    par_genre = {}
+    for genre in ("nombre", "expression"):
+        lot = [t for t in trace if t["genre"] == genre]
+        if lot:
+            par_genre[genre] = {
+                "testes": len(lot),
+                "exact": round(sum(t["juste"] for t in lot) / len(lot), 4),
+            }
+
     return {
-        "nombres_testes": len(numbers),
-        "nombre_exact": correct / len(numbers),
+        "enonces_testes": len(cibles),
+        "valeur_exacte": correct / len(cibles),
+        # Nombres et expressions séparés : ce sont deux difficultés distinctes,
+        # et une moyenne unique masquerait laquelle progresse.
+        "par_genre": par_genre,
         # Les effectifs accompagnent les moyennes : « confiance des fausses =
         # 1,0 » ne veut pas dire la même chose sur 2 erreurs et sur 30.
         "n_justes": len(good_confidence),
@@ -899,8 +957,13 @@ def main() -> None:
         if "contraint" in metrics:
             c = metrics["contraint"]
             print(
-                f"  GRAMMAIRE : nombre exact {c['nombre_exact']:.1%} "
-                f"sur {c['nombres_testes']} nombres | confiance "
+                f"  GRAMMAIRE : valeur exacte {c['valeur_exacte']:.1%} "
+                f"sur {c['enonces_testes']} énoncés "
+                + " ".join(
+                    f"[{g} {d['exact']:.0%} sur {d['testes']}]"
+                    for g, d in c["par_genre"].items()
+                )
+                + " | confiance "
                 f"{c['confiance_correctes']} (justes) vs {c['confiance_fausses']} (fausses)"
             )
         results_path.write_text(
