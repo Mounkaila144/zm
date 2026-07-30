@@ -1,0 +1,121 @@
+Tu travailles dans le monorepo /Users/pc/project/zarma.
+
+CONTEXTE
+
+Un modèle ASR zarma vient d'être entraîné (864 énoncés, 12 locuteurs). Il
+reconnaît les opérations arithmétiques, mais la grammaire les REFUSE, donc le
+décodeur contraint ne peut rien en faire.
+
+La cause : les opérateurs zarma sont des formes LONGUES, confirmées par le
+locuteur natif du projet et prouvées par la mesure (les 16 clips d'opérateur
+durent 1,40 s de médiane, contre 0,80 s pour un mot isolé) :
+
+    +  ->  kanga itonton     (2 tokens)
+    -  ->  kanga izabou      (2 tokens)
+    *  ->  kalangaybor       (1 token)
+    /  ->  kan ifaysor       (2 tokens)
+
+Or packages/zarma_numbers/src/zarma_numbers/lexicon.yaml porte encore les
+formes courtes, avec status: unresolved :
+
+    add:      { symbol: "+", canonical: tonton,    variants: [tonton, itonton],  status: unresolved }
+    subtract: { symbol: "-", canonical: zabou,     variants: [zabou, izabou],    status: unresolved }
+    multiply: { symbol: "*", canonical: ingaybor,  variants: [ingaybor],         status: unresolved }
+    divide:   { symbol: "/", canonical: inafaysor, variants: [inafaysor],        status: unresolved }
+
+Etat verifie aujourd'hui :
+
+    « ihinka kanga itonton ihinza »   ->  REFUSE   (ce que le modele produit)
+    « ihinka itonton ihinza »         ->  REFUSE
+    « ihinka tonton ihinza »          ->  ACCEPTE  (ce que personne ne dit)
+
+
+OBJECTIF
+
+Que la grammaire des expressions accepte les formes longues, sans casser la
+grammaire des nombres ni la banque vocale de l'application.
+
+
+RACINE DU PROBLEME, deja identifiee
+
+Dans packages/zarma_numbers/src/zarma_numbers/grammar.py, la fonction
+_operator_surfaces() n'utilise QUE operator.canonical :
+
+    tokens = tuple(operator.canonical.split())
+
+Elle ignore completement operator.variants. Le mecanisme de convergence des
+variantes, qui existe pour les nombres via `pronunciations`, n'a jamais ete
+branche pour les operateurs. C'est la qu'il faut agir.
+
+Note : canonical.split() montre que les formes MULTI-TOKENS sont deja prevues
+par la structure. Ce n'est donc pas un obstacle.
+
+
+CONTRAINTE IMPORTANTE — la banque vocale
+
+L'application PARLE ses reponses en concatenant des mots pre-enregistres. La
+banque (dossier « pour le tts » du corpus) ne contient que les formes COURTES :
+tonton.wav, zabou.wav, ingaybor.wav, inafaysor.wav. Il n'existe aucun
+enregistrement de « kanga itonton ».
+
+Solution a privilegier : les formes longues sont acceptees en ENTREE (variantes
+reconnues), la forme courte reste celle produite en SORTIE par
+render_expression() et canonical_form(). Le decodeur ferait alors converger
+« ihinka kanga itonton ihinza » vers la forme canonique « ihinka tonton ihinza »,
+qui reste parseable et prononcable avec la banque existante.
+
+Si cette separation entree/sortie n'est pas realisable proprement, signale-le
+plutot que de forcer : il faudra alors enregistrer de nouveaux fichiers audio,
+et c'est une decision qui appartient a l'utilisateur.
+
+
+VERIFICATION DEJA FAITE
+
+_operator_surfaces() refuse tout operateur dont un token appartient a
+l'alphabet des nombres, pour eviter qu'une suite de mots soit lisible a la fois
+comme un nombre et comme une operation. J'ai verifie : `kanga`, `itonton`,
+`izabou`, `kalangaybor`, `kan`, `ifaysor` n'entrent en collision avec AUCUN des
+35 tokens de la grammaire des nombres. Le controle passera.
+
+
+A FAIRE
+
+1. lexicon.yaml : ajouter les formes longues et passer status a resolved.
+
+2. grammar.py : faire deriver les surfaces d'operateur de canonical ET des
+   variantes, en gardant la verification de disjonction sur toutes les formes.
+
+3. Mettre a jour les tests. Environ 11 assertions concernees dans
+   packages/zarma_numbers/tests/test_expressions.py et test_loader.py, plus la
+   fixture services/asr/tests/fixtures/expression-token-lexicon.json.
+
+4. Ajouter des tests qui verrouillent le nouveau comportement : chaque forme
+   longue doit etre acceptee, et se ramener a la meme expression que sa forme
+   courte.
+
+
+NE PAS CASSER
+
+- La grammaire des NOMBRES doit rester identique, a l'octet pres. Tous les
+  tests existants qui la concernent doivent passer sans modification.
+
+- render_result() (« <quotient> ga cindi <reste> ») ne doit pas changer.
+
+- Le domaine arithmetique et les refus (resultat negatif, division par zero,
+  depassement) ne doivent pas changer.
+
+
+CRITERE DE REUSSITE
+
+    from zarma_numbers import load_expression_grammar
+    g = load_expression_grammar()
+
+    # doit etre accepte :
+    g.accepts("ihinka kanga itonton ihinza")
+    g.accepts("zangou gou kalangaybor igou")
+    g.accepts("iwey kan ifaysor ihinka")
+
+    # doit rester accepte :
+    g.accepts("ihinka tonton ihinza")
+
+et la suite de tests complete du paquet zarma_numbers au vert.

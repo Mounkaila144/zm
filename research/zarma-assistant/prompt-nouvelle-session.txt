@@ -1,0 +1,163 @@
+CONTEXTE DU PROJET
+
+Je développe "Zarma IA", une application mobile Flutter (Android) pour PTR
+Niger, destinée à des locuteurs zarma au Niger, en grande partie
+analphabètes. Le dépôt est à /Users/pc/project/zarma.
+
+Application existante (apps/mobile) — déjà fonctionnelle :
+- Reconnaît des nombres et des expressions arithmétiques (+ - x ÷) prononcés
+  en zarma et fait des calculs (vocabulaire fermé, grammaire contrainte).
+- Sortie vocale par concaténation de mots pré-enregistrés (banque vocale
+  embarquée, fonctionne hors-ligne).
+- Design de marque appliqué (couleurs du logo PTR Niger, AppBar, footer
+  "Fait par PTR Niger" + téléphone visible), zarma jamais affiché à l'écran
+  (utilisateurs analphabètes, seuls les nombres sont affichés), résultat de
+  calcul répété en boucle toutes les 2s, message vocal dédié si un nombre
+  n'est pas compris.
+- ASR actuel : modèle Meta "Omnilingual" (omniASR_CTC_300M_v2, 300M
+  paramètres, licence Apache 2.0, pip-installable via le paquet
+  `omnilingual-asr`) hébergé sur un serveur cloud (Modal) — PAS embarqué
+  dans le téléphone. Un décodeur à grammaire contrainte
+  (services/asr/app/decoding.py, code Python/numpy pur, déjà local) force
+  la sortie du modèle à correspondre à un nombre/expression zarma valide —
+  c'est cette contrainte, pas le modèle en lui-même, qui rend la
+  reconnaissance fiable.
+  Grammaire des nombres et opérations : packages/zarma_numbers — expose
+  `generate(n)` (nombre→zarma), `Expression`/`render_expression()`
+  (expressions arithmétiques→zarma), `supported_operators()` (les 4
+  opérateurs : + = tonton, - = zabou, * = ingaybor, / = inafaysor). Règles
+  validées par un locuteur natif.
+
+OBJECTIF ACTUEL — LE SEUL EN COURS
+
+Entraîner mon PROPRE modèle de reconnaissance vocale, léger, fermé sur le
+vocabulaire déjà géré par la calculatrice (nombres + les 4 opérations), et
+qui tourne ENTIÈREMENT EN LOCAL sur le téléphone de chaque utilisateur —
+sans serveur cloud, sans dépendance réseau. But explicite : remplacer
+Omnilingual (300M-1,2 Go, hébergé sur Modal) par un modèle maison beaucoup
+plus léger, pour que l'application reste légère et fonctionne partout, y
+compris sans connexion.
+
+IMPORTANT — hors sujet, ne pas y revenir : un projet plus large
+d'assistant conversationnel vocal zarma (traduction fr<->zarma générale,
+compréhension libre) a été exploré puis ABANDONNÉ / MIS EN PAUSE par
+décision explicite. Ce n'est plus un objectif. Ne pas proposer de reprendre
+ce travail ni de l'évoquer — le sujet est uniquement le modèle ASR local
+pour la calculatrice.
+
+Je suis moi-même locuteur natif zarma (important : mes évaluations de
+qualité de transcription font autorité, pas besoin de chercher un tiers
+pour valider). Le zarma n'a pas d'orthographe officielle standardisée — on
+l'écrit "au son", avec les réflexes du français. Ce qui compte pour
+entraîner un modèle, c'est la cohérence de l'écriture, pas une "correction"
+qui n'existe pas.
+
+POURQUOI UN MODÈLE MAISON (pistes externes déjà épuisées)
+
+- MMS-1B-all (Meta) : la doc officielle annonce le zarma ('dje') supporté,
+  mais le vocabulaire réel du checkpoint HF ne le contient PAS — testé et
+  confirmé en erreur directe. Incohérence documentation/modèle publié.
+- Mamadou2727/whisper-medium-zarma-model1 (Whisper fine-tuné sur zarma,
+  WER 41.4 annoncé) : accès gated, jamais approuvé.
+- Mamadou2727/whisper-medium-zarma-model (sans le "1", public) : dépôt
+  complètement VIDE (abandonné par son auteur).
+- openai/whisper-large-v3 (généraliste, public) testé en zéro-shot :
+  résultats mauvais (attendu, jamais appris le zarma).
+- Conclusion : aucun modèle zarma existant n'est utilisable tel quel — d'où
+  la décision d'entraîner notre propre modèle, sur nos propres données.
+- Base de données de contributions vocales du projet (zarma.db, table
+  contributions) : VIDE — 0 enregistrement. Le dossier de stockage audio
+  production est vide aussi. Il n'y avait donc PAS de vraies données
+  d'entraînement ASR disponibles avant qu'on commence à en collecter
+  nous-mêmes.
+
+DONNÉES D'ENTRAÎNEMENT — GÉNÉRATION DES PHRASES À ENREGISTRER
+
+Deux scripts (à lancer depuis la RACINE du monorepo, pas depuis
+research/zarma-assistant, car ils ont besoin du paquet zarma_numbers du
+workspace racine) :
+
+- research/zarma-assistant/scripts/generate_recording_prompts.py
+  -> research/zarma-assistant/data/asr_recording_prompts.csv (59 nombres
+  stratifiés : unités, dizaines, centaines, milliers, millions, cas du
+  marqueur "dala", connecteurs élidés).
+- research/zarma-assistant/scripts/generate_operator_prompts.py
+  -> research/zarma-assistant/data/asr_recording_prompts_operations.csv
+  (18 phrases : les 4 mots d'opérateur isolés + 14 expressions complètes
+  couvrant +, -, *, / à différentes grandeurs, dont un cas de division avec
+  reste).
+
+ÉTAT ACTUEL DE LA COLLECTE DE DONNÉES (À REPRENDRE ICI)
+
+- 8 locuteurs (moi + 7 autres : abdoulaye, amina, haoua, layhana, sharifa,
+  zizigna, zouera) ont chacun enregistré les 59 phrases du premier CSV À LA
+  SUITE dans un seul fichier audio continu (avec quelques secondes de pause
+  entre chaque phrase), au format .m4a. J'ai accès jusqu'à 9 locuteurs au
+  total.
+- Fichiers originaux (.m4a, AAC 48kHz stéréo, ~4h30 chacun) dans
+  /Users/pc/Music/2voix/
+- Convertis en .wav (16kHz mono) SANS découpage dans
+  /Users/pc/Music/2voix_wav/ — un fichier par locuteur, toujours 59 phrases
+  à la suite dans chaque fichier.
+- MANQUANT dans ce premier tour, à corriger : les nombres 30, 33 et 37
+  n'ont été dits par personne (oubli). Seul 30 ("waranza") introduit un mot
+  vraiment unique absent partout ailleurs — 33 et 37 réutilisent des mots
+  déjà couverts par d'autres nombres, donc moins urgent, mais autant tout
+  refaire tant qu'on y est.
+- MANQUANT également, à enregistrer en plus par les mêmes locuteurs : les
+  18 phrases d'opérations (asr_recording_prompts_operations.csv) — un tour
+  d'enregistrement séparé, pas encore fait par personne.
+- Découpage automatique en clips individuels : PAS TERMINÉ. Script écrit
+  (research/zarma-assistant/scripts/split_speaker_recordings.py) — pour
+  chaque locuteur, cherche automatiquement sur une grille de 154
+  combinaisons (durée de pause minimale × seuil de silence) celle qui tombe
+  exactement sur le nombre de segments attendu (nécessaire : un seuil fixe
+  ne marchait pour AUCUN des 8 locuteurs, résultats de 1 à 78 segments
+  détectés selon la voix). Ce script tournait en tâche de fond mais a été
+  arrêté avant la fin (je voulais d'abord juste les .wav bruts, obtenus). À
+  relancer/terminer.
+- ffmpeg installé (brew) pour tout traitement audio local.
+
+PROCHAINES ÉTAPES À REPRENDRE, DANS L'ORDRE
+
+1. Compléter la collecte : faire enregistrer par les locuteurs disponibles
+   (a) les 3 nombres manquants (30, 33, 37) et (b) les 18 phrases
+   d'opérations — en fichiers audio séparés ou à la suite, peu importe tant
+   que c'est cohérent avec ce que gère le script de découpage.
+2. Terminer le découpage automatique en clips individuels par locuteur
+   (scripts/split_speaker_recordings.py sur /Users/pc/Music/2voix_wav/ ou
+   .../2voix/) — le laisser aller au bout cette fois (peut être lent :
+   envisager de lancer en tâche de fond et vérifier périodiquement, ou
+   d'optimiser/réduire la grille de recherche si trop lent). Adapter aussi
+   le script pour gérer le fichier CSV des opérations (id textuel, pas un
+   nombre) si les locuteurs l'enregistrent séparément.
+3. Une fois les clips individuels obtenus et étiquetés (nombres + opérations,
+   plusieurs locuteurs), concevoir et lancer l'entraînement du petit modèle
+   ASR local (probablement sur Colab comme banc d'essai, GPU T4 gratuit,
+   transfer learning depuis un petit backbone pré-entraîné plutôt que from
+   scratch vu la taille limitée du jeu de données).
+4. Exporter le modèle entraîné dans un format utilisable sur mobile
+   (TFLite/ONNX) et l'intégrer dans l'app Flutter (apps/mobile), en
+   remplacement de l'appel réseau à Omnilingual/Modal — pas encore abordé
+   en détail.
+
+AUTRES ÉLÉMENTS DE CONTEXTE UTILES
+
+- Environnement : Mac M1, 8 Go RAM — insuffisant pour tout entraînement ML
+  sérieux en local, toujours passer par Colab (GPU T4 gratuit) pour
+  l'entraînement lui-même ; le traitement audio (découpage, conversion)
+  tourne bien en local.
+- Dossier de travail : research/zarma-assistant/ (projet Python autonome
+  avec son propre pyproject.toml/uv, dépendances légères : anthropic,
+  sacrebleu, huggingface-hub, pydub, audioop-lts — PAS de torch/
+  transformers en local, l'entraînement se fera sur Colab en collant le
+  contenu des scripts). Une partie de ce dossier (scripts de traduction,
+  README) concerne le projet d'assistant conversationnel abandonné — ne pas
+  s'y attarder, se concentrer sur les scripts liés à l'ASR
+  (generate_recording_prompts.py, generate_operator_prompts.py,
+  split_speaker_recordings.py, test_asr.py).
+  ATTENTION : ne jamais mettre de vraies clés API dans .env.example (suivi
+  par git) — toujours dans .env (gitignored).
+
+Merci de reprendre le travail à partir de "PROCHAINES ÉTAPES À REPRENDRE"
+ci-dessus.

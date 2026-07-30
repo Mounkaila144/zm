@@ -2,7 +2,7 @@
 
 ## 1. Objectif
 
-Créer une couche vocale en zarma, intégrable dans une application bancaire, Mobile Money ou de services, afin qu’une personne ne sachant ni lire ni écrire puisse :
+Créer une couche vocale en zarma, intégrable dans une application Mobile Money, afin qu’une personne ne sachant ni lire ni écrire puisse :
 
 - consulter son solde ;
 - transférer de l’argent à un bénéficiaire enregistré ;
@@ -40,8 +40,7 @@ Réalisée par un agent ou un proche de confiance :
 - activation du mode vocal zarma ;
 - configuration de la biométrie ou du PIN ;
 - enregistrement des bénéficiaires ;
-- enregistrement des compteurs ;
-- enregistrement des comptes d’eau et d’électricité ;
+- enregistrement des compteurs d’eau et d’électricité ;
 - enregistrement des numéros à recharger ;
 - choix de la vitesse de la voix ;
 - formation de l’utilisateur.
@@ -55,7 +54,6 @@ L’utilisateur dispose principalement de :
 - un grand bouton microphone ;
 - un bouton Répéter ;
 - un bouton Annuler ;
-- un bouton Aide ;
 - des réponses vocales ;
 - des vibrations et sons simples.
 

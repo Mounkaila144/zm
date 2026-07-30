@@ -1,0 +1,2023 @@
+{
+  "model": "glm-4.6",
+  "sample_size": 200,
+  "few_shot_count": 8,
+  "seed": 20260727,
+  "bleu": {
+    "fr_to_zarma": 0.953247288097367,
+    "zarma_to_fr": 8.7337802039553
+  },
+  "usage": {
+    "input_tokens": 151767,
+    "output_tokens": 15226,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 12672000
+  },
+  "estimated_cost_usd": 1.5184773999999999,
+  "results": {
+    "fr_to_zarma": [
+      {
+        "source": "C'est pourquoi ainsi parle l'Éternel sur Jojakim, roi de Juda: Aucun des siens ne sera assis sur le trône de David, et son cadavre sera exposé à la chaleur pendant le jour et au froid pendant la nuit.",
+        "reference": "Woodin sabbay se no, yaa no Rabbi ci Yahuda bonkoono Yehoyacim boŋ: A si du boro kulu kaŋ ga goro Dawda karga boŋ, i g'a buukwa furu wayna korna da cin yeeno ra mo.",
+        "hypothesis": "Wodin se Rabbi ciyohaw juŋ Yahuda koy Jojakim ga: Nga cigiri se ba hinkaŋ si ka Dabi hatum taara ga, a buko go ga dunguŋ diŋ han too gaŋ, nda yeeniŋ diŋ ciini."
+      },
+      {
+        "source": "Goûter les fruits de la terre est un plaisir.",
+        "reference": "Laabu albarkey day ga ti farhã.",
+        "hypothesis": "Tuuruize taba no kaani."
+      },
+      {
+        "source": "et à qui tu donneras mes ordres pour leurs maîtres, en disant: Ainsi parle l'Éternel des armées, le Dieu d'Israël: Voici ce que vous direz à vos maîtres:",
+        "reference": "M'i lordi mo ka ne i ma koy ngey koyey do, i ma ne: Yaa no Rabbi Kundeykoyo, Israyla Irikoyo ci: Mate kaŋ araŋ ga ci araŋ koyey se neeya:",
+        "hypothesis": "Nda ni suuba no aŋ ga boŋ koy se cere maŋ caw ce ga, ka ne: Irrkoy Soɓo boro haray, Israyeel irkoy no woo bay: Dini ne i ga har maŋ caw ga"
+      },
+      {
+        "source": "Et de la nuée sortit une voix, qui dit: Celui-ci est mon Fils élu: écoutez-le!",
+        "reference": "Jinde fo mo fun buro ra ka ne: «Boro woone ga ti ay Izo suubananta. Wa maa a se.»",
+        "hypothesis": "Ndandiŋ buruɲe ra no ci fo kaŋ ne, a har: Wodin no ay harmo manyane, ngey ma'a!"
+      },
+      {
+        "source": "et, parce qu'il a porté atteinte à la réputation d'une vierge d'Israël, ils le condamneront à une amende de cent sicles d'argent, qu'ils donneront au père de la jeune femme. Elle restera sa femme, et il ne pourra pas la renvoyer, tant qu'il vivra.",
+        "reference": "I g'a jukke mo da nzarfu sekel zangu fo k'i no wandiya din baabo se, zama a na Israyla wandiyo maa sara. Waybora mo ga goro a wande. I si yadda albora m'a fay kal a fundo me.",
+        "hypothesis": "Nda zamaŋ nga ka kaŋ ka maŋ subu Israyaize kwaari nangey, i so' n'a alzam waygu zangu nooru ga daŋ a baaba gaa, ka noŋ nga hanize. A ga so noŋ hanize, a si mana kay a, banda nga gonda funa."
+      },
+      {
+        "source": "Tu as raison",
+        "reference": "Ni ga cim",
+        "hypothesis": "A ga cim"
+      },
+      {
+        "source": "Car nos transgressions sont nombreuses devant toi, Et nos péchés témoignent contre nous; Nos transgressions sont avec nous, Et nous connaissons nos crimes.",
+        "reference": "Zama iri murteyaŋey baa gumo ni jine, Iri zunubey mo goono ga seeda iri boŋ. Zama iri murteyaŋey go iri banda, Iri g'iri laalayaŋey mo bay.",
+        "hypothesis": "Sabbu ay zunubuŋ ga boobo ni se, nda ay taalo ga kasam ay ga, nda ay zunubuŋ nda ay gondo, nda ay bay ay taalo."
+      },
+      {
+        "source": "Tes jets forment un jardin, où sont des grenadiers, Avec les fruits les plus excellents, Les troënes avec le nard;",
+        "reference": "Ni kambey ya garenad kali hanno no kaŋ gonda tuuri ize kaano yaŋ, Danga alhinna da nardi tilam,",
+        "hypothesis": "Ni tannteeyan ganji ka haŋ sanda garu ga, ture kulimbi ize maa boori, kaŋ i nna gomo ga culamay."
+      },
+      {
+        "source": "L'harmattan est un vent sec et poussiéreux.",
+        "reference": "Haw ga ti haw koogu ka gonda laabu fumbu.",
+        "hypothesis": "Harmattan yo no haw koosu nda hay boŋ kusa."
+      },
+      {
+        "source": "Les Jeux Olympiques réunissent tous les pays.",
+        "reference": "Jeux Olympiques ga gandawey kul marga.",
+        "hypothesis": "Jingareyɲoŋ ga marga kayi laabu kulu."
+      },
+      {
+        "source": "Car, moi qui suis soumis à des supérieurs, j'ai des soldats sous mes ordres; et je dis à l'un: Va! et il va; à l'autre: Viens! et il vient; et à mon serviteur: Fais cela! et il le fait.",
+        "reference": "Zama ay mo, boro fo dabari ra no ay go, soojeyaŋ go ay bumbo dabaro ra mo. Ay ga ne woone se: ‹Koy!› -- kal a ma koy. Ay ga ne afo se: ‹Kaa!› -- kal a ma kaa. Ay ga ne ay bannya se: ‹Ma te woone!› -- kal a m'a te.»",
+        "hypothesis": "Wa, ay baŋŋa hima ngey ga, ay ga sooje ay nake ga; ay ka ha: sobey, a so, ay ka ce: kay, a kay, nda ay ga ciyyaŋ, kay woo no, a ga woo."
+      },
+      {
+        "source": "Pourquoi endurciriez-vous votre coeur, comme les Égyptiens et Pharaon ont endurci leur coeur? N'exerça-t-il pas ses châtiments sur eux, et ne laissèrent-ils pas alors partir les enfants d'Israël?",
+        "reference": "Ifo se no araŋ g'araŋ biney sandandi binde, sanda mate kaŋ Misirancey da Firawna te, kaŋ yaŋ na ngey biney sandandi? Waato kaŋ a na goyey kaŋ ga dambarandi te i jine, manti i kokor ka borey taŋ, ngey mo tun ka dira?",
+        "hypothesis": "Ifo se arriŋ ni ŋa bine daa ka daŋ, sabbu Misiri bi ammisini se daŋ bammu Firawna daŋ dam, a ga wiiro zaa a doy ga, a ga nda kan Israyila hiiri zaa yo hinka?"
+      },
+      {
+        "source": "Et il monta sur l'autel qu'il avait fait à Béthel, le quinzième jour du huitième mois, mois qu'il avait choisi de son gré. Il fit une fête pour les enfants d'Israël, et il monta sur l'autel pour brûler des parfums.",
+        "reference": "A ziji mo feema kaŋ a te Betel ra din do, handu ahakkanta jirbi way cindi guwa, hando kaŋ a suuban nga bina ra din nooya. A na batu sinji mo Israyla izey se, ka ziji mo feema do zama nga ma dugu ton.",
+        "hypothesis": "A ga koy ka jiize kaŋ a tee Bethel ra, jirbi ihinkantey handu hakkuantey ra, haŋ a soyan kul a ra. A ga hiijiyan ce se iri yammaŋ, nd' a koy jiize ga ka tun wagar mo."
+      },
+      {
+        "source": "Malheur au pasteur de néant, qui abandonne ses brebis! Que l'épée fonde sur son bras et sur son oeil droit! Que son bras se dessèche, Et que son oeil droite s'éteigne!",
+        "reference": "Kaari hawji yaamo wo, kaŋ ga kalo naŋ! Takuba ma du a jase gaa, d'a kambe ŋwaari mwa gaa haray mo. A kamba ma suugu parkatak. A kambe ŋwaari mwa mo ma te kubay lip!",
+        "hypothesis": "Masiiba gaaboru kwaara-ce, moŋ kaŋ mo furu ŋa a ga marga! Daŋ gandi bareŋ kambe nwaare, mo kambe nwaare! A kambe fuusu, mo mo ga aŋ mo beeri ga gayi."
+      },
+      {
+        "source": "Le nile perch est un grand poisson du lac Victoria.",
+        "reference": "Nile perch ti haami beeri kaŋ ga duwandi Victoria bangu ra.",
+        "hypothesis": "The Nile perch gooho no, boro beeri hamiisa, mo no Victoria bangu ga"
+      },
+      {
+        "source": "Les rachetés de l'Éternel retourneront, Ils iront à Sion avec chants de triomphe, Et une joie éternelle couronnera leur tête; L'allégresse et la joie s'approcheront, La douleur et les gémissements s'enfuiront.",
+        "reference": "Rabbi wane fansantey ga ye ka kaa, I ga kaa ka to Sihiyona, I goono ga doon farhã sabbay se. Bine kaani kaŋ ga duumi ga goro i boŋ. I ga du bine kaani da farhã. Bine saray da durayyaŋ mo ga zuru.",
+        "hypothesis": "Irkoy tububoy go ga ye, iri ma koy Siyon nda dundeyŋ kaŋ beeriyan; wadata fuuzay do nda boŋ waati, ay bayan no hiiyante dumay ga ay; bine hasaraw no ŋwaaray, dumay no ga kaŋ kooŋ."
+      },
+      {
+        "source": "Dieu l'aida contre les Philistins, contre les Arabes qui habitaient à Gur Baal, et contre les Maonites.",
+        "reference": "Irikoy n'a gaa a ma wongu nda Filistancey, da Laarabey kaŋ yaŋ go Gur-Baal, da Meyunim izey mo.",
+        "hypothesis": "Irkoy ga faaba a ga Filistiiniyan kammu, nda Arabey goyonday ra Gur Baal, nda Maonitency."
+      },
+      {
+        "source": "(8:16) L'Éternel dit à Moïse: Lève-toi de bon matin, et présente-toi devant Pharaon; il sortira pour aller près de l'eau. Tu lui diras: Ainsi parle l'Éternel: Laisse aller mon peuple, afin qu'il me serve.",
+        "reference": "Yaadin mo no Rabbi te: hamni bi zugula kaŋ yaŋ ga taabandi furo Firawna windo d'a bannyey windey da Misira laabo kulu ra. Laabo halaci mo hamni bi zuguley sabbay se.",
+        "hypothesis": "(8:16) Ceenafo hiino ka Moose ci : A tun suba kaŋ ne cire, kaa Pharaaw me gaa ; a ye ka fatta koy hari boŋ. Nga ŋa ci : Wiza Rabbi nî har : Naŋ ce alɣay, ciŋ nga ma taasu."
+      },
+      {
+        "source": "Il lui répondit: Maître, j'ai observé toutes ces choses dès ma jeunesse.",
+        "reference": "A ne Yesu se: «Alfa, woodin yaŋ kulu no ay gana ka haggoy d'ey za ay go arwasu.»",
+        "hypothesis": "A hiiru nga har ci'no ay kaŋ, ay ti kaŋ ay hanga cin boro ciri ga cikaŋ ay taray."
+      },
+      {
+        "source": "Voici ceux que David établit pour la direction du chant dans la maison de l'Éternel, depuis que l'arche eut un lieu de repos:",
+        "reference": "Borey kaŋ yaŋ Dawda daŋ i ma baytu candi Rabbi windo ra binde, waato kaŋ i jin ka konda Rabbi sundurko k'a jisi noodin, ngey neeya:",
+        "hypothesis": "Woney boro kaŋ Daavi ga filla boŋ goy doonu ga ra cinka noy, gã kala sandalkaŋ ce goo go ga goro ga."
+      },
+      {
+        "source": "La maison en paille est fraîche en été.",
+        "reference": "Subu fuwo ga yay konni waate.",
+        "hypothesis": "Hayni waate hangaaji fu na ga yenni."
+      },
+      {
+        "source": "Dieu de mes pères, je te glorifie et je te loue de ce que tu m'as donné la sagesse et la force, et de ce que tu m'as fait connaître ce que nous t'avons demandé, de ce que tu nous as révélé le secret du roi.",
+        "reference": "Ya ay kaayey Irikoyo, Ay saabu ni se, ay ga ni kuku mo, Nin kaŋ n'ay no laakal da hina. Sohõ mo ni n'ay bayrandi nda haŋ kaŋ iri goono ga ceeci ni gaa, Zama ni n'iri bayrandi nda bonkoono misa din.»",
+        "hypothesis": "Ay baabaay irkoy, ay se a darza, ay so a sifa, za kaŋ a ma gay ay cimmi nda himma, nda za kaŋ a ma bay iri hã ga a soŋ, nda za kaŋ a faɲe iri goro naŋ nã."
+      },
+      {
+        "source": "Les moutons fournissent de la laine et de la viande.",
+        "reference": "Feejiyaŋ ga hambiri nda ham noo.",
+        "hypothesis": "Feeji ga no hammi da nga ham."
+      },
+      {
+        "source": "les fils d'Immer, mille cinquante-deux;",
+        "reference": "Immer izey, zambar fo da waygu cindi hinka.",
+        "hypothesis": "Immarsey hanize, zangu ihinka nda ay"
+      },
+      {
+        "source": "Mais Jésus leur dit: Un prophète n'est méprisé que dans sa patrie, parmi ses parents, et dans sa maison.",
+        "reference": "Yesu ne i se: «Annabi si jaŋ darza, kala nga laabo ra, da nga dumey ra, da nga windo ra mo.»",
+        "hypothesis": "Amma Yesu ne har ka iri caw: Annabi fo kaŋ te, nga mo ga wila boŋ ce, kaŋ a ra dumu, kune a fu ra."
+      },
+      {
+        "source": "La sauce d'oseille est bonne",
+        "reference": "Waraw foy ga kanu",
+        "hypothesis": "La sauce waraw no ga boori"
+      },
+      {
+        "source": "Sais-tu comment Dieu les dirige, Et fait briller son nuage étincelant?",
+        "reference": "Ni ga bay waati kaŋ no Irikoy ga woodin yaŋ tabbatandi, wala? Ni ga bay mate kaŋ a ga naŋ nga hirriyaŋo maliyaŋ ga kaari nd'a, wala?",
+        "hypothesis": "Ay sĩka hari Irkoy n ka ŋa kubbo? Nga ga i boŋ du sabaariye zommay se?"
+      },
+      {
+        "source": "Mais on dira: L'Éternel est vivant, Lui qui a fait monter les enfants d'Israël du pays du septentrion Et de tous les pays où il les avait chassés! Je les ramènerai dans leur pays, Que j'avais donné à leurs pères.",
+        "reference": "Amma a ga ne: «Ay ga ze da Rabbi fundikoono, nga kaŋ fun da Israyla izey azawa kambe laabo, da laabey kulu ra mo, nangey kaŋ a n'i gaaray ka kond'ey.» Zama ay ga ye ka kand'ey ngey laabo ra, wo kaŋ ay no i kaayey se.",
+        "hypothesis": "Amma kuma mo har: Iirkoy gonda funa, mo go kaŋ hiiri Israyillaize yan kaŋ nikey boroŋ boobuŋ ra, nda kuma hantam gaŋ a yahi i sabaŋ. Nga sohõnd i mey raŋ, aŋ mo ay hiiri baabey."
+      },
+      {
+        "source": "Est-il occupé au nord, je ne puis le voir; Se cache-t-il au midi, je ne puis le découvrir.",
+        "reference": "Kambe wow haray, nango kaŋ a ga goy, Amma yan'a fonnay, A ga nga boŋ tugu kambe ŋwaari haray, Hal ay si hin ka di a.",
+        "hypothesis": "A hi azawa kambe ra muraadu, ay si i di; a hi dandi kambe ra tugu, ay si i bay."
+      },
+      {
+        "source": "Le parvis intérieur avait une porte du côté du midi; il mesura d'une porte à l'autre au midi cent coudées.",
+        "reference": "Me fo go no koyne windo ra haray kaŋ ga guna dandi kamba haray. A neesi mo koyne me ka koy me gaa dandi kamba haray, kambe kar zangu.",
+        "hypothesis": "A kuna alhali fu mukaŋare ga poro me ra, a neesiri poro woori foo se poro woori foo ra ga alhali fu se zangu kambe kwaray."
+      },
+      {
+        "source": "J'avais fait un pacte avec mes yeux, Et je n'aurais pas arrêté mes regards sur une vierge.",
+        "reference": "Za kaŋ ay na sarti sambu d'ay moy, Mate binde no ay ga laakal ye wandiyo gaa d'a?",
+        "hypothesis": "Ay ga sanka ka ay mo-ize ga, kala ay si ga tu ceŋ kunaŋ."
+      },
+      {
+        "source": "pour la tribu de Benjamin: Palthi, fils de Raphu;",
+        "reference": "Benyamin kunda wane: Rafu ize Palti.",
+        "hypothesis": "Benyamin kunda se: Palti, Rafu hanga;"
+      },
+      {
+        "source": "Au milieu du fleuve",
+        "reference": "Isa bindo ra",
+        "hypothesis": "Isa bindi ra"
+      },
+      {
+        "source": "Jésus, connut qu'ils voulaient l'interroger, leur dit: Vous vous questionnez les uns les autres sur ce que j'ai dit: Encore un peu de temps, et vous ne me verrez plus; et puis encore un peu de temps, et vous me verrez.",
+        "reference": "Waato kaŋ Yesu bay kaŋ i ga ba ngey ma nga hã, kal a ne i se: «Araŋ goono ga care hã sanno wo kaŋ ay ne araŋ se boŋ, kaŋ ay ne: a cindi kayna fo araŋ si ye ka di ay, a cindi kayna koyne araŋ ga ye ka di ay?",
+        "hypothesis": "Yesu mo doyay kaŋ ng' i ga ŋwaaray no ay woo, a ne ng' ar hin: Ngey tonton nda ngey ka ŋwaaray kan ay go haray, ay soora: kaynayna hay kamma, nda ngey si a di ay; nda hã kaynayna hay kamma, nda ngey a di ay."
+      },
+      {
+        "source": "Cela arriva jusqu'à trois fois; et aussitôt après, l'objet fut retiré dans le ciel.",
+        "reference": "Woodin te hala sorro hinza, sahãadin-sahãadin mo, i na haya candi ka kond'a beene.",
+        "hypothesis": "Hin no koy ni igi ce; kuli sohon-sohon banda ga, din ga ye ka boŋ beene hi."
+      },
+      {
+        "source": "Jotham se retira et prit la fuite; il s'en alla à Beer, où il demeura loin d'Abimélec, son frère.",
+        "reference": "Yotam zuru ka yana ka koy Beyer. Noodin no a goro nga baabayzo Abimelek humburkuma sabbay se.",
+        "hypothesis": "Yotam ye bonka, nga zura, a koy Beer nda a goro ga, a ga kay nga kulu nga arme bubu."
+      },
+      {
+        "source": "Porte ton casque.",
+        "reference": "Ma ni kasko (casque) daŋ.",
+        "hypothesis": "Day ciki mootu hã."
+      },
+      {
+        "source": "C'est lui qui change les temps et les circonstances, qui renverse et qui établit les rois, qui donne la sagesse aux sages et la science à ceux qui ont de l'intelligence.",
+        "reference": "A ga alwaatey da jirbey bare. A ga koyey tumbi, a ga koyey daŋ koytaray mo. A ga laakal no laakalkooney se, A ga bayray mo no borey kaŋ yaŋ ga fahamay bay se.",
+        "hypothesis": "A noŋ waatiyan boŋŋe bare, a ga gunukey koyrey, nd'a zaa bayrey ga niŋ bayreyŋ, nd'a zaa lakkal bayey ga niŋ lakkal sambu ga niŋ."
+      },
+      {
+        "source": "Et si ton oeil est pour toi une occasion de chute, arrache-le et jette-le loin de toi; mieux vaut pour toi entrer dans la vie, n'ayant qu'un oeil, que d'avoir deux yeux et d'être jeté dans le feu de la géhenne.",
+        "reference": "Woodin banda, da ni mwa no na ni daŋ ni ma taali te, m'a dagu ka furu. Zama a ga bisa ni se ni ma furo fundi ra mo-fo-koy, d'i ma ni catu danji bangu danjo ra, nin da ni mo hinka.",
+        "hypothesis": "Nda nga mo ga a hã ce ga a ma zanna zanka, ka a daŋ ka a fu a ga, nga hõ doŋ moŋ a ka koy fundu ra, nda a mo cinne, wa aa go kaanda ay hanga me ce, nda a tee yoŋ kabbo, a daŋ too jahannama nuune ga."
+      },
+      {
+        "source": "La logique mathématique est un sous-domaine des mathématiques explorant les applications de la logique formelle aux mathématiques.",
+        "reference": "Lojik matematik ga ti matematik nangu kayna fo ka ga lojik formel aplikasyon matematik boŋ guna.",
+        "hypothesis": "Lakkal cikindiyan n'a goy fooŋ koy jiiri ra, wane go fooŋ haysiyan ciindi nda jiiri ra."
+      },
+      {
+        "source": "Ils lui dirent: Seigneur, que nos yeux s'ouvrent.",
+        "reference": "I ne a se: «Rabbi, iri moy ma fiti.»",
+        "hypothesis": "I ne nga har, 'Seye, a yante ay mo.'"
+      },
+      {
+        "source": "Mais vous direz au roi de Juda qui vous a envoyés pour consulter l'Éternel: Ainsi parle l'Éternel, le Dieu d'Israël, au sujet des paroles que tu as entendues:",
+        "reference": "Amma Yahuda bonkoono kaŋ n'araŋ donton araŋ ma hã Rabbi gaa din, haŋ kaŋ araŋ ga ci a se neeya: Yaa no Rabbi, Israyla Irikoyo ci, nga kaŋ me sanno ni maa din:",
+        "hypothesis": "Ammay araŋ ma hiiku ka Yahuda koy se, ngaŋ a foo go ka iri fun cinare zanka ra irkoy ga: Ikkoy zama harantey, Akaŋ yaa go hi: cinare boŋ ce hi ni ga ma,"
+      },
+      {
+        "source": "Je frapperai de stupeur beaucoup de peuples à cause de toi, Et leurs rois seront saisis d'épouvante à cause de toi, Quand j'agiterai mon épée devant leur face; Ils trembleront à tout instant chacun pour sa vie, Au jour de ta chute.",
+        "reference": "Haciika, ay ga naŋ ndunnya dumi boobo ma joote ni sabbay se. I bonkooney mo ga humburu gumo ni sabbay se, Waati kaŋ cine i di ay go g'ay takuba feeni ngey jine. I ga soobay ka jijiri saaya kulu, Boro fo kulu gaahamo ga jijiri nga fundo sabbay se, Ni kaŋyaŋo hane.",
+        "hypothesis": "Ay goobu ga ciwri borey marga zama se ni, nda kulu koy go ga jirsi zama se ni, hala ay zaaru bare, nga mo ga guna kan a furo ga ay kaŋ wane; kaŋ go fa, boro kulu go ga jirbi hayjuuro, kayŋ a zowa."
+      },
+      {
+        "source": "La mare d'Oursi est partagée entre le Niger et le Burkina Faso.",
+        "reference": "Oursi gooru ga zamna Niger nda Burkina Faso game.",
+        "hypothesis": "La mare d'Oursi zabbu na Burkina Fasoo wane Niger ga fay cere ra."
+      },
+      {
+        "source": "Le chien est mort",
+        "reference": "Hanso bu",
+        "hypothesis": "Hansi ga bu"
+      },
+      {
+        "source": "La femme de Samson pleurait auprès de lui, et disait: Tu n'as pour moi que de la haine, et tu ne m'aimes pas; tu as proposé une énigme aux enfants de mon peuple, et tu ne me l'as point expliquée! Et il lui répondait: Je ne l'ai expliquée ni à mon père ni à ma mère; est-ce à toi que je l'expliquerais?",
+        "reference": "Samson wando mo hẽ Samson jine ka ne: «Ni ga konna ay day no, ni si ba ay. Ni na jand'izo ci ay dumey izey se, amma ni man'a feerijo ci ay se.» Samson ne a se: «A go, ay man'a ci ay baaba wala ay nya se. May ci nin hala y'a ci ni se?»",
+        "hypothesis": "Samson goo ay boro hey taaroo ta, go hinka no: Ni yoo ay ga boro futu kambi kulu, kasi ni ma nga ay ga ba; ni di ce boro ga di nda ce boŋ ce doŋnaŋ hay kaŋ, kasi a kaŋ ay ga a no ay faŋ wala ka a go nga ga cim! Nga a tee ga ne: Manti ay bumba ka a no ba, kasi ay baba se, kasi ay ɲa se, a to a to ni nga ay ga a no?"
+      },
+      {
+        "source": "(18:32) Car qui est Dieu, si ce n'est l'Éternel; Et qui est un rocher, si ce n'est notre Dieu?",
+        "reference": "Irikoy wo, a fonda ya toonante no. Rabbi sanno ya neesante mo no, Koray mo no boro kulu kaŋ ga tugu a ra se.",
+        "hypothesis": "(18:32) Ifo ga ti irkoy, kala Abada; nda ifo ga hiiri, kala ngey irkoy?"
+      },
+      {
+        "source": "Puis Dieu dit: Faisons l'homme à notre image, selon notre ressemblance, et qu'il domine sur les poissons de la mer, sur les oiseaux du ciel, sur le bétail, sur toute la terre, et sur tous les reptiles qui rampent sur la terre.",
+        "reference": "Woodin banda Irikoy ne: «Iri ma boro te iri alhaalo ra, iri wane himando boŋ. I ma teeku hamey da beene curey da almaney may. I ma ndunnya may, da hay kulu kaŋ ga ganda biri ganda laabo boŋ.»",
+        "hypothesis": "Nga ga Iri ka har: Ay, boro te, kaŋ nga ciine ay ga, nga ay neeneeraney, nda a ga gaŋ kandaŋ hamiisa, ciroize, almaney, laabu kulu ga, nda aŋwaaray kulu kaŋ fanaŋ ga laabu se."
+      },
+      {
+        "source": "Il prendra vos serviteurs et vos servantes, vos meilleurs boeufs et vos ânes, et s'en servira pour ses travaux.",
+        "reference": "A g'araŋ bannyey d'araŋ koŋŋey sambu, d'araŋ arwasey ra ngey kaŋ yaŋ ga sogo nd'i kulu, d'araŋ farkayey, a m'i daŋ nga goy ra.",
+        "hypothesis": "A ga ngey foolize, ay ngey ga harndi goy ma, ngey alay ga barey nda ngey barey ga tiŋ ga, a kaŋ goo goy se."
+      },
+      {
+        "source": "David partit de là, et se sauva dans la caverne d'Adullam. Ses frères et toute la maison de son père l'apprirent, et ils descendirent vers lui.",
+        "reference": "Dawda tun noodin. A yana ka koy Adullam guuso ra. Waato kaŋ a nya-izey d'a baabo windo kulu maa baaru, i koy a do.",
+        "hypothesis": "Daaɓu ye ka dira kaŋ ne, a koyne ka hiijiyey furo Adullam ra. A zarmey ne nda baabaa duŋ mo ye du, kaŋ zaa a ma."
+      },
+      {
+        "source": "S'ils avaient assisté à mon conseil, Ils auraient dû faire entendre mes paroles à mon peuple, Et les faire revenir de leur mauvaise voie, De la méchanceté de leurs actions.",
+        "reference": "Amma d'a ciya i kay ay saaware marga ra, Doŋ i g'ay borey daŋ i ma maa ay sanney, Doŋ i g'i bare k'i kaa ngey fondo laalo ra d'i goyey laalayaŋo mo gaa.",
+        "hypothesis": "Si i ga ma ay yaamari, i hima faaba ay sanni ce ga ay se, ka borey ra zamba, ka i firnantiŋ ŋway bareey ra, i taalo feeri."
+      },
+      {
+        "source": "Fais moi une bague",
+        "reference": "Te ay se korbey",
+        "hypothesis": "Ay ga har gunu korbay fo"
+      },
+      {
+        "source": "Qui veut une autre part ?",
+        "reference": "May no ga ba afo koyne?",
+        "hypothesis": "Kaŋ bayan juwal care?"
+      },
+      {
+        "source": "Ils m'ont donné la chasse comme à un oiseau, Ceux qui sont à tort mes ennemis.",
+        "reference": "Ngey kaŋ yaŋ ciya ay ibarey sabaabu kulu si, I n'ay gaaray da himma danga curayze cine.",
+        "hypothesis": "I ga ay faɗu curoize boro yaamo bifo, i nangey wo kaŋ maabu ay ga ibir."
+      },
+      {
+        "source": "Tourne vers moi les regards et aie pitié de moi, Donne la force à ton serviteur, Et sauve le fils de ta servante!",
+        "reference": "Ma bare ay do haray ka gomni te ay se. Ma ni gaabo no ay, ni tamo se ka ni koŋŋa izo faaba.",
+        "hypothesis": "Ma mo go tun, ay ga bakar, ka hin a alman koy, no hiija a kaŋ way dumo"
+      },
+      {
+        "source": "Le publicain, se tenant à distance, n'osait même pas lever les yeux au ciel; mais il se frappait la poitrine, en disant: O Dieu, sois apaisé envers moi, qui suis un pécheur.",
+        "reference": "Amma jangal taakwa, kaŋ a kay banda nangu mooro, a mana baa ta ka beene guna, amma a soobay ka nga ganda di bine saray sabbay se ka ne: ‹Ya Irikoy, m'ay suuji, ay kaŋ ga ti zunubikoono.›",
+        "hypothesis": "Adulami mo maanu ne hare, nga ma a mo kamma hari beene diŋ banda; amma nga kar a gande, nga ka ciini: Iri irkoy, faali ay, mo no zunubukoy."
+      },
+      {
+        "source": "lorsqu'un messager vint dire à Saül: Hâte-toi de venir, car les Philistins ont fait invasion dans le pays.",
+        "reference": "Kala diya fo mo kaa Sawulu do ka ne: «Ma waasu ka kaa, zama Filistancey kande wurrandi laabo ra.»",
+        "hypothesis": "Waati kaŋ diyaw fo kaa ce Saŋ kaŋ ho: Cahan a koy, za kaŋ Falistey boobey no nay ga laabu ra."
+      },
+      {
+        "source": "David y monta, avec ses deux femmes, Achinoam de Jizreel, et Abigaïl de Carmel, femme de Nabal.",
+        "reference": "Dawda binde kaaru ka koy noodin, nga nda nga wande hinka, Ahinowam, Yezreyel waybora, da Abigayil, kaŋ goro ka te Nabal Karmel bora se wande waato.",
+        "hypothesis": "Dawuda koy tee ga nda kuroye wayra hinka, Ašino'am kaŋ bii Jizreel, nda Abigail kaŋ bii Karmel, Nabal kurɲe."
+      },
+      {
+        "source": "du miel, de la crème, des brebis, et des fromages de vache. Ils apportèrent ces choses à David et au peuple qui était avec lui, afin qu'ils mangeassent; car ils disaient: Ce peuple a dû souffrir de la faim, de la fatigue et de la soif, dans le désert.",
+        "reference": "da yu, da ji, da feejiyaŋ, da haw wa cukku, ka no Dawda nda nga banda borey se, i ma ŋwa. Zama i ne: «Borey wo, haray da jaw da farga go i gaa saajo ra.»",
+        "hypothesis": "yu, faani, feeji way, nda haw cuku. Nga so nda cimbori nda alboro kaŋ go a foo ra, kaŋ goo ŋwaa; za kaŋ bara so: Almalfa dam ŋway, no farga nda jaw, ga cahay teneera."
+      },
+      {
+        "source": "Israël dit à Joseph: Je ne pensais pas revoir ton visage, et voici que Dieu me fait voir même ta postérité.",
+        "reference": "Israyla ne Yusufu se: «Ay mana tammahã hal ay ga di ni moyduma. A go mo, Irikoy naŋ ay di ni izey mo.»",
+        "hypothesis": "Israyila yee hi Joseph: ay hima ka ni monduma di, se boŋ wadii, Irikey ga ay di ni cebere kulu."
+      },
+      {
+        "source": "Et dans le même temps les enfants d'Israël s'en allèrent de là chacun dans sa tribu et dans sa famille, ils retournèrent chacun dans son héritage.",
+        "reference": "Israyla izey mo fay da nango din jirbey din ra. Boro kulu koy nga kunda da nga almayaaley do. Boro kulu tun noodin ka koy nga tubo do mo.",
+        "hypothesis": "Nda mansaŋ Israyillaize ye dira, kala kunda se ga, kala dumize se ga, kala koy ka tubu mo nga gonda."
+      },
+      {
+        "source": "La femme dit: Permets que ta servante dise un mot à mon seigneur le roi. Et il dit: Parle!",
+        "reference": "Waato din gaa waybora ne: «Ay ga ni ŋwaaray, ma naŋ ay, ni koŋŋa ma salaŋ koyo ay bonkoono se.» A ne waybora se: «Ma ci.»",
+        "hypothesis": "Way boobɗo ka ne: Haa waŋkize kan bare kull fo goŋ abarba maa koy ga. Nga ka ne: Bare!"
+      },
+      {
+        "source": "Une pandémie est une épidémie qui se propage à l'échelle mondiale.",
+        "reference": "Pandemi ga ti epidemi ka ga koy ndunnya kul ra.",
+        "hypothesis": "Pandemia fo no epidemic fo kaŋ bare kaŋ barkay nduɲa kulu se."
+      },
+      {
+        "source": "Quand mon âme s'en souvient, Elle est abattue au dedans de moi.",
+        "reference": "Daahir hala hõ ay bina goono ga fongu i gaa, Hal ay gungum ka ye ganda.",
+        "hypothesis": "Waati kaŋ ay ga ni fongu, a ga zeeri ay kuna."
+      },
+      {
+        "source": "Le premier jour, il y aura une sainte convocation: vous ne ferez aucune oeuvre servile.",
+        "reference": "A zaari sintina gaa i ma marga hanante te. Araŋ ma si taabi goy kulu te.",
+        "hypothesis": "Hana sintina, boŋ jinsi go ga boy, araŋ si te goy ize."
+      },
+      {
+        "source": "Quand ils seront échauffés, je les ferai boire, Et je les enivrerai, pour qu'ils se livrent à la gaîté, Puis s'endorment d'un sommeil éternel, et ne se réveillent plus, Dit l'Éternel.",
+        "reference": "Waati kaŋ i maa korni, Ay wo ga foori te i se, Ay g'i bugandi zama i ma farhã. I ma kani mo ka jirbi hal abada. I mo ma si ye ka hay koyne. Yaadin no Rabbi ci.",
+        "hypothesis": "Waati kaŋ i ga koron, ay no i ga ŋwaari, nda ay no i ga su, kaŋ i ga fooru, kaŋ i ga jirbi cidibi, nda i ma tun koyne, wodzi Rabbi."
+      },
+      {
+        "source": "Mais celui qui hait son frère est dans les ténèbres, il marche dans les ténèbres, et il ne sait où il va, parce que les ténèbres ont aveuglé ses yeux.",
+        "reference": "Amma boro kaŋ go ga konna nga nya-izo, kubay ra no a go, kubay ra mo no a goono ga dira. A si bay naŋ kaŋ nga goono ga koy mo, zama kuba n'a moy danandi.",
+        "hypothesis": "Amma kaŋ boro a bayna ceraŋ ga a ga boobu ga a ga koy boobu, a ma si ifo a ŋ ga koy, zama ka boobu a mo faŋa."
+      },
+      {
+        "source": "Balaam prononça son oracle, et dit: Lève-toi, Balak, écoute! Prête-moi l'oreille, fils de Tsippor!",
+        "reference": "Kala Balaam na nga misa sambu ka ne: «Ya Balak, tun ka kay ka maa, ya Zippor izo, ma hanga jeeri ay se.",
+        "hypothesis": "Balaam bare ceedi ne, nga ti: Tunge so, Balak, ma! Hangan ma nge, Zippor hiize!"
+      },
+      {
+        "source": "(40:26) Couvriras-tu sa peau de dards, Et sa tête de harpons?",
+        "reference": "I ga maan care gaa mo, Hala haw si hin ka furo i game ra.",
+        "hypothesis": "A nda gaaroo dumuŋ daŋ, nda a boŋ hamniŋ ga darbiize daŋ?"
+      },
+      {
+        "source": "Hymne de David. Garde-moi, ô Dieu! car je cherche en toi mon refuge.",
+        "reference": "Dawda baytu fo no. Ya Irikoy, m'ay hallasi, zama ni do no ay ga tugu.",
+        "hypothesis": "Daawuda dooni. Ay ga saafi kaŋ ay nfo ra, ay gaa, Irkoy"
+      },
+      {
+        "source": "Azaria engendra Halets; Halets engendra Élasa;",
+        "reference": "Azariya na Helez hay, Helez na Eleyasa hay,",
+        "hypothesis": "Azariya ga hiijey Halets. Halets ga hiijey Elasa."
+      },
+      {
+        "source": "L'Égypte sera dévastée, Édom sera réduit en désert, A cause des violences contre les enfants de Juda, Dont ils ont répandu le sang innocent dans leur pays.",
+        "reference": "Misira ga ciya kurmu, Edom mo ga ciya saaji kaŋ boro kulu si a ra, Gurzuga kaŋ i te Yahuda izey se sabbay se, Za kaŋ i na borey kaŋ sinda taali wi ngey laabey ra.",
+        "hypothesis": "Misira no leemun, Idum no teeku, Yahudaizey bare boŋ se, iri kaŋ zaa kuri nungu wayboro ga firji ceray ra."
+      },
+      {
+        "source": "Je ne vous laisserai pas orphelins, je viendrai à vous.",
+        "reference": "Ay si g'araŋ naŋ alatuumiyaŋ, ay ga kaa araŋ do.",
+        "hypothesis": "I si ga ŋwaaray, ay ma bora koy nye ga."
+      },
+      {
+        "source": "Samuel fit ce que l'Éternel avait dit, et il alla à Bethléhem. Les anciens de la ville accoururent effrayés au-devant de lui et dirent: Ton arrivée annonce-t-elle quelque chose d'heureux?",
+        "reference": "Kala Samuwila te haŋ kaŋ Rabbi ci a se ka koy Baytlahami. Kwaara arkusey n'a kubay. I go ga jijiri ka ne: «Baani mo no, ni kaayaŋo wo?»",
+        "hypothesis": "Samu te rkoy walhi ŋaharandi, a koy Betlehem. Kwaara kɔrɔyize tun fu foo-foo banga ciro, kaŋŋa ci: Ni kaŋ wara no ga bay lay bine wane?"
+      },
+      {
+        "source": "les gens de Micmas, cent vingt-deux;",
+        "reference": "Mikmas alborey, zangu nda waranka cindi hinka no.",
+        "hypothesis": "Mikmasi borey zamma waygu ihinkan"
+      },
+      {
+        "source": "Ce même jour, sur le soir, Jésus leur dit: Passons à l'autre bord.",
+        "reference": "Zaaro din ra, waato kaŋ wiciri kambo to, Yesu ne nga talibey se: «Iri ma teeko daŋandi ka koy ya-haray kambo gaa.»",
+        "hypothesis": "Hari kuro wo, ciini, Yesu ga boobu ka ne: Koyne ka banda go ra."
+      },
+      {
+        "source": "Azareel, Schélémia, Schemaria,",
+        "reference": "da Azarel, da Selemiya, da Semariya,",
+        "hypothesis": "Azareel, Shelmiya, Shechemariya"
+      },
+      {
+        "source": "Quel livre",
+        "reference": "Tira fo",
+        "hypothesis": "ifo buki"
+      },
+      {
+        "source": "L'officier du roi lui dit: Seigneur, descends avant que mon enfant meure.",
+        "reference": "Faadanca din ne a se: «Rabbi, ma kaa za ay izo mana bu!»",
+        "hypothesis": "Alkawal koy no ay ga har: Armeŋ, iri ma zumbu kaŋ a zanka ga bu."
+      },
+      {
+        "source": "Ils ne se raseront pas la tête, et ne laisseront pas non plus croître leurs cheveux; mais ils devront couper leur chevelure.",
+        "reference": "I ma si ngey boŋey cabu, i ma si boŋ zoobey taŋ yaadin mo. Kal i ma ngey boŋ hamney hanse hinne.",
+        "hypothesis": "I si kay hã, nda i na si haw ga beeri wa, manti i hima haw hamni beeri."
+      },
+      {
+        "source": "Quand mes pieds se baignaient dans la crème Et que le rocher répandait près de moi des ruisseaux d'huile!",
+        "reference": "Saaya din cine i g'ay ce taamey nyun nda haw ji, Tondi mo go ga ji dooru ay se danga gooru cine.",
+        "hypothesis": "Waati ay ce ga ŋwa ji cindi nda diji boŋ a ga, kala tondi ga bera hay se maanu ga nda diji nambu goyme!"
+      },
+      {
+        "source": "En effet, si la première alliance avait été sans défaut, il n'aurait pas été question de la remplacer par une seconde.",
+        "reference": "Zama nda sintinay wano sinda taali, doŋ i s'a barmay da ihinkanta.",
+        "hypothesis": "Waati se, aŋ alkawali taanga bare ga cimi kala, a ma siŋkaŋ bareze no fo."
+      },
+      {
+        "source": "Car plusieurs en Juda étaient liés à lui par serment, parce qu'il était gendre de Schecania, fils d'Arach, et que son fils Jochanan avait pris la fille de Meschullam, fils de Bérékia.",
+        "reference": "Zama boro boobo go Yahuda ra kaŋ yaŋ gonda zeyaŋ nga nd'ey game ra, zama Sekaniya Ara izo anzuray no. A ize Yehohanan no ka Mesullam Bereciya izo ize way hiiji.",
+        "hypothesis": "Za kaŋ bare wuro key no Yahuda ra, nga zamma hiiji wa Shekaniya ize, Aracize ka, kaŋ ize gaa Joħanan go daŋ Mesķullam ize, Berakiyaize ka, no i waafaku."
+      },
+      {
+        "source": "C'est pourquoi ses parents dirent: Il a de l'âge, interrogez-le lui-même.",
+        "reference": "Woodin sabbay se no a hayrey ne: «A to albeeri, w'a hã.»",
+        "hypothesis": "Wodin se na bay ne ng'a boŋ jiiri beeri no, foo foo ay hã."
+      },
+      {
+        "source": "Tselophchad, fils de Hépher, fils de Galaad, fils de Makir, fils de Manassé, n'eut point de fils, mais il eut des filles dont voici les noms: Machla, Noa, Hogla, Milca et Thirtsa.",
+        "reference": "Amma Zelofehad, Hefer izo, Jileyad ize, Macir ize, Manasse ize, a sinda ize alboro, kala wayboroyaŋ. A ize wayey maayey neeya: Mala, da Noha, da Hogla, da Milka, da Tirza.",
+        "hypothesis": "Tselopada Maakiira hiize, Gaalada hiize, Makiri hiize, Manase hiize, oo ma naŋ hiizo kulu, amma o ga hiize wayey nda maŋa: Mahla, Noa, Hogila, Milka kwa Tirca."
+      },
+      {
+        "source": "Elle est plus précieuse que les perles, Elle a plus de valeur que tous les objets de prix.",
+        "reference": "A nafa ga bisa tondi hiir'ize caadante yaŋ. Hay kulu kaŋ ni ga bini sinda haŋ kaŋ i ga kar a gaa.",
+        "hypothesis": "A ga kwasu ngey hirri. A boŋ go neeri ga kaŋ nooru kaŋ si."
+      },
+      {
+        "source": "(89:11) Tu écrasas l'Égypte comme un cadavre, Tu dispersas tes ennemis par la puissance de ton bras.",
+        "reference": "Ni ga teeko boŋbeera dabari, Waati kaŋ bonday beerey ga tun ka ciciri, Ni ga i kanandi no.",
+        "hypothesis": "(89:11) I ceeri Misira ka woye buko ga, i say ibarey ni kambe ga himma."
+      },
+      {
+        "source": "L'Éternel parla à Moïse, et dit:",
+        "reference": "Rabbi salaŋ Musa se ka ne:",
+        "hypothesis": "Irkoy ka har Moize,ndon ka ne"
+      },
+      {
+        "source": "Il lui dit: Donne-moi, je te prie, un peu d'eau à boire, car j'ai soif. Elle ouvrit l'outre du lait, lui donna à boire, et le couvrit.",
+        "reference": "A ne Yayel se: «Ay ga ni ŋwaaray, m'ay no hari kayna ay ma haŋ, zama ay goono ga maa jaw.» Kala Yayel na wa mooro humbur me feeri ka dooru ka no Sisera se. A haŋ, ka ye ka daabu.",
+        "hypothesis": "Ara neŋ har: Ay ŋwaaroo hari gaŋ a no foo haŋ nda ay, ay ga jaw. A ga fiti kulba nda wa, a no ga haŋ nda a, nda a daabu."
+      },
+      {
+        "source": "Vous n'avez pas encore résisté jusqu'au sang, en luttant contre le péché.",
+        "reference": "Araŋ mana tangami te jina ka to naŋ kaŋ araŋ g'araŋ kuuri mun ka bu zunubi gurjay ra.",
+        "hypothesis": "Araŋ si taŋ koroni kulu faama, aŋ zunubu kammu ga."
+      },
+      {
+        "source": "Il s'est coupé le doigt",
+        "reference": "A na inga kambeizo dumbu",
+        "hypothesis": "A ga zanzi ay kambe"
+      },
+      {
+        "source": "Conducteurs aveugles! qui coulez le moucheron, et qui avalez le chameau.",
+        "reference": "Araŋ danawyaŋ wo kaŋ goono ga fondo cabe, kaŋ yaŋ ga hamn'ize soolam ka yo gon!",
+        "hypothesis": "Dana tumayey kaw! ni go naŋ gon kayiire, ni hay yo."
+      },
+      {
+        "source": "Les Églises se fortifiaient dans la foi, et augmentaient en nombre de jour en jour.",
+        "reference": "Almasihu margey binde tabbat cimi fonda ra, borey mo goono ga tonton i ra zaari kulu.",
+        "hypothesis": "Jingarey go ga hima suuru ni cimayan, kambu go tonton waati kulu ra."
+      },
+      {
+        "source": "Qui sait si Dieu ne reviendra pas et ne se repentira pas, et s'il ne renoncera pas à son ardente colère, en sorte que nous ne périssions point?",
+        "reference": "Zama may no ga bay hala Irikoy ga bare ka ba ye koyne, a ma fay da nga futay korna, iri ma si halaci mo?»",
+        "hypothesis": "Ifo wi ni irkoy boro waadu ka ye ka tuube, ka nga za bon ga tee, nda nga ga ye alhali?"
+      },
+      {
+        "source": "Maudit soit celui qui fait égarer un aveugle dans le chemin! Et tout le peuple dira: Amen!",
+        "reference": "«Laalante no boro kaŋ ga danaw darandi fonda gaa.» Jama kulu ma tu ka ne: «Amin!»",
+        "hypothesis": "Munsi boro boŋ kay daanaŋ roo ga, a lali! Gaa borey marga go ga ne: Amin"
+      },
+      {
+        "source": "Il est enrhumé",
+        "reference": "Hungum no a ga a goga tisso",
+        "hypothesis": "A gonda hungum"
+      },
+      {
+        "source": "Nous récoltons le miel sans tuer les abeilles.",
+        "reference": "Iri ga yuu zaa bila ka yuuyey wi.",
+        "hypothesis": "Iri ŋwa yu, waati hansi ga wi."
+      },
+      {
+        "source": "Vous saurez alors que je vous ai adressé cet ordre, Afin que mon alliance avec Lévi subsiste, Dit l'Éternel des armées.",
+        "reference": "Araŋ ga bay mo kaŋ ay no ka lordo din zumandi araŋ se, zama ay sappa ma goro Lawi banda. Yaadin no Rabbi Kundeykoyo ci.",
+        "hypothesis": "Ni ma kan di ay ni ce banda niŋ zaa foo ŋa ŋaŋ, I niŋ ga sawa ay maŋ Lewi maŋ koyŋa, irkoy army ga, no hanti."
+      },
+      {
+        "source": "L'attiéké est fait à partir de manioc fermenté.",
+        "reference": "Attiéké ga tee nda banga funsante.",
+        "hypothesis": "Attikey no roogo mooro tee."
+      },
+      {
+        "source": "La région de Maradi est considérée comme le grenier du Niger.",
+        "reference": "Maradi kwaara ga honnandi sanda Niger ŋwaari jisi nangu.",
+        "hypothesis": "Maradi batama no Niger laabize barma ga mi hoodi."
+      },
+      {
+        "source": "le milan, l'autour et ce qui est de son espèce;",
+        "reference": "da gabu, da gabu-ce-daŋ-guusu, d'i dumi kulu.",
+        "hypothesis": "le milan, l'autour et ce qui est de son espèce;"
+      },
+      {
+        "source": "Comme quelques-uns parlaient des belles pierres et des offrandes qui faisaient l'ornement du temple, Jésus dit:",
+        "reference": "Boro fooyaŋ mo goono ga salaŋ a se Irikoy windo ciine ra, mate kaŋ i n'a taalam da tondi hanno yaŋ da nooyaŋey mo. Kal a ne:",
+        "hypothesis": "Waato zanka borey ce hara boŋ boori tondiize nda sargaay kaŋ bo ŋwa jingara, Yesu ne:"
+      },
+      {
+        "source": "Les gouttes de rosée brillaient comme des perles sur les feuilles.",
+        "reference": "Sayni tonsayaŋ ga nyalalandi sanda alyaati tuuri fitey ga.",
+        "hypothesis": "Harandaŋ goyarey ga boŋ daaraka gonde daŋ kopto gaa."
+      },
+      {
+        "source": "L'un d'eux, nommé Cléopas, lui répondit: Es-tu le seul qui, séjournant à Jérusalem ne sache pas ce qui y est arrivé ces jours-ci? -",
+        "reference": "I ra afo kaŋ se i ga ne Ciliyobas tu a se ka ne: «Ni hinne no ga ti yaw Urusalima, kaŋ mana bay hayey kaŋ te jirbey wo gaa?»",
+        "hypothesis": "A ce banda kaŋ ma Kulepas, a tuwoo nga: Haa'a araŋ wane goo go goro Jerozalama, ma hã ifo ga hiy ra waati kati no?"
+      },
+      {
+        "source": "Après nous être sauvés, nous reconnûmes que l'île s'appelait Malte.",
+        "reference": "Saaya kaŋ cine iri du ka fatta, gaa no iri du ka bay kaŋ gungo maa ga ti Malita.",
+        "hypothesis": "Iri ma kwaari banda, kaŋ iri bay tiri no."
+      },
+      {
+        "source": "Lorsqu'il eut achevé de lui parler, Dieu s'éleva au-dessus d'Abraham.",
+        "reference": "Kal a fay da sanno, Irikoy tun mo ka fay da Ibrahim.",
+        "hypothesis": "A go ka kokoy ka nga har, I ga kay kaŋ go Ibraahima boŋ."
+      },
+      {
+        "source": "(80:11) Les montagnes étaient couvertes de son ombre, Et ses rameaux étaient comme des cèdres de Dieu;",
+        "reference": "Ni na nangu soola ka jisi a se, A na nga kaajey sinji nda guusuyaŋ, A na laabo toonandi mo.",
+        "hypothesis": "(80:11) Tondi boŋ go bi fuusu, a turi kambe se no i goo Iriji turi yaanga,"
+      },
+      {
+        "source": "Ainsi lève-toi de bon matin, toi et les serviteurs de ton maître qui sont venus avec toi; levez-vous de bon matin, et partez dès que vous verrez la lumière.",
+        "reference": "Kala ni ma biya nda ni jine bora bannyey kaŋ yaŋ kaa ni banda. Araŋ tunanta susubay, waato kaŋ hananyaŋo wasa araŋ se, kala araŋ ma araŋ diraw te.»",
+        "hypothesis": "Wodin se tun fu alhazar, ni nda maagabu doŋ fo i yo ka ni ka, ka tun fu alhazar, koy kalla i fo di danji"
+      },
+      {
+        "source": "Les enfants d'Israël crièrent à l'Éternel, car Jabin avait neuf cents chars de fer, et il opprimait avec violence les enfants d'Israël depuis vingt ans.",
+        "reference": "Kala Israyla izey hẽ Rabbi gaa, zama bonkoono din gonda wongu guuru torko zangu yagga. Jiiri waranka timmante no a na Israyla izey kaynandi gumo.",
+        "hypothesis": "Israyizey kooɳe ga kuuwa ciri ra Jabin ga, nga ga hinka gokey fer ga, ga toɲe Israyizey kooɿne nda haama cendi koyne, waati nga waranka."
+      },
+      {
+        "source": "Va dire à mon serviteur David: Ainsi parle l'Éternel: Est-ce toi qui me bâtirais une maison pour que j'en fasse ma demeure?",
+        "reference": "«Ma koy ay tamo Dawda do ka ci a se kaŋ Rabbi ne: Nin no ga fu cina ay se kaŋ ra ay ga goro, wala?",
+        "hypothesis": "Sobey ce ay ka Almasyi David wati ha: Almasiye wodi har: Ifo se ni ay ga cina fu ka ay se dii ma?"
+      },
+      {
+        "source": "Demain j'irai à Dosso et toi",
+        "reference": "suba ay ga koy Dosso ni binde",
+        "hypothesis": "Suba ay ga koy Dosso, ay ni ni"
+      },
+      {
+        "source": "On éprouve de la joie à donner une réponse de sa bouche; Et combien est agréable une parole dite à propos!",
+        "reference": "Boro gonda farhã nga tuyaŋey ra, Sanni kaŋ ga hagu nga alwaati ra mo, Man a booriyaŋ misa!",
+        "hypothesis": "A ga kaani ka ne sanni se a ma ce ga, hariyan; hã nda ŋa booro ŋwa sanni kañ´ boro boori"
+      },
+      {
+        "source": "Samuel, après avoir entendu toutes les paroles du peuple, les redit aux oreilles de l'Éternel.",
+        "reference": "Samuwila mo maa jama sanney kulu, a n'i ci Rabbi hangey ra.",
+        "hypothesis": "Samuura, ka ma cey-boroŋ sanni kulu ay, nga ye ga ti Rabbi me ga har."
+      },
+      {
+        "source": "car Jean a baptisé d'eau, mais vous, dans peu de jours, vous serez baptisés du Saint Esprit.",
+        "reference": "Zama haciika, Yohanna na baptisma te da hari, amma araŋ wo, araŋ ga du Biya Hanna baptisma ne ka koy jirbiyaŋ.»",
+        "hypothesis": "waati kaŋ Yoŋa ma hiiji nda hari, amma iri, nda jirbiyaŋ kayna, ciŋ baa hiiji nda Almasi Ruuhu."
+      },
+      {
+        "source": "(6:3) Aie pitié de moi, Éternel! car je suis sans force; Guéris-moi, Éternel! car mes os sont tremblants.",
+        "reference": "Ya Rabbi, ma si deeni ay ga ni futa ra, Ma s'ay gooji mo ni futay korna ra.",
+        "hypothesis": "Aay war ni jalla, Rabbi! Ay ga hima hina baano; Aay tini ay, Rabbi! Ay bubu go kaw."
+      },
+      {
+        "source": "Il n'y avait point de fin à tout ce peuple, à tous ceux à la tête desquels il était. Et toutefois, ceux qui viendront après ne se réjouiront pas à son sujet. Car c'est encore là une vanité et la poursuite du vent.",
+        "reference": "Borey kaŋ yaŋ se a te jine boro sinda me. Kulu nda yaadin borey kaŋ yaŋ ga kaa banda si maa a kaani. Haciika, woodin mo yaamo no da haw gaarayyaŋ.",
+        "hypothesis": "Boro kulu a ka di foo hima foo, koyaŋ kaŋ nga a boŋ tiŋey ga. Kulu wala, kuyaŋ ga banda go fanda a se si, za kaŋ no nka fo fo fo, haw goyyan no."
+      },
+      {
+        "source": "Amnon se coucha, et fit le malade. Le roi vint le voir, et Amnon dit au roi: Je te prie, que Tamar, ma soeur, vienne faire deux gâteaux sous mes yeux, et que je les mange de sa main.",
+        "reference": "Amnon binde kani ka te sanda nga jante no. Waato kaŋ bonkoono kaa zama nga m'a guna se, Amnon ne bonkoono se: «Ay ga ni ŋwaaray no, ma naŋ ay waymo Tamar ma kaa ka maasa hinka te ay se ay jine, zama ay ma ŋwa a kambe ra.»",
+        "hypothesis": "Amnon goono ka jirbi tee, a naŋ a ŋwa ŋwayari. Koy a ma tee, a maŋ Amnon har koy ga: Ay ga hã ni, Tamar waybo ay, ma ka tumo maasa kammaŋ ce ay mo ga, k ay se ŋwa nda ay kambe ce."
+      },
+      {
+        "source": "Jésus leur répondit: Ils n'ont pas besoin de s'en aller; donnez-leur vous-mêmes à manger.",
+        "reference": "Amma Yesu ne i se: «Manti tilas no i ma koy, day araŋ bumbey m'i no ŋwaari.»",
+        "hypothesis": "Yesu ga tu iri se: I si hima ra koy, i no hara ŋwaari."
+      },
+      {
+        "source": "Il se rend maître d'Édom, Il se rend maître de Séir, ses ennemis. Israël manifeste sa force.",
+        "reference": "I ga Edom ciya a wane. Seyir mo ngey kaŋ ti a waato ibarey, i ga ye a do, saaya kaŋ Israyla ga gaabi bangandi.",
+        "hypothesis": "A ga kay Edom, a ga kay Seeri nga ibarey. Israyila ga ŋwa."
+      },
+      {
+        "source": "Dans sa frayeur, Josaphat se disposa à chercher l'Éternel, et il publia un jeûne pour tout Juda.",
+        "reference": "Kala Yehosafat humburu. A na nga bina daŋ Rabbi ceeciyaŋ gaa. A binde fe Yahuda kulu ra ka ne i ma mehaw.",
+        "hypothesis": "A boŋ hamburu, Jehoshapat ga soju ceeci irkoy, nd'a ga me haw filla kaa Yahuda kulu."
+      },
+      {
+        "source": "La chiralité est la propriété d'un objet non superposable à son image miroir.",
+        "reference": "Širalité ga ti jinay taka kaŋ si hin ka nga diji bisa.",
+        "hypothesis": "La chiralité no da boro fo alhaali ndadaŋ kaa boŋ si hin so kaŋ a di dijine nda a boŋ woo ga."
+      },
+      {
+        "source": "Jacob appela ses fils, et dit: Assemblez-vous, et je vous annoncerai ce qui vous arrivera dans la suite des temps.",
+        "reference": "Yakuba na nga izey ce ka ne: «Wa margu hal ay ma ci araŋ se haŋ kaŋ ga du araŋ da haŋ kaŋ araŋ ga du jirbey kaŋ ga kaa ra.",
+        "hypothesis": "Yakuba ce armey ce, a too ka har: I margu nda ay ma foo niyan kaŋ naŋ hiine waati culu."
+      },
+      {
+        "source": "Mais, quand les Juifs de Thessalonique surent que Paul annonçait aussi à Bérée la parole de Dieu, ils vinrent y agiter la foule.",
+        "reference": "Amma waato kaŋ Tassalonika kwaara Yahudancey du baaru kaŋ Bulos goono ga Irikoy sanno waazu Beriya mo ra, i kaa noodin mo ka borey marga zukku k'i laakaley tunandi.",
+        "hypothesis": "Amma, Yahudiize kaŋ go Tesalonikay boro ma, š保罗 ma daŋ Béreya ga irkoy pulu ŋwaandi, iri ga kaa tee, marga ga i kuttandi."
+      },
+      {
+        "source": "Il les remit à ses serviteurs, troupeau par troupeau séparément, et il dit à ses serviteurs: Passez devant moi, et mettez un intervalle entre chaque troupeau.",
+        "reference": "A n'i daŋ nga goy-teerey kambey ra, kurey kulu waani-waani. A ne nga goy-teerey se: «Araŋ ma jin ka koy ay se. Araŋ ma daŋandi. Araŋ ma game naŋ kurey da care game ra.»",
+        "hypothesis": "A foo gaŋ goo ga nu, foo da foo da foo waani, nd'a ne wada gaŋ goo ga: Passez bara a fo, nd'a hanga foo ga."
+      },
+      {
+        "source": "Ta grande soeur, qui demeure à ta gauche, c'est Samarie avec ses filles; et ta petite soeur, qui demeure à ta droite, c'est Sodome avec ses filles.",
+        "reference": "Ni beere waybora no ga ti Samariya, kaŋ goro ni se azawa kambe haray doŋ, nga nda nga ize wayey. Ni kayne waybora mo, kaŋ goro ni se dandi kambe haray doŋ, Saduma nda nga ize wayey no.",
+        "hypothesis": "Ni beere kaŋ go ti ni ce kambe nwaari, no Samariya nda ciizey; ni kayne wo go ti ni ce kambe ce foo, no Sodoma nda ciizey"
+      },
+      {
+        "source": "Alors il s'assit, appela les douze, et leur dit: Si quelqu'un veut être le premier, il sera le dernier de tous et le serviteur de tous.",
+        "reference": "Yesu goro ka iway cindi hinka ce ka ne i se: «Boro kulu kaŋ ga ba nga ma ciya ibeeri, a ma ciya ikulu kokor banda ka ikulu saajaw mo.»",
+        "hypothesis": "To sohon a goro, a ye bare ihinka, a kaŋ araŋ har: Kal boro fo bay ka boŋ sintina, a ga filla boŋ kokoro kulu, ay ka al-goy tee kulu."
+      },
+      {
+        "source": "L'espoir est une lumière dans l'obscurité.",
+        "reference": "Beejo ga ti kaari kubay ra.",
+        "hypothesis": "Ɲaray no danji fu kubay."
+      },
+      {
+        "source": "Le thé est servi en trois services selon la tradition.",
+        "reference": "Attaay ga gaara sorro hinza alaada boŋ.",
+        "hypothesis": "Atti ga jirga cerebere fo kaŋ boŋ alhadi ga boŋ ra."
+      },
+      {
+        "source": "L'échec est une opportunité d'apprendre et de grandir.",
+        "reference": "Patiyan ga ti dama ka boro ma dondon k'a ma beeri.",
+        "hypothesis": "Hasaraw no bisante ga caw nda beeri."
+      },
+      {
+        "source": "C'est l'Éternel des armées qui a pris cette résolution, Pour blesser l'orgueil de tout ce qui brille, Pour humilier tous les grands de la terre.",
+        "reference": "Rabbi Kundeykoyo no k'a waadu, Zama nga ma boŋbeeray darza kulu ziibandi, A ma donda-caray candi ka kande ndunnya beeraykoyey kulu boŋ.",
+        "hypothesis": "Irkoy tamakize no ŋwa ni yaamare, ka ga cafaray kaŋ ɲaale, ka beeri-nduɲa kulu kaynandi cimbandi."
+      },
+      {
+        "source": "Et il fit ainsi pour toutes ses femmes étrangères, qui offraient des parfums et des sacrifices à leurs dieux.",
+        "reference": "Yaadin mo no a te nga mebaraw wandey kulu se, ngey kaŋ yaŋ ga dugu ton, i ga sargayyaŋ wi mo ngey toorey se.",
+        "hypothesis": "A wooŋ ka ti iniŋ ga ni korŋo ngey zama i kaa haraji nda sarga nda ize irkoy."
+      },
+      {
+        "source": "Toute l'assemblée fut d'avis de célébrer sept autres jours. Et ils célébrèrent joyeusement ces sept jours;",
+        "reference": "Jama kulu binde na anniya sambu ngey ma ye ka jirbi iyye fo haggoy koyne. I na jirbi iyya din mo toonandi nda farhã.",
+        "hypothesis": "Batu marga go ga cim, kala iyye sohoyan diŋ jiire. Nga so i diŋ ce iyye, i farha ga."
+      },
+      {
+        "source": "La gentillesse coûte peu mais vaut beaucoup.",
+        "reference": "Baani teyan si hay kul day, amma a alhorma ga baa.",
+        "hypothesis": "A ga laala taasi faala, amma a si faala beeri."
+      },
+      {
+        "source": "A l'instant il recouvra la vue, et suivit Jésus, en glorifiant Dieu. Tout le peuple, voyant cela, loua Dieu.",
+        "reference": "Sahãadin-sahãadin a ye ka di, ka Yesu gana, a goono ga Irikoy beerandi. Boro kulu kaŋ di woodin mo na Irikoy kuku.",
+        "hypothesis": "Aŋ waati foo no a mo daabu, a gaa yesu naŋ a irkoy foobar. Borey kulu ga maa a foo no, a moŋ irkoy foobar."
+      },
+      {
+        "source": "Niamey est la capitale du Niger.",
+        "reference": "Niamey ga ti Niger faaba koira.",
+        "hypothesis": "Niamey no Niger gallu dunka."
+      },
+      {
+        "source": "Je ferai connaître mon saint nom au milieu de mon peuple d'Israël, Et je ne laisserai plus profaner mon saint nom; Et les nations sauront que je suis l'Éternel, Le Saint en Israël.",
+        "reference": "Ay g'ay maa hanna bayrandi ay borey Israyla bindo ra, ay si naŋ mo i ma ye k'ay maa hanna ziibandi koyne. Dumi cindey ga bay mo kaŋ ay no ga ti Rabbi, Koy Hanna no Israyla game ra.",
+        "hypothesis": "Ay ga ma hima bay, n nga maa ma tanka go hammu kɨy Israyla dumo ra ga, kala n ga naŋ manti n nga maa tanka soobay kaŋ se; kalka goyyɨy ma hima bay, nga maa no ay Rabbi, nda tanka kaŋ go Israyla ra."
+      },
+      {
+        "source": "Mon héritage a été pour moi un oiseau de proie, une hyène; Aussi les oiseaux de proie viendront de tous côtés contre lui. Allez, rassemblez tous les animaux des champs, Faites-les venir pour qu'ils le dévorent!",
+        "reference": "Ay wane jama go ay se sanda curo kaŋ gonda cangare-cangare, kaŋ curo cindey n'a daŋ game ka gaaba nd'a. Araŋ ma koy ka ganji ham kulu margu ka kand'ey zama i ma ham ŋwa.",
+        "hypothesis": "Ay tubu no a ma ay ga curoize, a ma kooro; i nungey fo, curoize koy ra ganda kammaaŋ hay ta nga ga. To sohon, margu ganji dumize kulu, kaŋ iri ye ga ŋwayandi nga"
+      },
+      {
+        "source": "Pseudogyps africanus",
+        "reference": "zeban",
+        "hypothesis": "Pseudogyps africanus"
+      },
+      {
+        "source": "Il y eut à Jérusalem des rois puissants, maîtres de tout le pays de l'autre côté du fleuve, et auxquels on payait tribut, impôt, et droit de passage.",
+        "reference": "Waato mo bonkooni gaabikooniyaŋ go Urusalima ra kaŋ yaŋ na isa daŋanta laabey kulu may. I na jangal da marga-marga da dwan nooru mo bana i se.",
+        "hypothesis": "Jerusalima ga koy kulu, kulu ga koy ga moŋ beeri, tunbu tondi hayri beeri se kaŋ moo naɲaybirgo ga faamo, bay tarki naŋɓay, ga ka haray aŋgeenze."
+      },
+      {
+        "source": "Au bout des deux mois, elle revint vers son père, et il accomplit sur elle le voeu qu'il avait fait. Elle n'avait point connu d'homme. Dès lors s'établit en Israël la coutume",
+        "reference": "I go no, handu hinkanta bananta, a ye ka kaa nga baabo do. Nga mo te a se mate kaŋ a na nga sarto sambu din boŋ. Wandiya mana alboro bay mo. A ciya alaada Israyla ra,",
+        "hypothesis": "Wayggu ihinka fo, a ye ka ye baaba, nga mo go albeeri a ga tee no, nga ga boŋ funa. A mana siiki boro fo. Din se manti Israyila wa, naamu no ga goro"
+      },
+      {
+        "source": "Sa soeur Oholiba vit cela, Et fut plus déréglée qu'elle dans sa passion; Ses prostitutions dépassèrent celles de sa soeur.",
+        "reference": "A kayno Oholiba mo di woodin, amma nga din bisa nga beero biniyay goyey ra, a kaaruwatara mo bisa beero wano.",
+        "hypothesis": "A wondi Oholiba, nga ti ŋa wayme, boŋ ši, nga ma a ga ti duŋ gaŋ. A halaŋaŋ zoy kay gaŋ ŋa."
+      },
+      {
+        "source": "La ville avait la forme d'un carré, et sa longueur était égale à sa largeur. Il mesura la ville avec le roseau, et trouva douze mille stades; la longueur, la largeur et la hauteur en étaient égales.",
+        "reference": "Birno mo kambu-taaci-koy no, kaŋ ikulu ga saba, a salleyaŋo ga saba nd'a hayyaŋo. A na birno neesi nda goobo din mo, a to kilometar zambar hinka nda zangu hinka. A salleyaŋo, d'a hayyaŋo, d'a kuuyaŋo, ikulu afolloŋ no.",
+        "hypothesis": "Al gallu no nanga nda kare-kare, a kuuyan sinjante a hareyan. A faala gaŋ al gallu nda linji, a du ihinka dumu zangu; a kuuyan, a hareyan nda a fu nangey ga sinjante."
+      },
+      {
+        "source": "Celui qui n'aime pas n'a pas connu Dieu, car Dieu est amour.",
+        "reference": "Boro kaŋ sinda baakasinay si Irikoy bay, zama Irikoy ya baakasinay no.",
+        "hypothesis": "Boro ŋaŋ ba, a ŋaŋ bay irkoy, za kaŋ irkoy no bakasiney."
+      },
+      {
+        "source": "et ils gagnèrent à prix d'argent des conseillers pour faire échouer son entreprise. Il en fut ainsi pendant toute la vie de Cyrus, roi de Perse, et jusqu'au règne de Darius, roi de Perse.",
+        "reference": "I zinga nda saawareko fooyaŋ kaŋ yaŋ ga koy k'i hiila, i m'i ganji ngey miila Persiya bonkoono Sirus jirbey kulu ra, hal a koy Persiya bonkoono Dariyus mayra waate.",
+        "hypothesis": "Nda i y' hiiri nooro-kaw, ni ka n'a yo daŋ baŋ goro, a diraw ga fay gay hin, zama a beeri koroŋ. Nga no kaŋ Kirus yero gonda kaw kulu, Persia koy se, nda Darius, Persia koy, ga too kamma kaynay."
+      },
+      {
+        "source": "La biotechnologie utilise des organismes vivants pour créer des produits.",
+        "reference": "Biyoteknoloji ga alman fundikooniyaŋ goyandi zama a ma hayey te.",
+        "hypothesis": "Birotakanoloogi ga no funk-ɗiire ŋwa-ɗiire hã ka ŋwayandi jinay."
+      },
+      {
+        "source": "Cependant, tous les Moabites ayant appris que les rois montaient pour les attaquer, on convoqua tous ceux en âge de porter les armes et même au-dessus, et ils se tinrent sur la frontière.",
+        "reference": "Alwaato kaŋ Mowabancey kulu maa baaru kaŋ koyey kaa zama ngey ma wongu se, day i margu, i kulu kaŋ yaŋ ga hin ka takuba koto ka koy beene. I kay laabo hirro me gaa.",
+        "hypothesis": "Ammay se, Moabe kulu, i ga ma aŋa koyey kan kaŋ i ra koy wongu ga, a da wa borey fo kaŋ ju jiiri ra nda wongu jine ga, foo ga koy kulu banda, a ma koy kay me boŋ iri ga."
+      },
+      {
+        "source": "Christ aussi a souffert une fois pour les péchés, lui juste pour des injustes, afin de nous amener à Dieu, ayant été mis à mort quant à la chair, mais ayant été rendu vivant quant à l'Esprit,",
+        "reference": "Zama Almasihu bu zunubey sabbay se sorro folloŋ. Nga kaŋ ga ti adilitaraykoy, a n'a te no borey kaŋ sinda adilitaray se zama a ma konda iri Irikoy do. I n'a wi gaaham ra, amma Biya Hanno n'a funandi.",
+        "hypothesis": "Almasiŋ kuna wi ka taabi ce wara hinka, nga cimi nda baayuney, kala iri ka konda Iirki ga, a ga wi ka gunde harfu, kala a ga funa nda sambu."
+      },
+      {
+        "source": "Car comme le bruit des épines sous la chaudière, ainsi est le rire des insensés. C'est encore là une vanité.",
+        "reference": "Zama danga karji kaŋ go ga di kusu cire kosongu, Yaadin cine no saamo haaray go, Woodin mo yaamo no.",
+        "hypothesis": "Waati, koŋ boŋ saro buku cinna fo ga kosongu, no yu gammo dumo boro ŋwa. A no koyne too jaase."
+      },
+      {
+        "source": "(89:49) Y a-t-il un homme qui puisse vivre et ne pas voir la mort, Qui puisse sauver son âme du séjour des morts? Pause.",
+        "reference": "Ma fongu kaŋ ay aloomaro si ku, Ma fongu mate kaŋ ni na Adam-izey kulu taka i ga ciya yaamo.",
+        "hypothesis": "Ifo boro fo wanga hin funa ka hi mana ga bu fo, ka a ga faaba a sambu ga yoo ga jirbi bi? Soobay."
+      },
+      {
+        "source": "Ne cherchons pas une vaine gloire, en nous provoquant les uns les autres, en nous portant envie les uns aux autres.",
+        "reference": "Iri ma si ciya foomanteyaŋ, ka care futandi, ka canse care gaa.",
+        "hypothesis": "Ni cee foo diɲe gunu-kunuŋ kala ni kusuuma boro cero, ni beeje boro cero."
+      },
+      {
+        "source": "En vérité, en vérité, je vous le dis, celui qui croit en moi a la vie éternelle.",
+        "reference": "Haciika, haciika ay ga ci araŋ se: boro kaŋ ga cimandi gonda fundi hal abada.",
+        "hypothesis": "Wiza, wiza, ay ga ngaŋ kuniyan ci ga, boro kaŋ i kaaba ka ay ga, no ga fundu alomar."
+      },
+      {
+        "source": "Même les nuits les plus sombres sont suivies d'une aurore.",
+        "reference": "Baa cin ka bi sosso, subba ga fatta a banda.",
+        "hypothesis": "Bi ciini sandi kulu, alfazar ga filla ay bande."
+      },
+      {
+        "source": "Je n'ai pas de plus grande joie que d'apprendre que mes enfants marchent dans la vérité.",
+        "reference": "Hay kulu s'ay farhandi ka bisa woone: ay ma maa baaru kaŋ ay izey goono ga cimo gana.",
+        "hypothesis": "Ay boŋ kaani gaa filla, kala ay biize boro goro ga cimman."
+      },
+      {
+        "source": "C'est pourquoi Christ, entrant dans le monde, dit: Tu n'as voulu ni sacrifice ni offrande, Mais tu m'as formé un corps;",
+        "reference": "Woodin sabbay se no, waato kaŋ Almasihu ga ba ka furo ndunnya ra a ne: «Ni si ba sargay da nooyaŋ, amma gaaham no ni soola ay se.",
+        "hypothesis": "Wodin se, Almasiifu, a koy dunyaŋ ra, a har: A si bayar wa sarga, manti a ga si no ay ga gonda kumpi boŋ;"
+      },
+      {
+        "source": "Elles ont des mains et ne touchent point, Des pieds et ne marchent point, Elles ne produisent aucun son dans leur gosier.",
+        "reference": "I gonda kambeyaŋ, amma i si ham; I gonda ceyaŋ, amma i si dira, I si salaŋ mo ngey karrey ra.",
+        "hypothesis": "I ga kambe, manti ka lamba. I ga cee, manti ka dira. I manta jiŋa ga, manti ka heeni."
+      },
+      {
+        "source": "Si donc le Fils vous affranchit, vous serez réellement libres.",
+        "reference": "Da Izo g'araŋ fansa, araŋ ga ciya fansanteyaŋ da cimi.",
+        "hypothesis": "Jesus kala nga ngey fansa, ngey boŋ wasa fo."
+      },
+      {
+        "source": "La onzième année, le premier jour du mois, la parole de l'Éternel me fut adressée, en ces mots:",
+        "reference": "I go no yaadin, jiiri way cindi fa ra, hando zaari sintina hane, kala Rabbi sanno kaa ay do ka ne:",
+        "hypothesis": "Hinkanti jiiri, ce hara foo, Rabbo sanni nungey a mo ay ga ce:"
+      },
+      {
+        "source": "L'architecture est à la fois le processus et le produit de la planification, de la conception et de la construction de bâtiments ou d'autres structures.",
+        "reference": "Arshitektur ga ti proses da prodi plan teyan, dizayn da batiman wala striktür fooyaŋ teyan wane kul.",
+        "hypothesis": "A cinayan daŋ nor cinaize bandi, a koy sabbu teeri, neeri, hanse, wadda fu cinaize wala jinay huru."
+      },
+      {
+        "source": "Par amour fraternel, soyez pleins d'affection les uns pour les autres; par honneur, usez de prévenances réciproques.",
+        "reference": "Wa bara nda baakasinay care se danga nya izeyaŋ kaŋ ga ba care. Araŋ ma care beerandi ka care daŋ jine.",
+        "hypothesis": "Ay kaŋ iri ga hangasin, iri ga boro kulu ra cebeyan tee; kaŋ daŋ darzay ga, iri ga rawaŋ ngey ga foŋ."
+      },
+      {
+        "source": "L'astronomie étudie les corps célestes.",
+        "reference": "Astronomie ga beero almaney dondon.",
+        "hypothesis": "Astronomiyan ga boŋ gaay beena boronchiyan."
+      },
+      {
+        "source": "Celui qui dit qu'il demeure en lui doit marcher aussi comme il a marché lui-même.",
+        "reference": "Boro kaŋ go ga ne nga ga goro Irikoy ra, a ga hima bora bumbo ma dira mo danga mate kaŋ cine Yesu dira.",
+        "hypothesis": "Boro kaŋ har a goro ga a ra, hima koy cine bongo nga bumbo koy"
+      },
+      {
+        "source": "Tiens-toi sur le chemin, et regarde, habitante d'Aroër! Interroge le fuyard, le réchappé, Demande: Qu'est-il arrivé? -",
+        "reference": "Ya nin Arower gorokwa, Ma kay fondo me gaa, ma mo daaru ka guna. Ma zuruko da waybora kaŋ go ga yana mo hã ka ne: «Ifo no ka te?»",
+        "hypothesis": "Goro nga fondo ga, guna, Aroer-izeyan! Kaŋ bare kaŋ yana boŋ ga, hã: ifo te?"
+      },
+      {
+        "source": "Il y eut une famine dans le pays, outre la première famine qui eut lieu du temps d'Abraham; et Isaac alla vers Abimélec, roi des Philistins, à Guérar.",
+        "reference": "Haray fo ye ka te koyne laabo din ra, kaŋ waana haray fa din kaŋ jin ka te Ibrahim jirbey ra. Isaka mo koy Filistancey koyo Abimelek do, Gerar ra.",
+        "hypothesis": "Haray way boŋ se du kaŋ bi kaŋ a ciy haray kan fo, kan foo a ga ciy Ibraahima waati ga; nda Ishaaki koy ka Abimelek, koy Palistiin koy ra, Guerrare."
+      },
+      {
+        "source": "Le roi appela Tsiba, serviteur de Saül, et lui dit: Je donne au fils de ton maître tout ce qui appartenait à Saül et à toute sa maison.",
+        "reference": "Saaya din binde bonkoono na Ziba kaŋ ga ti Sawulu bannya ce ka ne a se: «Hay kulu kaŋ ga ti Sawulu wane za doŋ, hala nd'a windo kulu, ay n'a no ni koyo izo se.",
+        "hypothesis": "Koo ka ce Tsiba, Saalu gaayika, nda kaa ne: Ay no Saalu dumo nda ay key noŋ waŋ foo ga Saũlu, nda ay goro kulu ga."
+      },
+      {
+        "source": "et les mets de sa table, et la demeure de ses serviteurs, et les fonctions et les vêtements de ceux qui le servaient, et ses échansons, et ses holocaustes qu'il offrait dans la maison de l'Éternel.",
+        "reference": "d'a taablo ŋwaaro, d'a tamey gora dumi, d'a windi goy-izey kayyaŋo dumi, d'i bankaarayey, da ngey kaŋ yaŋ g'a no haŋyaŋ hari, da mate kaŋ i ga sargay salle Rabbi windo ra, kala waybora gaa yay.",
+        "hypothesis": "nda ɲwaari maaŋ a teebur nangey, a gaayinkaŋ goro dinga, nda koyey nor nda a dumaw ga daŋ, nda bankarey maaŋ nka dum bay se, nda saŋkaw maaŋ, nda bongo maaŋ nka a no sarga go Rabbi fu ra."
+      },
+      {
+        "source": "Et s'il a péché contre toi sept fois dans un jour et que sept fois il revienne à toi, disant: Je me repens, -tu lui pardonneras.",
+        "reference": "D'a na zunubi te ni se hala sorro iyye zaari fo ra, hala sorro iyye mo a ma ye ni do ka ne: ‹Ay tuubi,› kulu ni m'a yaafa.»",
+        "hypothesis": "Nda nga soŋ a guna noŋ iri fo iggu ba han, kala nga filla iri ceranda soŋ a hiiba, a ne: Ay tuba, -a ŋ a yaafu."
+      },
+      {
+        "source": "David s'établit dans la forteresse, qu'il appela cité de David. Il fit de tous côtés des constructions, en dehors et en dedans de Millo.",
+        "reference": "Dawda goro wongu fuwo ra, a na maa daŋ a gaa ka ne a se Dawda kwaara. Dawda mo na nango windi nda cinari-cinari yaŋ za Millo gaa kal a ma kaa hala kwaara ra.",
+        "hypothesis": "Daawuda goro ga toogu ngey, a ma ce kuro Daawuda. A te fooŋ beray ra ga siŋa, Millo faare ra da."
+      },
+      {
+        "source": "Et que tu ne dises: Comment donc ai-je pu haïr la correction, Et comment mon coeur a-t-il dédaigné la réprimande?",
+        "reference": "Kala ni ma ne: «Kaari ay! Ay kaŋ wangu dondonandiyaŋ, ay bina donda kaseetiyaŋ.",
+        "hypothesis": "Ni nga ma hã tunti: Fo ni go ga zaŋ korzi, ni se hinsiine ga yeene wari?"
+      },
+      {
+        "source": "Saluez Apellès, qui est éprouvé en Christ. Saluez ceux de la maison d'Aristobule.",
+        "reference": "Wa Appeles fo, yaddante no Almasihu ra. Wa Aristabulos almayaaley fo.",
+        "hypothesis": "Fo Apelles, kaŋ Kristo ra ga ti hiizan so. Fo Aristobul fuɲaɲawey."
+      },
+      {
+        "source": "La colombe symbolisait la paix dans les contes traditionnels.",
+        "reference": "Tubaniya go alaafiya alaamey cabe alhaada deedey ra.",
+        "hypothesis": "Kolnay no ga to foyan ga na janti ka."
+      },
+      {
+        "source": "Lorsqu'il arriva, Éli était dans l'attente, assis sur un siège près du chemin, car son coeur était inquiet pour l'arche de Dieu. A son entrée dans la ville, cet homme donna la nouvelle, et toute la ville poussa des cris.",
+        "reference": "Waato kaŋ cine a kaa, a saba nda Eli goono ga goro nga nangora boŋ, fonda me gaa. A goono ga hangan, zama a bina goono ga jijiri Irikoy sundurko sabbay se. Saaya kaŋ bora furo kwaara ra, hal a na baaro dede mo, kala kwaara kulu na jinde sambu nda hẽeni.",
+        "hypothesis": "A faara koy kaŋ Ili ga batu nge ga, a goro ga tee kan taataray ra, koyne kan fondo ga, za kaŋ a bine ga boobay se Alkuraana naanga. A fo fu duk gan ra, boro no go labari."
+      },
+      {
+        "source": "Devant lui est un feu dévorant, Et derrière lui une flamme brûlante; Le pays était auparavant comme un jardin d'Éden, Et depuis, c'est un désert affreux: Rien ne lui échappe.",
+        "reference": "Danji go ga di i jine, I banda mo danji beele go ga di. I jine laabo ga ciya danga Eden kalo cine, Amma i banda a ga ciya saaji koonu -- Oho, hala hay kulu mana i yana.",
+        "hypothesis": "A daabu wane danji ŋwari fandi, a banda ga beela ize; Si alhaku no noyya siidi ga firaandi, doŋ ga raame tokoraw meeri; Fo si ga a yi."
+      },
+      {
+        "source": "Noisette, qui avait bon cœur, partagea ses provisions avec la cigale.",
+        "reference": "Nwayet, ka gonda bine kaano, na nga ŋwaarey fay da sigalo.",
+        "hypothesis": "Noisette, ŋa bine ka boori, ka fo go ŋwaari ga nda ciroize."
+      },
+      {
+        "source": "(6:8) J'ai le visage usé par le chagrin; Tous ceux qui me persécutent le font vieillir.",
+        "reference": "Ay farga ay hẽeni booba sabbay se. Cin kulu ay go g'ay daarijo tayandi, Ay dima mo tay d'ay mundey.",
+        "hypothesis": "(6:8) Ay munduma fuusuŋ se; aŋ weeze ga konda fuusuŋ zunbu."
+      },
+      {
+        "source": "Moïse dit à Aaron: Dis à toute l'assemblée des enfants d'Israël: Approchez-vous devant l'Éternel, car il a entendu vos murmures.",
+        "reference": "Musa ne Haruna se: «Ma ci Israyla jama kulu se ka ne: ‹Wa maan Rabbi jine, zama a maa araŋ janca.› »",
+        "hypothesis": "Moysi ka haru Haruna: Hangardu nda Israelize jama kulu: Maanu no se Rabbi fo, za kaŋ a ga ma i heeni go."
+      },
+      {
+        "source": "Il brûla sur l'autel la graisse, les rognons, et le grand lobe du foie de la victime expiatoire, comme l'Éternel l'avait ordonné à Moïse.",
+        "reference": "Amma maano da dumayzey, da taana kaŋ go ga haame daabu, kaŋ yaŋ i kaa zunubi se sarga gaa, a n'i ton sargay feema ra, danga mate kaŋ cine Rabbi ci Musa se.",
+        "hypothesis": "A ton kaŋ go ga ji ga haynandi go no banda, a no maana daŋ haama biji boobu nda londi ga zay wayna gaŋa wala-ize a no Rabbi ga ciini Moose."
+      },
+      {
+        "source": "Puits, que des princes ont creusé, Que les grands du peuple ont creusé, Avec le sceptre, avec leurs bâtons!",
+        "reference": "Day no kaŋ jine borey fansi, kaŋ marga jine borey fansi. I n'a fansi nda sarjilla. I na fansi nda ngey goobey.» I dira za ganji woone gaa ka koy to Mattana.",
+        "hypothesis": "Dey, amiri n' fensi, boro boŋ koni n' fensi, nda takuba, nda goobey!"
+      },
+      {
+        "source": "Kofi avait appris que l'Afrique était un continent de diversité et de beauté.",
+        "reference": "Kofi bey kan Afriki batama no kan borin da foyyanka go ara.",
+        "hypothesis": "Kofi ma fun kaŋ Afrika boŋ bii kan dumi bii nayni."
+      },
+      {
+        "source": "Jésus, sachant tout ce qui devait lui arriver, s'avança, et leur dit: Qui cherchez-vous?",
+        "reference": "Yesu binde ga bay hay kulu kaŋ goono ga kaa nga gaa. A fatta ka ne i se: «May no araŋ goono ga ceeci?»",
+        "hypothesis": "Yesu, a faŋ kaŋ mo ga ŋ a bongo, a koy jina, nga zaŋ ce: I ceeci fo?"
+      },
+      {
+        "source": "Et ils montèrent à la ville. Ils étaient arrivés au milieu de la ville, quand ils furent rencontrés par Samuel qui sortait pour monter au haut lieu.",
+        "reference": "I binde ziji ka koy kwaara ra. I tooyanta kwaara ra, kala Samuwila kuband'ey, kaŋ a goono ga ziji ka koy sududuyaŋ nango do.",
+        "hypothesis": "Nda i ka tun ka gaa. Ndi i man ka bindi ra, kaŋ Samuel ga m'a jay, nga mo koy ka bene koro."
+      },
+      {
+        "source": "Ils erraient en aveugles dans les rues, Souillés de sang; On ne pouvait Toucher leurs vêtements.",
+        "reference": "Sohõ i goono ga dira ka tatanji kwaara fondey ra sanda danawyaŋ. Kuri n'i ziibandi hal a to naŋ kaŋ boro kulu s'i bankaarayey ham.",
+        "hypothesis": "I boro bi barbare siiri da goro korfo ra, maraay a kumbe, si hima ka lamba ngey bankarey"
+      },
+      {
+        "source": "Le quatrième, pour le quatrième mois, était Asaël, frère de Joab, et, après lui, Zebadia, son fils; et il avait une division de vingt-quatre mille hommes.",
+        "reference": "Handu taacanta ra boro taacanta mo, Asahel Yowab kayne no. A izo Zebadiya ga dak'a gaa. A sata gonda boro zambar waranka cindi taaci.",
+        "hypothesis": "Zarma: Itaacante, nuŋ a nooji ga, Asayel mo, Joab bacco, nda a ga bande, Zebadiya, a hiizo; nga mo gonda gundu-kulu ni cappo ahakku zankey."
+      },
+      {
+        "source": "Aussi longtemps que tu vivras dans ton pays, garde-toi de délaisser le Lévite.",
+        "reference": "Ma haggoy da ni boŋ! Ma si Lawiti furu waati kulu kaŋ ni go ni laabo ra ga goro.",
+        "hypothesis": "Ay fo kan ni goro ay ni beeri ra ga hima wa fu fu dum ba ciroŋ."
+      },
+      {
+        "source": "Et le même jour il donna un signe, en disant: C'est ici le signe que l'Éternel a parlé: Voici, l'autel se fendra, et la cendre qui est dessus sera répandue.",
+        "reference": "Irikoy bora na alaamayaŋ mo cabe han din hane ka ne: «Alaama kaŋ Rabbi ci neeya: Guna, feema wo ga kortu. Booso kaŋ go a ra mo ga mun.»",
+        "hypothesis": "Alhadi kano ga a miisi, goo har: Ne kaŋ Rabbi ga ci no: Tuni, cibibi nge fay ra, a daaraŋ korji ga dammoo."
+      },
+      {
+        "source": "Aussitôt il monta dans la barque avec ses disciples, et se rendit dans la contrée de Dalmanutha.",
+        "reference": "Sahãadin-sahãadin a furo hi ra, nga nda nga talibey, ka kaa Dalmanuta laabu.",
+        "hypothesis": "Sohon sohon, a ga ka hi no nga doomize ce, koy ka Dalmanuta kaw."
+      },
+      {
+        "source": "Le forage de puits profonds permet d'accéder aux nappes phréatiques.",
+        "reference": "Luluwey kaŋ ga zurga guusu ra ga naŋ boro ma duu labu cire hari.",
+        "hypothesis": "Hiyankuna hiiri beeran ga hima ka bisu hari jiire."
+      },
+      {
+        "source": "Tous tes ennemis ouvrent la bouche contre toi, Ils sifflent, ils grincent des dents, Ils disent: Nous l'avons engloutie! C'est bien le jour que nous attendions, nous l'avons atteint, nous le voyons!",
+        "reference": "Ni ibarey kulu na ngey meyey feeri ni boŋ. I goono ga cuusu ka ngey hinjey kaama mo ka ne: «Iri n'a gon sukutum! Daahir hano kaŋ iri goono ga laakal dake a gaa neeya. Iri to a gaa, iri di a mo.»",
+        "hypothesis": "Ibarey kulu no ay so, a me ma ce ay fo ga. A falle, a hinje ga jijiri, a har: Ay mo ni ŋway. Zamaŋ no a ma sikkay koyne boŋ, a mo ni to, a mo ni di."
+      },
+      {
+        "source": "Elle a du prix aux yeux de l'Éternel, La mort de ceux qui l'aiment.",
+        "reference": "Rabbi diyaŋo gaa a wane hanantey buuyaŋ wo darza hari no.",
+        "hypothesis": "Nga ga boori ma Irkoy, boro wiyaŋ ga bu."
+      },
+      {
+        "source": "Mais Josaphat dit: N'y a-t-il ici aucun prophète de l'Éternel, par qui nous puissions consulter l'Éternel? L'un des serviteurs du roi d'Israël répondit: Il y a ici Élisée, fils de Schaphath, qui versait l'eau sur les mains d'Élie.",
+        "reference": "Amma Yehosafat ne: «Rabbi annabi fo si neewo kaŋ do iri ga hã?» Kala boro fo Israyla bonkoono bannyey ra tu ka ne a se: «Iliyasu, Safat izo kaŋ doŋ a goro ka hari dooru Iliya kambe gaa, a go no.»",
+        "hypothesis": "Amma Yosafat hi kaŋ: Ma kulu kaŋ ngey nga, annabi fo Rabbiŋ ma, kaŋ ngey foo Rabbiŋ ga? Israyila kuy dumize foo ni zeeti: Mo nga Eliise, Sayafat hãaize, kaŋ mo Hari nkaŋ Eliya ga."
+      },
+      {
+        "source": "Fuyez de Babylone, sortez du pays des Chaldéens, Et soyez comme des boucs à la tête du troupeau!",
+        "reference": "Wa zuru ka fun Babila bindo ra, Wa fun Kaldancey laabo ra, Wa ciya danga hincin jindi yaŋ ngey kuro jine.",
+        "hypothesis": "Soŋ Babilone ga, fu Kaldaynu laabu ra, kala ngey no ce baw ga haw kuru goy se"
+      },
+      {
+        "source": "Daniel résolut de ne pas se souiller par les mets du roi et par le vin dont le roi buvait, et il pria le chef des eunuques de ne pas l'obliger à se souiller.",
+        "reference": "Amma Daniyel anniya nga bina ra nga ma si nga boŋ ziibandi nda bonkoono ŋwaaro, wala baa da duvan kaŋ a ga haŋ. Woodin se no a na yadda ceeci mantawey arkuso do, nga ma si nga boŋ ziibandi.",
+        "hypothesis": "Daaniyal filla ka hin si ti ciine nda Kurɲe ndi gune ŋwaari, nda Kurɲe ndi haŋ, o ga ŋwaarandi eunuukize koy fo, ka manta nga ga nga tilas ka ti ciine."
+      },
+      {
+        "source": "Il a passé, et voici, il n'est plus; Je le cherche, et il ne se trouve plus.",
+        "reference": "Amma a bisa, a si no mo. Oho, hala ay n'a ceeci zaati, Amma boro si ye ka di a koyne.",
+        "hypothesis": "A ye ka bori koy, kante nga boŋ wasa; ay ga ceeci kaa nga, ay ka si go."
+      },
+      {
+        "source": "Viens par là",
+        "reference": "Ka ne hare",
+        "hypothesis": "Ni ma ne hare"
+      },
+      {
+        "source": "L'ingénierie assistée par ordinateur (IAO) simule le comportement des produits.",
+        "reference": "Enjeniyeri asiste par ordinatör (IAO) ga hayey alhaali hima.",
+        "hypothesis": "Gooromize kaŋ kompaaro faaba (IAO) no ŋwaare ŋwaariyaŋ ganda."
+      },
+      {
+        "source": "Ses fils seront assaillis par les pauvres, Et ses mains restitueront ce qu'il a pris par violence.",
+        "reference": "A kambey mo ga ngey duura yeti, A izey ga gomni ceeci talkey gaa.",
+        "hypothesis": "A barey ga boŋ futu boro taali, nga kambe ga bonngaŋ nga ga goobu hiizo."
+      },
+      {
+        "source": "Les termites mangent le bois de ma chaise.",
+        "reference": "Kontomey ga ay korgaa bundoo ŋwa.",
+        "hypothesis": "Dusu ŋwa fu bundu ay ga teebur."
+      },
+      {
+        "source": "Les festivals culturels célèbrent la diversité ethnique du pays.",
+        "reference": "Alaada batuyaŋ ga laabo dumey boobaayaŋ batu.",
+        "hypothesis": "Festival cigaba ngey ga cebe jamana dumi-dumi naamu."
+      },
+      {
+        "source": "et tu approcheras des enfants d'Ammon. Ne les attaque pas, et ne t'engage pas dans un combat avec eux; car je ne te donnerai rien à posséder dans le pays des enfants d'Ammon: c'est aux enfants de Lot que je l'ai donné en propriété.",
+        "reference": "Amma waati kaŋ ni ga kaa ka maan Amonancey hirro me, ma si i taabandi, ma si i zokoti mo. Zama ay mana ni no Amon izey laabo gaa, zama ay n'a no Lotu izey se i ma may.»",
+        "hypothesis": "Nda ni maanu Ammonize zanka ce. Naŋ i fafuŋ ce, kala naŋ i zokandiyan nda ira, wa irkoy ma si di fo ga ay no hari ga Ammonize zanka cerbanda hiiryan; Ammonize zanka ce, Lotize se ni kaa hiiryan."
+      },
+      {
+        "source": "Celui qui garde ses commandements demeure en Dieu, et Dieu en lui; et nous connaissons qu'il demeure en nous par l'Esprit qu'il nous a donné.",
+        "reference": "Boro kaŋ goono ga Irikoy lordey gana mo goono ga goro Irikoy ra, Irikoy mo goono ga goro a ra. Naŋ kaŋ iri ga bay a goono ga goro iri ra neeya: Biya Hanno kaŋ a n'iri no do.",
+        "hypothesis": "Boro kaŋ gaŋ a fedey no ga fun irkoy ra, nda irkubey ga a ra; nda iri bay zaŋ a go fun iri ga, hinka caw kaŋ a no iri ga."
+      },
+      {
+        "source": "Dis au roi et à la reine: Asseyez-vous à terre! Car il est tombé de vos têtes, Le diadème qui vous servait d'ornement.",
+        "reference": "Ma salaŋ bonkoono nda nga nyaŋo se ka ne i se: Wa zumbu ganda ka kayna goray te, Zama araŋ darza koytaray fuula ga fun araŋ boŋey boŋ ka kaŋ.",
+        "hypothesis": "Har ka koy nda koyŋo se: Goro kuna ga! Korooy nga kaŋ gonda a boŋ boŋ, gaa go woŋ kaŋ duŋ nda a boŋ cebeeray."
+      }
+    ],
+    "zarma_to_fr": [
+      {
+        "source": "Woodin sabbay se no, yaa no Rabbi ci Yahuda bonkoono Yehoyacim boŋ: A si du boro kulu kaŋ ga goro Dawda karga boŋ, i g'a buukwa furu wayna korna da cin yeeno ra mo.",
+        "reference": "C'est pourquoi ainsi parle l'Éternel sur Jojakim, roi de Juda: Aucun des siens ne sera assis sur le trône de David, et son cadavre sera exposé à la chaleur pendant le jour et au froid pendant la nuit.",
+        "hypothesis": "Tout cela à cause du crime, oui, l'Éternel a dit contre Juda et contre Jérusalem: La multitude sera rassemblée contre la ville, et l'armée sera détruite et la porte sera renversée,"
+      },
+      {
+        "source": "Laabu albarkey day ga ti farhã.",
+        "reference": "Goûter les fruits de la terre est un plaisir.",
+        "hypothesis": "Le commerce est une chose bonne"
+      },
+      {
+        "source": "M'i lordi mo ka ne i ma koy ngey koyey do, i ma ne: Yaa no Rabbi Kundeykoyo, Israyla Irikoyo ci: Mate kaŋ araŋ ga ci araŋ koyey se neeya:",
+        "reference": "et à qui tu donneras mes ordres pour leurs maîtres, en disant: Ainsi parle l'Éternel des armées, le Dieu d'Israël: Voici ce que vous direz à vos maîtres:",
+        "hypothesis": "Je les ferai venir et ils se tiendront devant moi; on dira: Que signifie le Seigneur des armées, le Dieu d'Israël? Ce que vous faites aux princes signifie ceci:"
+      },
+      {
+        "source": "Jinde fo mo fun buro ra ka ne: «Boro woone ga ti ay Izo suubananta. Wa maa a se.»",
+        "reference": "Et de la nuée sortit une voix, qui dit: Celui-ci est mon Fils élu: écoutez-le!",
+        "hypothesis": "L'un d'eux dit à l'autre: \"Celui qui m'a choisi, moi je ne le choisirai pas. Il est comme moi."
+      },
+      {
+        "source": "I g'a jukke mo da nzarfu sekel zangu fo k'i no wandiya din baabo se, zama a na Israyla wandiyo maa sara. Waybora mo ga goro a wande. I si yadda albora m'a fay kal a fundo me.",
+        "reference": "et, parce qu'il a porté atteinte à la réputation d'une vierge d'Israël, ils le condamneront à une amende de cent sicles d'argent, qu'ils donneront au père de la jeune femme. Elle restera sa femme, et il ne pourra pas la renvoyer, tant qu'il vivra.",
+        "hypothesis": "Il le racheta pour quinze pièces d'argent et pour sa fiancée, afin qu'il devienne le mari de la fille d'un homme. Et ce jeune homme l'épousa. Et il accepta de se rendre dans sa maison."
+      },
+      {
+        "source": "Ni ga cim",
+        "reference": "Tu as raison",
+        "hypothesis": "Tu as raison"
+      },
+      {
+        "source": "Zama iri murteyaŋey baa gumo ni jine, Iri zunubey mo goono ga seeda iri boŋ. Zama iri murteyaŋey go iri banda, Iri g'iri laalayaŋey mo bay.",
+        "reference": "Car nos transgressions sont nombreuses devant toi, Et nos péchés témoignent contre nous; Nos transgressions sont avec nous, Et nous connaissons nos crimes.",
+        "hypothesis": "Traduction: Parce que vous avez péché avec une grande ardeur contre le Seigneur, vous êtes témoins que vos péchés sont à cause de vous. Parce que vous êtes avec nous, vous êtes nos associés."
+      },
+      {
+        "source": "Ni kambey ya garenad kali hanno no kaŋ gonda tuuri ize kaano yaŋ, Danga alhinna da nardi tilam,",
+        "reference": "Tes jets forment un jardin, où sont des grenadiers, Avec les fruits les plus excellents, Les troënes avec le nard;",
+        "hypothesis": "Ton bras est fort comme un arbre aux fruits délicieux, l'Acacia du henné et la graine à repiquer"
+      },
+      {
+        "source": "Haw ga ti haw koogu ka gonda laabu fumbu.",
+        "reference": "L'harmattan est un vent sec et poussiéreux.",
+        "hypothesis": "La poussière est sèche et la terre est gâtée."
+      },
+      {
+        "source": "Jeux Olympiques ga gandawey kul marga.",
+        "reference": "Les Jeux Olympiques réunissent tous les pays.",
+        "hypothesis": "Des foules sont venues aux Jeux Olympiques"
+      },
+      {
+        "source": "Zama ay mo, boro fo dabari ra no ay go, soojeyaŋ go ay bumbo dabaro ra mo. Ay ga ne woone se: ‹Koy!› -- kal a ma koy. Ay ga ne afo se: ‹Kaa!› -- kal a ma kaa. Ay ga ne ay bannya se: ‹Ma te woone!› -- kal a m'a te.»",
+        "reference": "Car, moi qui suis soumis à des supérieurs, j'ai des soldats sous mes ordres; et je dis à l'un: Va! et il va; à l'autre: Viens! et il vient; et à mon serviteur: Fais cela! et il le fait.",
+        "hypothesis": "Parce que je suis un homme, je ne peux rien réclamer à quiconque, vous non plus, vous ne pouvez rien me réclamer. J'ai dit à celui-ci: «Va!»—et il est allé; j'ai dit à mon serviteur: «Viens!»—et il est venu; j'ai dit à ma servante: «Fais ceci!»—et elle l'a fait."
+      },
+      {
+        "source": "Ifo se no araŋ g'araŋ biney sandandi binde, sanda mate kaŋ Misirancey da Firawna te, kaŋ yaŋ na ngey biney sandandi? Waato kaŋ a na goyey kaŋ ga dambarandi te i jine, manti i kokor ka borey taŋ, ngey mo tun ka dira?",
+        "reference": "Pourquoi endurciriez-vous votre coeur, comme les Égyptiens et Pharaon ont endurci leur coeur? N'exerça-t-il pas ses châtiments sur eux, et ne laissèrent-ils pas alors partir les enfants d'Israël?",
+        "hypothesis": "Pourquoi vous faites-vous du mal à vous-mêmes, comme je vous le demande, les Égyptiens font à Pharaon, pour vous tuer vous-mêmes ? Quand le travail qu'il fait n'est pas bon à vous, mais que vous êtes complet avec les gens, est-ce vous, vous allez partir ?"
+      },
+      {
+        "source": "A ziji mo feema kaŋ a te Betel ra din do, handu ahakkanta jirbi way cindi guwa, hando kaŋ a suuban nga bina ra din nooya. A na batu sinji mo Israyla izey se, ka ziji mo feema do zama nga ma dugu ton.",
+        "reference": "Et il monta sur l'autel qu'il avait fait à Béthel, le quinzième jour du huitième mois, mois qu'il avait choisi de son gré. Il fit une fête pour les enfants d'Israël, et il monta sur l'autel pour brûler des parfums.",
+        "hypothesis": "Il fit monter sa famille vers Béthel, la cinquième nuit, une petite partie du reste de ce qu'il avait choisi. Il s'arrêta pour établir les enfants d'Israël, afin de faire monter sa famille parce que la terre était brûlée."
+      },
+      {
+        "source": "Kaari hawji yaamo wo, kaŋ ga kalo naŋ! Takuba ma du a jase gaa, d'a kambe ŋwaari mwa gaa haray mo. A kamba ma suugu parkatak. A kambe ŋwaari mwa mo ma te kubay lip!",
+        "reference": "Malheur au pasteur de néant, qui abandonne ses brebis! Que l'épée fonde sur son bras et sur son oeil droit! Que son bras se dessèche, Et que son oeil droite s'éteigne!",
+        "hypothesis": "C'est un berger inutile, qui laisse son troupeau ! L'épée n'a pas touché son épaule, ni sa main n'a pris de nourriture. Sa lanterne s'est complètement fanée. Sa main qui a pris la nourriture ne va pas être blanchie au feu"
+      },
+      {
+        "source": "Nile perch ti haami beeri kaŋ ga duwandi Victoria bangu ra.",
+        "reference": "Le nile perch est un grand poisson du lac Victoria.",
+        "hypothesis": "Le Nile perch est un gros poisson qui vit dans le lac Victoria."
+      },
+      {
+        "source": "Rabbi wane fansantey ga ye ka kaa, I ga kaa ka to Sihiyona, I goono ga doon farhã sabbay se. Bine kaani kaŋ ga duumi ga goro i boŋ. I ga du bine kaani da farhã. Bine saray da durayyaŋ mo ga zuru.",
+        "reference": "Les rachetés de l'Éternel retourneront, Ils iront à Sion avec chants de triomphe, Et une joie éternelle couronnera leur tête; L'allégresse et la joie s'approcheront, La douleur et les gémissements s'enfuiront.",
+        "hypothesis": "Le chef des prêtres leur dit: allez à Sion, vous aurez de la joie à cause de cela. Il y aura un bien que vous procurera. Vous ferez du bien à cause de la joie. Le malheur pleurera et s'enfuira loin."
+      },
+      {
+        "source": "Irikoy n'a gaa a ma wongu nda Filistancey, da Laarabey kaŋ yaŋ go Gur-Baal, da Meyunim izey mo.",
+        "reference": "Dieu l'aida contre les Philistins, contre les Arabes qui habitaient à Gur Baal, et contre les Maonites.",
+        "hypothesis": "L'Éternel a battu les Philistins, les Arabes qui sont à Gur-Baal, et les Meïunites."
+      },
+      {
+        "source": "Yaadin mo no Rabbi te: hamni bi zugula kaŋ yaŋ ga taabandi furo Firawna windo d'a bannyey windey da Misira laabo kulu ra. Laabo halaci mo hamni bi zuguley sabbay se.",
+        "reference": "(8:16) L'Éternel dit à Moïse: Lève-toi de bon matin, et présente-toi devant Pharaon; il sortira pour aller près de l'eau. Tu lui diras: Ainsi parle l'Éternel: Laisse aller mon peuple, afin qu'il me serve.",
+        "hypothesis": "Rappe-toi de ce que fit l'Éternel: la colère s'échauffa contre eux, et il fit entrer les eaux du fleuve sur Pharaon et sur sa maison et sur tout le peuple d'Égypte; les eaux furent changées en sang à cause de la colère."
+      },
+      {
+        "source": "A ne Yesu se: «Alfa, woodin yaŋ kulu no ay gana ka haggoy d'ey za ay go arwasu.»",
+        "reference": "Il lui répondit: Maître, j'ai observé toutes ces choses dès ma jeunesse.",
+        "hypothesis": "Et Jésus lui dit : « Maître, tous les jours je suis assis à guetter le matin pour voir s'il viendra me chercher. "
+      },
+      {
+        "source": "Borey kaŋ yaŋ Dawda daŋ i ma baytu candi Rabbi windo ra binde, waato kaŋ i jin ka konda Rabbi sundurko k'a jisi noodin, ngey neeya:",
+        "reference": "Voici ceux que David établit pour la direction du chant dans la maison de l'Éternel, depuis que l'arche eut un lieu de repos:",
+        "hypothesis": "Les gens qui allèrent trouver David et comprirent le Seigneur dans le cœur, quand ils eurent conduit la brebis du Seigneur à cet endroit, eux dirent:"
+      },
+      {
+        "source": "Subu fuwo ga yay konni waate.",
+        "reference": "La maison en paille est fraîche en été.",
+        "hypothesis": "La femme couche pendant la saison chaude."
+      },
+      {
+        "source": "Ya ay kaayey Irikoyo, Ay saabu ni se, ay ga ni kuku mo, Nin kaŋ n'ay no laakal da hina. Sohõ mo ni n'ay bayrandi nda haŋ kaŋ iri goono ga ceeci ni gaa, Zama ni n'iri bayrandi nda bonkoono misa din.»",
+        "reference": "Dieu de mes pères, je te glorifie et je te loue de ce que tu m'as donné la sagesse et la force, et de ce que tu m'as fait connaître ce que nous t'avons demandé, de ce que tu nous as révélé le secret du roi.",
+        "hypothesis": "Seigneur Dieu, je te demande, je veux que tu me pardonnes car c'est moi qui ai mangé la nourriture. Maintenant, je suis en colère et je t'ai appelé, parce que tu m'as appelé avec l'offrande de la foi à cet instant."
+      },
+      {
+        "source": "Feejiyaŋ ga hambiri nda ham noo.",
+        "reference": "Les moutons fournissent de la laine et de la viande.",
+        "hypothesis": "Les brebis ont peur du loup."
+      },
+      {
+        "source": "Immer izey, zambar fo da waygu cindi hinka.",
+        "reference": "les fils d'Immer, mille cinquante-deux;",
+        "hypothesis": "Le petit enfant donne cinq cents francs à son petit frère."
+      },
+      {
+        "source": "Yesu ne i se: «Annabi si jaŋ darza, kala nga laabo ra, da nga dumey ra, da nga windo ra mo.»",
+        "reference": "Mais Jésus leur dit: Un prophète n'est méprisé que dans sa patrie, parmi ses parents, et dans sa maison.",
+        "hypothesis": "Jésus leur dit: «Il n'est pas un prophète sans honneur, si ce n'est dans son pays, dans sa maison et parmi ses parents."
+      },
+      {
+        "source": "Waraw foy ga kanu",
+        "reference": "La sauce d'oseille est bonne",
+        "hypothesis": "La sauce a bon goût"
+      },
+      {
+        "source": "Ni ga bay waati kaŋ no Irikoy ga woodin yaŋ tabbatandi, wala? Ni ga bay mate kaŋ a ga naŋ nga hirriyaŋo maliyaŋ ga kaari nd'a, wala?",
+        "reference": "Sais-tu comment Dieu les dirige, Et fait briller son nuage étincelant?",
+        "hypothesis": "Sais-tu quand Dieu a fermé la chose qui est confirmée, ou ? Sais-tu quand il cessera de lui envoyer la pluie sur la terre, ou ?"
+      },
+      {
+        "source": "Amma a ga ne: «Ay ga ze da Rabbi fundikoono, nga kaŋ fun da Israyla izey azawa kambe laabo, da laabey kulu ra mo, nangey kaŋ a n'i gaaray ka kond'ey.» Zama ay ga ye ka kand'ey ngey laabo ra, wo kaŋ ay no i kaayey se.",
+        "reference": "Mais on dira: L'Éternel est vivant, Lui qui a fait monter les enfants d'Israël du pays du septentrion Et de tous les pays où il les avait chassés! Je les ramènerai dans leur pays, Que j'avais donné à leurs pères.",
+        "hypothesis": "Mais il dit: «Je dois me lever et aller au Père, et si je m'en vais, je vous enverrai un consolateur, celui qui viendra du Père à vous, et qui rendra témoignage de moi.» C'est parce que je suis allé vers le Père, ce que je vous avais dit."
+      },
+      {
+        "source": "Kambe wow haray, nango kaŋ a ga goy, Amma yan'a fonnay, A ga nga boŋ tugu kambe ŋwaari haray, Hal ay si hin ka di a.",
+        "reference": "Est-il occupé au nord, je ne puis le voir; Se cache-t-il au midi, je ne puis le découvrir.",
+        "hypothesis": "La main a faim, ce qu'elle va faire, Mais l'œil l'a surprise, Elle a été mise dans la cachette avec la nourriture, Mais je ne peux pas la voir."
+      },
+      {
+        "source": "Me fo go no koyne windo ra haray kaŋ ga guna dandi kamba haray. A neesi mo koyne me ka koy me gaa dandi kamba haray, kambe kar zangu.",
+        "reference": "Le parvis intérieur avait une porte du côté du midi; il mesura d'une porte à l'autre au midi cent coudées.",
+        "hypothesis": "Je dis à sa mère de lui donner du mil pour le mettre dans une hotte de cuisine. Elle le pèse et je vais mettre le mil dans la hotte de cuisine, pour cent francs."
+      },
+      {
+        "source": "Za kaŋ ay na sarti sambu d'ay moy, Mate binde no ay ga laakal ye wandiyo gaa d'a?",
+        "reference": "J'avais fait un pacte avec mes yeux, Et je n'aurais pas arrêté mes regards sur une vierge.",
+        "hypothesis": "Qu'est-ce que je dois faire pour que tu me pardonnes et que je puisse aller voir ma fiancée ?"
+      },
+      {
+        "source": "Benyamin kunda wane: Rafu ize Palti.",
+        "reference": "pour la tribu de Benjamin: Palthi, fils de Raphu;",
+        "hypothesis": "La tribu de Benjamin : Rafu, fils de Palti."
+      },
+      {
+        "source": "Isa bindo ra",
+        "reference": "Au milieu du fleuve",
+        "hypothesis": "vers le fleuve"
+      },
+      {
+        "source": "Waato kaŋ Yesu bay kaŋ i ga ba ngey ma nga hã, kal a ne i se: «Araŋ goono ga care hã sanno wo kaŋ ay ne araŋ se boŋ, kaŋ ay ne: a cindi kayna fo araŋ si ye ka di ay, a cindi kayna koyne araŋ ga ye ka di ay?",
+        "reference": "Jésus, connut qu'ils voulaient l'interroger, leur dit: Vous vous questionnez les uns les autres sur ce que j'ai dit: Encore un peu de temps, et vous ne me verrez plus; et puis encore un peu de temps, et vous me verrez.",
+        "hypothesis": "Quand Jésus dit qu'ils allaient leur demander, il se dit en lui-même : Ce peuple demandera, ce que je leur ai dit : Il y a longtemps qu'ils ne m'ont vu, et il y a longtemps qu'ils m'ont vu?"
+      },
+      {
+        "source": "Woodin te hala sorro hinza, sahãadin-sahãadin mo, i na haya candi ka kond'a beene.",
+        "reference": "Cela arriva jusqu'à trois fois; et aussitôt après, l'objet fut retiré dans le ciel.",
+        "hypothesis": "La parole ne s'éloignera jamais de toi, de génération en génération, tu tireras l'épée."
+      },
+      {
+        "source": "Yotam zuru ka yana ka koy Beyer. Noodin no a goro nga baabayzo Abimelek humburkuma sabbay se.",
+        "reference": "Jotham se retira et prit la fuite; il s'en alla à Beer, où il demeura loin d'Abimélec, son frère.",
+        "hypothesis": "Jotham s'enfuit et s'en alla, et il se rendit à Beer. C'est à cause de cela qu'il y avait peur à cause d'Abimélek."
+      },
+      {
+        "source": "Ma ni kasko (casque) daŋ.",
+        "reference": "Porte ton casque.",
+        "hypothesis": "Je mets le casse."
+      },
+      {
+        "source": "A ga alwaatey da jirbey bare. A ga koyey tumbi, a ga koyey daŋ koytaray mo. A ga laakal no laakalkooney se, A ga bayray mo no borey kaŋ yaŋ ga fahamay bay se.",
+        "reference": "C'est lui qui change les temps et les circonstances, qui renverse et qui établit les rois, qui donne la sagesse aux sages et la science à ceux qui ont de l'intelligence.",
+        "hypothesis": "Il passera les nuits à dormir. Il se rendra au puits, il ira sur les chemins avec ses compagnons. Il percevra par sa perception, il acquerra la connaissance par ce que les gens comprendront par lui."
+      },
+      {
+        "source": "Woodin banda, da ni mwa no na ni daŋ ni ma taali te, m'a dagu ka furu. Zama a ga bisa ni se ni ma furo fundi ra mo-fo-koy, d'i ma ni catu danji bangu danjo ra, nin da ni mo hinka.",
+        "reference": "Et si ton oeil est pour toi une occasion de chute, arrache-le et jette-le loin de toi; mieux vaut pour toi entrer dans la vie, n'ayant qu'un oeil, que d'avoir deux yeux et d'être jeté dans le feu de la géhenne.",
+        "hypothesis": "Après cela, si tu veux te plaindre de ce qu'on t'a fait, je m'en irai. Parce qu'il te dépassera et te jettera dans le feu éternel, si tu ne changes pas."
+      },
+      {
+        "source": "Lojik matematik ga ti matematik nangu kayna fo ka ga lojik formel aplikasyon matematik boŋ guna.",
+        "reference": "La logique mathématique est un sous-domaine des mathématiques explorant les applications de la logique formelle aux mathématiques.",
+        "hypothesis": "La logique mathématique est une sous-discipline des mathématiques qui utilise la logique formelle et définit les mathématiques par l'examen."
+      },
+      {
+        "source": "I ne a se: «Rabbi, iri moy ma fiti.»",
+        "reference": "Ils lui dirent: Seigneur, que nos yeux s'ouvrent.",
+        "hypothesis": "Ils lui dirent: «Maître, ouvre-nous."
+      },
+      {
+        "source": "Amma Yahuda bonkoono kaŋ n'araŋ donton araŋ ma hã Rabbi gaa din, haŋ kaŋ araŋ ga ci a se neeya: Yaa no Rabbi, Israyla Irikoyo ci, nga kaŋ me sanno ni maa din:",
+        "reference": "Mais vous direz au roi de Juda qui vous a envoyés pour consulter l'Éternel: Ainsi parle l'Éternel, le Dieu d'Israël, au sujet des paroles que tu as entendues:",
+        "hypothesis": "Mais Jude, le frère de Jacques, et Simon le Zélote? Judas Iscariot, qui aussi le trahit?"
+      },
+      {
+        "source": "Haciika, ay ga naŋ ndunnya dumi boobo ma joote ni sabbay se. I bonkooney mo ga humburu gumo ni sabbay se, Waati kaŋ cine i di ay go g'ay takuba feeni ngey jine. I ga soobay ka jijiri saaya kulu, Boro fo kulu gaahamo ga jijiri nga fundo sabbay se, Ni kaŋyaŋo hane.",
+        "reference": "Je frapperai de stupeur beaucoup de peuples à cause de toi, Et leurs rois seront saisis d'épouvante à cause de toi, Quand j'agiterai mon épée devant leur face; Ils trembleront à tout instant chacun pour sa vie, Au jour de ta chute.",
+        "hypothesis": "Cependant, je vais vous raconter beaucoup de choses qui vous effraient à cause de l'obscurité. Ils ont tous très peur à cause de l'obscurité, Au moment où je me suis servi de mon sabre sur eux tous. Ils ont commencé à trembler de tout le corps, Toute personne est tombée à terre à cause de l'obscurité, Toi qui es là."
+      },
+      {
+        "source": "Oursi gooru ga zamna Niger nda Burkina Faso game.",
+        "reference": "La mare d'Oursi est partagée entre le Niger et le Burkina Faso.",
+        "hypothesis": "Oursi se trouve à la frontière entre le Niger et le Burkina Faso."
+      },
+      {
+        "source": "Hanso bu",
+        "reference": "Le chien est mort",
+        "hypothesis": "Traduction : Le petit chat"
+      },
+      {
+        "source": "Samson wando mo hẽ Samson jine ka ne: «Ni ga konna ay day no, ni si ba ay. Ni na jand'izo ci ay dumey izey se, amma ni man'a feerijo ci ay se.» Samson ne a se: «A go, ay man'a ci ay baaba wala ay nya se. May ci nin hala y'a ci ni se?»",
+        "reference": "La femme de Samson pleurait auprès de lui, et disait: Tu n'as pour moi que de la haine, et tu ne m'aimes pas; tu as proposé une énigme aux enfants de mon peuple, et tu ne me l'as point expliquée! Et il lui répondait: Je ne l'ai expliquée ni à mon père ni à ma mère; est-ce à toi que je l'expliquerais?",
+        "hypothesis": "Samson dit à sa femme: « Tu m'as détesté et tu ne m'as pas aimé. Tu as demandé aux gens de mon peuple mon secret, mais tu ne me l'as pas révélé. » Samson lui dit: « C'est cela, je n'ai rien dit à mon père ni à ma mère. Le dirai-je à toi ? "
+      },
+      {
+        "source": "Irikoy wo, a fonda ya toonante no. Rabbi sanno ya neesante mo no, Koray mo no boro kulu kaŋ ga tugu a ra se.",
+        "reference": "(18:32) Car qui est Dieu, si ce n'est l'Éternel; Et qui est un rocher, si ce n'est notre Dieu?",
+        "hypothesis": "Seigneur, il a fait entendre sa voix puissante. La voix de l'Eternel est pleine de majesté, la voix de l'Eternel, c'est le feu qui dévore."
+      },
+      {
+        "source": "Woodin banda Irikoy ne: «Iri ma boro te iri alhaalo ra, iri wane himando boŋ. I ma teeku hamey da beene curey da almaney may. I ma ndunnya may, da hay kulu kaŋ ga ganda biri ganda laabo boŋ.»",
+        "reference": "Puis Dieu dit: Faisons l'homme à notre image, selon notre ressemblance, et qu'il domine sur les poissons de la mer, sur les oiseaux du ciel, sur le bétail, sur toute la terre, et sur tous les reptiles qui rampent sur la terre.",
+        "hypothesis": "Par la suite, Dieu leur dit: «Vous aurez des gens avec vous, vous serez des maîtres. Vous avez les grandes eaux et les poissons. Vous aurez le sable et toute chose qui est sur la terre et sous terre."
+      },
+      {
+        "source": "A g'araŋ bannyey d'araŋ koŋŋey sambu, d'araŋ arwasey ra ngey kaŋ yaŋ ga sogo nd'i kulu, d'araŋ farkayey, a m'i daŋ nga goy ra.",
+        "reference": "Il prendra vos serviteurs et vos servantes, vos meilleurs boeufs et vos ânes, et s'en servira pour ses travaux.",
+        "hypothesis": "Il a reçu des étrangers et les a accueillus, vous (pl.) qui étiez étrangers et hôtes, ainsi que vos ânes, et il vous a aidés dans le travail."
+      },
+      {
+        "source": "Dawda tun noodin. A yana ka koy Adullam guuso ra. Waato kaŋ a nya-izey d'a baabo windo kulu maa baaru, i koy a do.",
+        "reference": "David partit de là, et se sauva dans la caverne d'Adullam. Ses frères et toute la maison de son père l'apprirent, et ils descendirent vers lui.",
+        "hypothesis": "David était là. Il allait à Adullam se réfugier. Lorsque ses frères et toute la maison de son père l'apprirent, ils vinrent le trouver."
+      },
+      {
+        "source": "Amma d'a ciya i kay ay saaware marga ra, Doŋ i g'ay borey daŋ i ma maa ay sanney, Doŋ i g'i bare k'i kaa ngey fondo laalo ra d'i goyey laalayaŋo mo gaa.",
+        "reference": "S'ils avaient assisté à mon conseil, Ils auraient dû faire entendre mes paroles à mon peuple, Et les faire revenir de leur mauvaise voie, De la méchanceté de leurs actions.",
+        "hypothesis": "Mais ils s'arrêtèrent et me dirent : Au nom de Dieu, ne va pas dans la foule. Au nom de Dieu, dis-leur qu'ils doivent cesser d'être mauvais les uns envers les autres."
+      },
+      {
+        "source": "Te ay se korbey",
+        "reference": "Fais moi une bague",
+        "hypothesis": "Mets des bracelets à moi"
+      },
+      {
+        "source": "May no ga ba afo koyne?",
+        "reference": "Qui veut une autre part ?",
+        "hypothesis": "Est-ce que je ne vais pas aussi ?"
+      },
+      {
+        "source": "Ngey kaŋ yaŋ ciya ay ibarey sabaabu kulu si, I n'ay gaaray da himma danga curayze cine.",
+        "reference": "Ils m'ont donné la chasse comme à un oiseau, Ceux qui sont à tort mes ennemis.",
+        "hypothesis": "Ce qui m'est arrivé a fait que je ne cherche aucun remède, vous m'avez contraint avec courage et une fermeté totale."
+      },
+      {
+        "source": "Ma bare ay do haray ka gomni te ay se. Ma ni gaabo no ay, ni tamo se ka ni koŋŋa izo faaba.",
+        "reference": "Tourne vers moi les regards et aie pitié de moi, Donne la force à ton serviteur, Et sauve le fils de ta servante!",
+        "hypothesis": "Je m'inquiète pour toi, afin que tu manges le bien-être avec moi. Car si tu es bon, et pour que tu puisses secourir ton esclave."
+      },
+      {
+        "source": "Amma jangal taakwa, kaŋ a kay banda nangu mooro, a mana baa ta ka beene guna, amma a soobay ka nga ganda di bine saray sabbay se ka ne: ‹Ya Irikoy, m'ay suuji, ay kaŋ ga ti zunubikoono.›",
+        "reference": "Le publicain, se tenant à distance, n'osait même pas lever les yeux au ciel; mais il se frappait la poitrine, en disant: O Dieu, sois apaisé envers moi, qui suis un pécheur.",
+        "hypothesis": "Mais quand l'impôt fut dû, comme il n'avait pas de quoi payer, on le fit comparaître devant le maître de la justice, et il dit qu'il ne pourrait payer que s'il vendait l'un de ses esclaves; et, comme il ne voulait pas le vendre, il fut introduit en prison; et il se jeta aux pieds de Jésus en disant: « Ô Dieu, aie pitié de moi qui suis un pécheur. "
+      },
+      {
+        "source": "Kala diya fo mo kaa Sawulu do ka ne: «Ma waasu ka kaa, zama Filistancey kande wurrandi laabo ra.»",
+        "reference": "lorsqu'un messager vint dire à Saül: Hâte-toi de venir, car les Philistins ont fait invasion dans le pays.",
+        "hypothesis": "Tout homme qui est appelé Philippe dit : Va-t'en vite, car Philippe a mis les sennes en désordre."
+      },
+      {
+        "source": "Dawda binde kaaru ka koy noodin, nga nda nga wande hinka, Ahinowam, Yezreyel waybora, da Abigayil, kaŋ goro ka te Nabal Karmel bora se wande waato.",
+        "reference": "David y monta, avec ses deux femmes, Achinoam de Jizreel, et Abigaïl de Carmel, femme de Nabal.",
+        "hypothesis": "David prit une autre femme à Macol, qui s'appelait Ahinoam de Jezreel, et Abigail, celle qui avait été la femme de Nabal de Carmel, était devenue sa femme."
+      },
+      {
+        "source": "da yu, da ji, da feejiyaŋ, da haw wa cukku, ka no Dawda nda nga banda borey se, i ma ŋwa. Zama i ne: «Borey wo, haray da jaw da farga go i gaa saajo ra.»",
+        "reference": "du miel, de la crème, des brebis, et des fromages de vache. Ils apportèrent ces choses à David et au peuple qui était avec lui, afin qu'ils mangeassent; car ils disaient: Ce peuple a dû souffrir de la faim, de la fatigue et de la soif, dans le désert.",
+        "hypothesis": "le blé, le lait, les brebis, les viandes de bœuf, et les esclaves de David avec les gens avec lui, ils ont mangé. Parce qu'ils disaient: «Ces gens, la faim et la soif et la fatigue dans le désert nous frappent. "
+      },
+      {
+        "source": "Israyla ne Yusufu se: «Ay mana tammahã hal ay ga di ni moyduma. A go mo, Irikoy naŋ ay di ni izey mo.»",
+        "reference": "Israël dit à Joseph: Je ne pensais pas revoir ton visage, et voici que Dieu me fait voir même ta postérité.",
+        "hypothesis": "Israël dit à Joseph : Je n'avais pas pensé que je te verrais encore. Dieu m'a fait voir tes enfants."
+      },
+      {
+        "source": "Israyla izey mo fay da nango din jirbey din ra. Boro kulu koy nga kunda da nga almayaaley do. Boro kulu tun noodin ka koy nga tubo do mo.",
+        "reference": "Et dans le même temps les enfants d'Israël s'en allèrent de là chacun dans sa tribu et dans sa famille, ils retournèrent chacun dans son héritage.",
+        "hypothesis": "Les enfants d'Israël campèrent dans ce désert. Chacun alla vers ses tentes et ses biens. Chacun retourna chez soi."
+      },
+      {
+        "source": "Waato din gaa waybora ne: «Ay ga ni ŋwaaray, ma naŋ ay, ni koŋŋa ma salaŋ koyo ay bonkoono se.» A ne waybora se: «Ma ci.»",
+        "reference": "La femme dit: Permets que ta servante dise un mot à mon seigneur le roi. Et il dit: Parle!",
+        "hypothesis": "Ce jour-là, le voleur lui dit : « Je t'en supplie, lâche-moi, je suis ton captive ; je te pardonnerai. » Il dit au voleur : « Je refuse. "
+      },
+      {
+        "source": "Pandemi ga ti epidemi ka ga koy ndunnya kul ra.",
+        "reference": "Une pandémie est une épidémie qui se propage à l'échelle mondiale.",
+        "hypothesis": "Une pandémie est une épidémie qui se répand dans le monde entier."
+      },
+      {
+        "source": "Daahir hala hõ ay bina goono ga fongu i gaa, Hal ay gungum ka ye ganda.",
+        "reference": "Quand mon âme s'en souvient, Elle est abattue au dedans de moi.",
+        "hypothesis": "En vérité, quand je me souviens qu'ils se sont rassemblés contre moi, je ne fais que m'asseoir par terre."
+      },
+      {
+        "source": "A zaari sintina gaa i ma marga hanante te. Araŋ ma si taabi goy kulu te.",
+        "reference": "Le premier jour, il y aura une sainte convocation: vous ne ferez aucune oeuvre servile.",
+        "hypothesis": "Du premier jour jusqu'à maintenant, vous ne vous êtes reposé en aucun travail."
+      },
+      {
+        "source": "Waati kaŋ i maa korni, Ay wo ga foori te i se, Ay g'i bugandi zama i ma farhã. I ma kani mo ka jirbi hal abada. I mo ma si ye ka hay koyne. Yaadin no Rabbi ci.",
+        "reference": "Quand ils seront échauffés, je les ferai boire, Et je les enivrerai, pour qu'ils se livrent à la gaîté, Puis s'endorment d'un sommeil éternel, et ne se réveillent plus, Dit l'Éternel.",
+        "hypothesis": "Au moment où vous m'appelez, voici, je sors vers vous; et je me précipite, parce que vous avez été favorable. L'on n'a pas besoin de me faire coucher jamais. Vous ne cesserez pas de chanter. Mais Dieu a dit."
+      },
+      {
+        "source": "Amma boro kaŋ go ga konna nga nya-izo, kubay ra no a go, kubay ra mo no a goono ga dira. A si bay naŋ kaŋ nga goono ga koy mo, zama kuba n'a moy danandi.",
+        "reference": "Mais celui qui hait son frère est dans les ténèbres, il marche dans les ténèbres, et il ne sait où il va, parce que les ténèbres ont aveuglé ses yeux.",
+        "hypothesis": "Mais si quelqu'un a de la haine contre son frère, qu'il l'accueille, et qu'il se réconcilie avec lui, sinon il ne peut pas offrir son don."
+      },
+      {
+        "source": "Kala Balaam na nga misa sambu ka ne: «Ya Balak, tun ka kay ka maa, ya Zippor izo, ma hanga jeeri ay se.",
+        "reference": "Balaam prononça son oracle, et dit: Lève-toi, Balak, écoute! Prête-moi l'oreille, fils de Tsippor!",
+        "hypothesis": "Mais Balaam lui dit: «Viens Balak, reste ici et je te dirai ce que l'Éternel me montrera."
+      },
+      {
+        "source": "I ga maan care gaa mo, Hala haw si hin ka furo i game ra.",
+        "reference": "(40:26) Couvriras-tu sa peau de dards, Et sa tête de harpons?",
+        "hypothesis": "Il entend ce qui se murmure, mais quand le vent entre dans votre maison, vous ne l'entendez pas."
+      },
+      {
+        "source": "Dawda baytu fo no. Ya Irikoy, m'ay hallasi, zama ni do no ay ga tugu.",
+        "reference": "Hymne de David. Garde-moi, ô Dieu! car je cherche en toi mon refuge.",
+        "hypothesis": "Le refuge de Dawda est là. Ô Dieu, je me suis réfugié, parce que tu es celui en qui je me cache."
+      },
+      {
+        "source": "Azariya na Helez hay, Helez na Eleyasa hay,",
+        "reference": "Azaria engendra Halets; Halets engendra Élasa;",
+        "hypothesis": "Azazias, fils de Hélec, Hélec, fils d'Élisé"
+      },
+      {
+        "source": "Misira ga ciya kurmu, Edom mo ga ciya saaji kaŋ boro kulu si a ra, Gurzuga kaŋ i te Yahuda izey se sabbay se, Za kaŋ i na borey kaŋ sinda taali wi ngey laabey ra.",
+        "reference": "L'Égypte sera dévastée, Édom sera réduit en désert, A cause des violences contre les enfants de Juda, Dont ils ont répandu le sang innocent dans leur pays.",
+        "hypothesis": "Misra deviendra un lieu désert, Édom sera une solitude déserte, pour toujours, à cause de tous les crimes commis contre Juda, à cause des innocents répandus dans leur pays."
+      },
+      {
+        "source": "Ay si g'araŋ naŋ alatuumiyaŋ, ay ga kaa araŋ do.",
+        "reference": "Je ne vous laisserai pas orphelins, je viendrai à vous.",
+        "hypothesis": "Je vous ai laissés orphelins, je vous ai renvoyés."
+      },
+      {
+        "source": "Kala Samuwila te haŋ kaŋ Rabbi ci a se ka koy Baytlahami. Kwaara arkusey n'a kubay. I go ga jijiri ka ne: «Baani mo no, ni kaayaŋo wo?»",
+        "reference": "Samuel fit ce que l'Éternel avait dit, et il alla à Bethléhem. Les anciens de la ville accoururent effrayés au-devant de lui et dirent: Ton arrivée annonce-t-elle quelque chose d'heureux?",
+        "hypothesis": "Toi, ne crains pas, car l'Éternel a parlé de toi pour aller à Bethléhem. La ville s'est rassemblée. Ils tremblaient en disant: «Qui est ce bonhomme, toi?"
+      },
+      {
+        "source": "Mikmas alborey, zangu nda waranka cindi hinka no.",
+        "reference": "les gens de Micmas, cent vingt-deux;",
+        "hypothesis": "Mikmas les cent quatre-vingt-dix restants."
+      },
+      {
+        "source": "Zaaro din ra, waato kaŋ wiciri kambo to, Yesu ne nga talibey se: «Iri ma teeko daŋandi ka koy ya-haray kambo gaa.»",
+        "reference": "Ce même jour, sur le soir, Jésus leur dit: Passons à l'autre bord.",
+        "hypothesis": "Dans l'après-midi, comme il faisait très chaud, Jésus dit à ses disciples : «Allons vous reposer à l'écart un peu."
+      },
+      {
+        "source": "da Azarel, da Selemiya, da Semariya,",
+        "reference": "Azareel, Schélémia, Schemaria,",
+        "hypothesis": "et Azarel, et Sélémya, et Sémariya,"
+      },
+      {
+        "source": "Tira fo",
+        "reference": "Quel livre",
+        "hypothesis": "Le livre"
+      },
+      {
+        "source": "Faadanca din ne a se: «Rabbi, ma kaa za ay izo mana bu!»",
+        "reference": "L'officier du roi lui dit: Seigneur, descends avant que mon enfant meure.",
+        "hypothesis": "Alors ce centenier lui dit: Seigneur, je ne suis pas digne que tu entres sous mon toit"
+      },
+      {
+        "source": "I ma si ngey boŋey cabu, i ma si boŋ zoobey taŋ yaadin mo. Kal i ma ngey boŋ hamney hanse hinne.",
+        "reference": "Ils ne se raseront pas la tête, et ne laisseront pas non plus croître leurs cheveux; mais ils devront couper leur chevelure.",
+        "hypothesis": "Vous ne vous couperez pas les cheveux, vous ne ferez pas de tonsure sur votre tête. Chacun de vous ne couvrira qu'une seule fois la tête"
+      },
+      {
+        "source": "Saaya din cine i g'ay ce taamey nyun nda haw ji, Tondi mo go ga ji dooru ay se danga gooru cine.",
+        "reference": "Quand mes pieds se baignaient dans la crème Et que le rocher répandait près de moi des ruisseaux d'huile!",
+        "hypothesis": "Le démon de la fièvre m'a piqué avec le bout de son ongle, La terre me fait mal comme on me perce avec une épine."
+      },
+      {
+        "source": "Zama nda sintinay wano sinda taali, doŋ i s'a barmay da ihinkanta.",
+        "reference": "En effet, si la première alliance avait été sans défaut, il n'aurait pas été question de la remplacer par une seconde.",
+        "hypothesis": "Parce qu'avec le commencement et sans faute, alors ils l'ont changé en deuxième."
+      },
+      {
+        "source": "Zama boro boobo go Yahuda ra kaŋ yaŋ gonda zeyaŋ nga nd'ey game ra, zama Sekaniya Ara izo anzuray no. A ize Yehohanan no ka Mesullam Bereciya izo ize way hiiji.",
+        "reference": "Car plusieurs en Juda étaient liés à lui par serment, parce qu'il était gendre de Schecania, fils d'Arach, et que son fils Jochanan avait pris la fille de Meschullam, fils de Bérékia.",
+        "hypothesis": "Parce que beaucoup de gens de Juda étaient là, qui avaient des serviteurs et des troupes, parce que ce sont des cousins de Secania, fils de Arab, fils d'Arab, et les fils de Jéhojanan, fils de Mesullam, et les fils de Berecya, fils d'Arab, et les fils d'Ezechias, fils de Mesullam, et les fils de Berecya, et les fils de Mesullam, et les fils de Berecya."
+      },
+      {
+        "source": "Woodin sabbay se no a hayrey ne: «A to albeeri, w'a hã.»",
+        "reference": "C'est pourquoi ses parents dirent: Il a de l'âge, interrogez-le lui-même.",
+        "hypothesis": "Pour cette raison, il leur cria: «Vous avez de la chance, appelez."
+      },
+      {
+        "source": "Amma Zelofehad, Hefer izo, Jileyad ize, Macir ize, Manasse ize, a sinda ize alboro, kala wayboroyaŋ. A ize wayey maayey neeya: Mala, da Noha, da Hogla, da Milka, da Tirza.",
+        "reference": "Tselophchad, fils de Hépher, fils de Galaad, fils de Makir, fils de Manassé, n'eut point de fils, mais il eut des filles dont voici les noms: Machla, Noa, Hogla, Milca et Thirtsa.",
+        "hypothesis": "Mais Zelophéhad, fils de Hépher, fils de Galaad, fils de Makir, fils de Manassé, de la famille de Manassé, fils de Joseph; il n'e point de fils, mais seulement des filles. Voici les noms de ses filles: Machla, Noa, Hogla, Milca et Thirsa."
+      },
+      {
+        "source": "A nafa ga bisa tondi hiir'ize caadante yaŋ. Hay kulu kaŋ ni ga bini sinda haŋ kaŋ i ga kar a gaa.",
+        "reference": "Elle est plus précieuse que les perles, Elle a plus de valeur que tous les objets de prix.",
+        "hypothesis": "C'est un avantage qui dépasse les montagnes et les forêts de prix élevés. Toute chose que tu convoites sans avoir d'argent, tu la lances au loin."
+      },
+      {
+        "source": "Ni ga teeko boŋbeera dabari, Waati kaŋ bonday beerey ga tun ka ciciri, Ni ga i kanandi no.",
+        "reference": "(89:11) Tu écrasas l'Égypte comme un cadavre, Tu dispersas tes ennemis par la puissance de ton bras.",
+        "hypothesis": "Tu me parleras avec sagesse, Quand les gens instruits seront assemblés, Tu m'écouteras."
+      },
+      {
+        "source": "Rabbi salaŋ Musa se ka ne:",
+        "reference": "L'Éternel parla à Moïse, et dit:",
+        "hypothesis": "L'Éternel parla à Moïse en disant"
+      },
+      {
+        "source": "A ne Yayel se: «Ay ga ni ŋwaaray, m'ay no hari kayna ay ma haŋ, zama ay goono ga maa jaw.» Kala Yayel na wa mooro humbur me feeri ka dooru ka no Sisera se. A haŋ, ka ye ka daabu.",
+        "reference": "Il lui dit: Donne-moi, je te prie, un peu d'eau à boire, car j'ai soif. Elle ouvrit l'outre du lait, lui donna à boire, et le couvrit.",
+        "hypothesis": "Yael dit: «Je te prie, laisse-moi boire un peu d'eau, car j'ai soif.» Il lui donna du lait caillé, et la porte lui fut ouverte; elle but."
+      },
+      {
+        "source": "Araŋ mana tangami te jina ka to naŋ kaŋ araŋ g'araŋ kuuri mun ka bu zunubi gurjay ra.",
+        "reference": "Vous n'avez pas encore résisté jusqu'au sang, en luttant contre le péché.",
+        "hypothesis": "Vous n'avez pas été affligés en allant à la rencontre de la lutte avec le péché."
+      },
+      {
+        "source": "A na inga kambeizo dumbu",
+        "reference": "Il s'est coupé le doigt",
+        "hypothesis": "Il y avait un homme qui avait de la main droite"
+      },
+      {
+        "source": "Araŋ danawyaŋ wo kaŋ goono ga fondo cabe, kaŋ yaŋ ga hamn'ize soolam ka yo gon!",
+        "reference": "Conducteurs aveugles! qui coulez le moucheron, et qui avalez le chameau.",
+        "hypothesis": "Vous, les aveugles, qui êtes sur le chemin, et que nous allons guider pour que vous entriez dans le trou !"
+      },
+      {
+        "source": "Almasihu margey binde tabbat cimi fonda ra, borey mo goono ga tonton i ra zaari kulu.",
+        "reference": "Les Églises se fortifiaient dans la foi, et augmentaient en nombre de jour en jour.",
+        "hypothesis": "Le Christ a confirmé la chose véritable en ajoutant que tous les hommes lui seraient soumis."
+      },
+      {
+        "source": "Zama may no ga bay hala Irikoy ga bare ka ba ye koyne, a ma fay da nga futay korna, iri ma si halaci mo?»",
+        "reference": "Qui sait si Dieu ne reviendra pas et ne se repentira pas, et s'il ne renoncera pas à son ardente colère, en sorte que nous ne périssions point?",
+        "hypothesis": "Parce que comment se fait-il que Dieu change et t'éloigne de lui, qu'il brise ta confiance, et qu'il te détruise?"
+      },
+      {
+        "source": "«Laalante no boro kaŋ ga danaw darandi fonda gaa.» Jama kulu ma tu ka ne: «Amin!»",
+        "reference": "Maudit soit celui qui fait égarer un aveugle dans le chemin! Et tout le peuple dira: Amen!",
+        "hypothesis": "Un aveugle est un homme qui guide les autres sur le chemin. Toute la foule a dit: Amen!"
+      },
+      {
+        "source": "Hungum no a ga a goga tisso",
+        "reference": "Il est enrhumé",
+        "hypothesis": "Le rhume est ce qui le fait éternuer."
+      },
+      {
+        "source": "Iri ga yuu zaa bila ka yuuyey wi.",
+        "reference": "Nous récoltons le miel sans tuer les abeilles.",
+        "hypothesis": "Nous vendons toutes les choses pour les acheter."
+      },
+      {
+        "source": "Araŋ ga bay mo kaŋ ay no ka lordo din zumandi araŋ se, zama ay sappa ma goro Lawi banda. Yaadin no Rabbi Kundeykoyo ci.",
+        "reference": "Vous saurez alors que je vous ai adressé cet ordre, Afin que mon alliance avec Lévi subsiste, Dit l'Éternel des armées.",
+        "hypothesis": "Vous savez que je suis descendu vers vous à cause de ma maladie, car j'ai voulu revenir avec vous. C'est ce que dit le Seigneur l'Eternel."
+      },
+      {
+        "source": "Attiéké ga tee nda banga funsante.",
+        "reference": "L'attiéké est fait à partir de manioc fermenté.",
+        "hypothesis": "L'attiéké est bon avec la sauce piment."
+      },
+      {
+        "source": "Maradi kwaara ga honnandi sanda Niger ŋwaari jisi nangu.",
+        "reference": "La région de Maradi est considérée comme le grenier du Niger.",
+        "hypothesis": "Maradi permet de produire de la nourriture comme au Niger partout."
+      },
+      {
+        "source": "da gabu, da gabu-ce-daŋ-guusu, d'i dumi kulu.",
+        "reference": "le milan, l'autour et ce qui est de son espèce;",
+        "hypothesis": "Il est trouble, trouble de fond, dans tous ses aspects."
+      },
+      {
+        "source": "Boro fooyaŋ mo goono ga salaŋ a se Irikoy windo ciine ra, mate kaŋ i n'a taalam da tondi hanno yaŋ da nooyaŋey mo. Kal a ne:",
+        "reference": "Comme quelques-uns parlaient des belles pierres et des offrandes qui faisaient l'ornement du temple, Jésus dit:",
+        "hypothesis": "Aucun homme ne prie Dieu dans sa langue, si ce n'est qu'ils le décorent sur la pierre comme une chose qui est en lui. Il est dit"
+      },
+      {
+        "source": "Sayni tonsayaŋ ga nyalalandi sanda alyaati tuuri fitey ga.",
+        "reference": "Les gouttes de rosée brillaient comme des perles sur les feuilles.",
+        "hypothesis": "La saison des cultures se traduit par le bruit des danses dans les forêts."
+      },
+      {
+        "source": "I ra afo kaŋ se i ga ne Ciliyobas tu a se ka ne: «Ni hinne no ga ti yaw Urusalima, kaŋ mana bay hayey kaŋ te jirbey wo gaa?»",
+        "reference": "L'un d'eux, nommé Cléopas, lui répondit: Es-tu le seul qui, séjournant à Jérusalem ne sache pas ce qui y est arrivé ces jours-ci? -",
+        "hypothesis": "Il arriva qu'il lui dit, Chélias, et qu'il lui dit : « Toi seul es l'étranger à Jérusalem, qui ne sait pas les choses qui se passent par ici ? "
+      },
+      {
+        "source": "Saaya kaŋ cine iri du ka fatta, gaa no iri du ka bay kaŋ gungo maa ga ti Malita.",
+        "reference": "Après nous être sauvés, nous reconnûmes que l'île s'appelait Malte.",
+        "hypothesis": "Quand nous partîmes pour sortir, nous sûmes que le nom de la ville est Malita."
+      },
+      {
+        "source": "Kal a fay da sanno, Irikoy tun mo ka fay da Ibrahim.",
+        "reference": "Lorsqu'il eut achevé de lui parler, Dieu s'éleva au-dessus d'Abraham.",
+        "hypothesis": "Et Dieu a béni Abraham, et l'Éternel l'a béni."
+      },
+      {
+        "source": "Ni na nangu soola ka jisi a se, A na nga kaajey sinji nda guusuyaŋ, A na laabo toonandi mo.",
+        "reference": "(80:11) Les montagnes étaient couvertes de son ombre, Et ses rameaux étaient comme des cèdres de Dieu;",
+        "hypothesis": "Tu es en sécurité pour le poser, Il plante des tomates avec une houe, Il retourne le remuer."
+      },
+      {
+        "source": "Kala ni ma biya nda ni jine bora bannyey kaŋ yaŋ kaa ni banda. Araŋ tunanta susubay, waato kaŋ hananyaŋo wasa araŋ se, kala araŋ ma araŋ diraw te.»",
+        "reference": "Ainsi lève-toi de bon matin, toi et les serviteurs de ton maître qui sont venus avec toi; levez-vous de bon matin, et partez dès que vous verrez la lumière.",
+        "hypothesis": "À moins que tu ne t'en ailles avec tes femmes, et qu'aucun homme ne se sauve avec toi. Vous tous lèverez-vous le matin, et quand le jour se lèvera pour vous, s'enfuira-t-vous ?"
+      },
+      {
+        "source": "Kala Israyla izey hẽ Rabbi gaa, zama bonkoono din gonda wongu guuru torko zangu yagga. Jiiri waranka timmante no a na Israyla izey kaynandi gumo.",
+        "reference": "Les enfants d'Israël crièrent à l'Éternel, car Jabin avait neuf cents chars de fer, et il opprimait avec violence les enfants d'Israël depuis vingt ans.",
+        "hypothesis": "Quand les enfants d'Israël furent rebellions contre l'Eternel, il les livra entre les mains des Madianites pendant sept ans. Ils opprimèrent les enfants d'Israël pendant cette période."
+      },
+      {
+        "source": "«Ma koy ay tamo Dawda do ka ci a se kaŋ Rabbi ne: Nin no ga fu cina ay se kaŋ ra ay ga goro, wala?",
+        "reference": "Va dire à mon serviteur David: Ainsi parle l'Éternel: Est-ce toi qui me bâtirais une maison pour que j'en fasse ma demeure?",
+        "hypothesis": "Je vais trouver David pour lui dire de la part du Seigneur: Est-ce cela qui me dit de construire une maison pour moi, ou bien?"
+      },
+      {
+        "source": "suba ay ga koy Dosso ni binde",
+        "reference": "Demain j'irai à Dosso et toi",
+        "hypothesis": "Demain j'irai à Dosso avec eux"
+      },
+      {
+        "source": "Boro gonda farhã nga tuyaŋey ra, Sanni kaŋ ga hagu nga alwaati ra mo, Man a booriyaŋ misa!",
+        "reference": "On éprouve de la joie à donner une réponse de sa bouche; Et combien est agréable une parole dite à propos!",
+        "hypothesis": "L'homme est heureux dans ses affaires, Les paroles qui conviennent au temps, vraiment c'est bon que je dise!"
+      },
+      {
+        "source": "Samuwila mo maa jama sanney kulu, a n'i ci Rabbi hangey ra.",
+        "reference": "Samuel, après avoir entendu toutes les paroles du peuple, les redit aux oreilles de l'Éternel.",
+        "hypothesis": "Samoula, qui avait tous les jours, était avec le seigneur dans les champs."
+      },
+      {
+        "source": "Zama haciika, Yohanna na baptisma te da hari, amma araŋ wo, araŋ ga du Biya Hanna baptisma ne ka koy jirbiyaŋ.»",
+        "reference": "car Jean a baptisé d'eau, mais vous, dans peu de jours, vous serez baptisés du Saint Esprit.",
+        "hypothesis": "Car il était nécessaire que Jésus fût baptisé par Jean, mais non pas vous ; car il vous faut être baptisé de la baptême de Jean, pour aller dormir."
+      },
+      {
+        "source": "Ya Rabbi, ma si deeni ay ga ni futa ra, Ma s'ay gooji mo ni futay korna ra.",
+        "reference": "(6:3) Aie pitié de moi, Éternel! car je suis sans force; Guéris-moi, Éternel! car mes os sont tremblants.",
+        "hypothesis": "Seigneur, je ne suis pas de ceux qui doutent de la religion, ne me rends pas perdid parmi les gens égarés."
+      },
+      {
+        "source": "Borey kaŋ yaŋ se a te jine boro sinda me. Kulu nda yaadin borey kaŋ yaŋ ga kaa banda si maa a kaani. Haciika, woodin mo yaamo no da haw gaarayyaŋ.",
+        "reference": "Il n'y avait point de fin à tout ce peuple, à tous ceux à la tête desquels il était. Et toutefois, ceux qui viendront après ne se réjouiront pas à son sujet. Car c'est encore là une vanité et la poursuite du vent.",
+        "hypothesis": "Ceux qui sont avec lui ne sont pas des êtres humains. Et tous ceux qui sont avec lui sont des méchants. En effet, le rien est la cible du mépris."
+      },
+      {
+        "source": "Amnon binde kani ka te sanda nga jante no. Waato kaŋ bonkoono kaa zama nga m'a guna se, Amnon ne bonkoono se: «Ay ga ni ŋwaaray no, ma naŋ ay waymo Tamar ma kaa ka maasa hinka te ay se ay jine, zama ay ma ŋwa a kambe ra.»",
+        "reference": "Amnon se coucha, et fit le malade. Le roi vint le voir, et Amnon dit au roi: Je te prie, que Tamar, ma soeur, vienne faire deux gâteaux sous mes yeux, et que je les mange de sa main.",
+        "hypothesis": "Alors Amnon tomba malade, parce qu'il disait qu'elle était malade. Le temps que le maigre (fils) passa, parce qu'il le vit, Amnon dit au maigre: «Je te prie, que Tamar ma sœur vienne et fasse les gâteaux cinq devant moi, car je mangerai de sa main."
+      },
+      {
+        "source": "Amma Yesu ne i se: «Manti tilas no i ma koy, day araŋ bumbey m'i no ŋwaari.»",
+        "reference": "Jésus leur répondit: Ils n'ont pas besoin de s'en aller; donnez-leur vous-mêmes à manger.",
+        "hypothesis": "Mais Jésus leur dit: Puisque c'est forcé que vous partiez, vendez ce que vous avez et mangez."
+      },
+      {
+        "source": "I ga Edom ciya a wane. Seyir mo ngey kaŋ ti a waato ibarey, i ga ye a do, saaya kaŋ Israyla ga gaabi bangandi.",
+        "reference": "Il se rend maître d'Édom, Il se rend maître de Séir, ses ennemis. Israël manifeste sa force.",
+        "hypothesis": "Il est devenu un peuple, appelé du nom de ce peuple du désert, et Israël s'est mis à le combattre avec violence, mais il n'a pas triompher"
+      },
+      {
+        "source": "Kala Yehosafat humburu. A na nga bina daŋ Rabbi ceeciyaŋ gaa. A binde fe Yahuda kulu ra ka ne i ma mehaw.",
+        "reference": "Dans sa frayeur, Josaphat se disposa à chercher l'Éternel, et il publia un jeûne pour tout Juda.",
+        "hypothesis": "Quand Josaphat eut peur, il décida de consulter l'Éternel. Il proclama un jeûne pour tout Juda, et le peuple s'assembla pour chercher l'Éternel."
+      },
+      {
+        "source": "Širalité ga ti jinay taka kaŋ si hin ka nga diji bisa.",
+        "reference": "La chiralité est la propriété d'un objet non superposable à son image miroir.",
+        "hypothesis": "La réalité est que les choses sont difficiles, car il n'est pas facile qu'il gagne."
+      },
+      {
+        "source": "Yakuba na nga izey ce ka ne: «Wa margu hal ay ma ci araŋ se haŋ kaŋ ga du araŋ da haŋ kaŋ araŋ ga du jirbey kaŋ ga kaa ra.",
+        "reference": "Jacob appela ses fils, et dit: Assemblez-vous, et je vous annoncerai ce qui vous arrivera dans la suite des temps.",
+        "hypothesis": "Jacob demanda à ses fils: Allez et achetez-nous du blé pour que nous puissions vivre et ne pas mourir, nous et vous."
+      },
+      {
+        "source": "Amma waato kaŋ Tassalonika kwaara Yahudancey du baaru kaŋ Bulos goono ga Irikoy sanno waazu Beriya mo ra, i kaa noodin mo ka borey marga zukku k'i laakaley tunandi.",
+        "reference": "Mais, quand les Juifs de Thessalonique surent que Paul annonçait aussi à Bérée la parole de Dieu, ils vinrent y agiter la foule.",
+        "hypothesis": "Mais comme les Juifs de Thessalonique avaient formé une bande et que Paul se trouvait déjà chez eux, ils vinrent jusqu'à Bérée et y excitèrent les foules."
+      },
+      {
+        "source": "A n'i daŋ nga goy-teerey kambey ra, kurey kulu waani-waani. A ne nga goy-teerey se: «Araŋ ma jin ka koy ay se. Araŋ ma daŋandi. Araŋ ma game naŋ kurey da care game ra.»",
+        "reference": "Il les remit à ses serviteurs, troupeau par troupeau séparément, et il dit à ses serviteurs: Passez devant moi, et mettez un intervalle entre chaque troupeau.",
+        "hypothesis": "Et il dit à ses ouvriers : C'est que je vais après vous. Mettez-vous à la cause, et laissez ce qu'il y a de caché derrière vous."
+      },
+      {
+        "source": "Ni beere waybora no ga ti Samariya, kaŋ goro ni se azawa kambe haray doŋ, nga nda nga ize wayey. Ni kayne waybora mo, kaŋ goro ni se dandi kambe haray doŋ, Saduma nda nga ize wayey no.",
+        "reference": "Ta grande soeur, qui demeure à ta gauche, c'est Samarie avec ses filles; et ta petite soeur, qui demeure à ta droite, c'est Sodome avec ses filles.",
+        "hypothesis": "Ta femmeSamarie est comme une terre à sec, comme une terre stérile, qui retient la pluie; et ta sœur, comme une terre flétrie, qui ne retient pas l'eau."
+      },
+      {
+        "source": "Yesu goro ka iway cindi hinka ce ka ne i se: «Boro kulu kaŋ ga ba nga ma ciya ibeeri, a ma ciya ikulu kokor banda ka ikulu saajaw mo.»",
+        "reference": "Alors il s'assit, appela les douze, et leur dit: Si quelqu'un veut être le premier, il sera le dernier de tous et le serviteur de tous.",
+        "hypothesis": "Jésus étant là, il leur dit une seconde fois : Tout homme qui fait du mal, deviendra mauvais pour toujours, et ne sera jamais utile."
+      },
+      {
+        "source": "Beejo ga ti kaari kubay ra.",
+        "reference": "L'espoir est une lumière dans l'obscurité.",
+        "hypothesis": "Le troupau va rejoindre les gens."
+      },
+      {
+        "source": "Attaay ga gaara sorro hinza alaada boŋ.",
+        "reference": "Le thé est servi en trois services selon la tradition.",
+        "hypothesis": "Le thé est une parole importante selon la coutume"
+      },
+      {
+        "source": "Patiyan ga ti dama ka boro ma dondon k'a ma beeri.",
+        "reference": "L'échec est une opportunité d'apprendre et de grandir.",
+        "hypothesis": "L'instruction sert à ce que la personne enseigne les humains et les grandisse."
+      },
+      {
+        "source": "Rabbi Kundeykoyo no k'a waadu, Zama nga ma boŋbeeray darza kulu ziibandi, A ma donda-caray candi ka kande ndunnya beeraykoyey kulu boŋ.",
+        "reference": "C'est l'Éternel des armées qui a pris cette résolution, Pour blesser l'orgueil de tout ce qui brille, Pour humilier tous les grands de la terre.",
+        "hypothesis": "Car le Seigneur Dieu l'a destiné, parce qu'il a vu sa gloire toute souillée, Il n'a point arraché l'os du péché, ni au Christ ni à ses frères."
+      },
+      {
+        "source": "Yaadin mo no a te nga mebaraw wandey kulu se, ngey kaŋ yaŋ ga dugu ton, i ga sargayyaŋ wi mo ngey toorey se.",
+        "reference": "Et il fit ainsi pour toutes ses femmes étrangères, qui offraient des parfums et des sacrifices à leurs dieux.",
+        "hypothesis": "Alors que ce n'était qu'un jeune garçon, et qu'il était petit, et que ses frères le détestaient."
+      },
+      {
+        "source": "Jama kulu binde na anniya sambu ngey ma ye ka jirbi iyye fo haggoy koyne. I na jirbi iyya din mo toonandi nda farhã.",
+        "reference": "Toute l'assemblée fut d'avis de célébrer sept autres jours. Et ils célébrèrent joyeusement ces sept jours;",
+        "hypothesis": "Toute l'assemblée eut un même dessein, car ils entendirent tous passer la nuit avec leurs femmes. Ils convinrent de passer la nuit avec joie."
+      },
+      {
+        "source": "Baani teyan si hay kul day, amma a alhorma ga baa.",
+        "reference": "La gentillesse coûte peu mais vaut beaucoup.",
+        "hypothesis": "Le bien est meilleur que la richesse, mais il assure le respect."
+      },
+      {
+        "source": "Sahãadin-sahãadin a ye ka di, ka Yesu gana, a goono ga Irikoy beerandi. Boro kulu kaŋ di woodin mo na Irikoy kuku.",
+        "reference": "A l'instant il recouvra la vue, et suivit Jésus, en glorifiant Dieu. Tout le peuple, voyant cela, loua Dieu.",
+        "hypothesis": "De temps en temps il allait le rejoindre, et Jésus le louait. Tous ceux qui le trouvaient louaient Dieu."
+      },
+      {
+        "source": "Niamey ga ti Niger faaba koira.",
+        "reference": "Niamey est la capitale du Niger.",
+        "hypothesis": "Niamey est la capitale du Niger"
+      },
+      {
+        "source": "Ay g'ay maa hanna bayrandi ay borey Israyla bindo ra, ay si naŋ mo i ma ye k'ay maa hanna ziibandi koyne. Dumi cindey ga bay mo kaŋ ay no ga ti Rabbi, Koy Hanna no Israyla game ra.",
+        "reference": "Je ferai connaître mon saint nom au milieu de mon peuple d'Israël, Et je ne laisserai plus profaner mon saint nom; Et les nations sauront que je suis l'Éternel, Le Saint en Israël.",
+        "hypothesis": "J'ai appelé un homme pour venir du milieu d'Israël, et je l'ai laissé aller pour qu'il m'appelle et aille. La signification est que je suis l'Éternel, Le Saint est au milieu d'Israël."
+      },
+      {
+        "source": "Ay wane jama go ay se sanda curo kaŋ gonda cangare-cangare, kaŋ curo cindey n'a daŋ game ka gaaba nd'a. Araŋ ma koy ka ganji ham kulu margu ka kand'ey zama i ma ham ŋwa.",
+        "reference": "Mon héritage a été pour moi un oiseau de proie, une hyène; Aussi les oiseaux de proie viendront de tous côtés contre lui. Allez, rassemblez tous les animaux des champs, Faites-les venir pour qu'ils le dévorent!",
+        "hypothesis": "C'est ce que nous avons fait comme l'oiseau qui a été utilisé (ou pris) pour nous, que l'oiseau ait posé le piège et qu'il soit libéré. Allez, appelez tous les oiseaux ensemble pour qu'ils viennent manger avec nous."
+      },
+      {
+        "source": "zeban",
+        "reference": "Pseudogyps africanus",
+        "hypothesis": "Répartir"
+      },
+      {
+        "source": "Waato mo bonkooni gaabikooniyaŋ go Urusalima ra kaŋ yaŋ na isa daŋanta laabey kulu may. I na jangal da marga-marga da dwan nooru mo bana i se.",
+        "reference": "Il y eut à Jérusalem des rois puissants, maîtres de tout le pays de l'autre côté du fleuve, et auxquels on payait tribut, impôt, et droit de passage.",
+        "hypothesis": "Comme il était très près de Jérusalem, au bord du fleuve, tous les marchands d'eau ont payé la taxe."
+      },
+      {
+        "source": "I go no, handu hinkanta bananta, a ye ka kaa nga baabo do. Nga mo te a se mate kaŋ a na nga sarto sambu din boŋ. Wandiya mana alboro bay mo. A ciya alaada Israyla ra,",
+        "reference": "Au bout des deux mois, elle revint vers son père, et il accomplit sur elle le voeu qu'il avait fait. Elle n'avait point connu d'homme. Dès lors s'établit en Israël la coutume",
+        "hypothesis": "Ils n'allèrent pas; le troisième jour, il le délivra. Il ne savait pas comment il lui avait sauvé la vie à cause de cela. Une jeune femme vit un homme; elle devint coutumière du peuple d'Israël,"
+      },
+      {
+        "source": "A kayno Oholiba mo di woodin, amma nga din bisa nga beero biniyay goyey ra, a kaaruwatara mo bisa beero wano.",
+        "reference": "Sa soeur Oholiba vit cela, Et fut plus déréglée qu'elle dans sa passion; Ses prostitutions dépassèrent celles de sa soeur.",
+        "hypothesis": "Oholiab ne lui succéda, mais il l'emportait sur tous dans l'habileté, et il était plus ingénieux que tous."
+      },
+      {
+        "source": "Birno mo kambu-taaci-koy no, kaŋ ikulu ga saba, a salleyaŋo ga saba nd'a hayyaŋo. A na birno neesi nda goobo din mo, a to kilometar zambar hinka nda zangu hinka. A salleyaŋo, d'a hayyaŋo, d'a kuuyaŋo, ikulu afolloŋ no.",
+        "reference": "La ville avait la forme d'un carré, et sa longueur était égale à sa largeur. Il mesura la ville avec le roseau, et trouva douze mille stades; la longueur, la largeur et la hauteur en étaient égales.",
+        "hypothesis": "C'est un village peu peuplé, dont les habitants vivent ensemble, et ses coutumes sont faciles à observer. Il est très vaste et très grand, il mesure environ cinq kilomètres sur cent mètres. Ses coutumes, et ses façons de faire, et ses règles, tous les habitants sont d'accord."
+      },
+      {
+        "source": "Boro kaŋ sinda baakasinay si Irikoy bay, zama Irikoy ya baakasinay no.",
+        "reference": "Celui qui n'aime pas n'a pas connu Dieu, car Dieu est amour.",
+        "hypothesis": "Celui qui n'a pas d'ami n'a pas la foi en Dieu, car la foi en Dieu c'est l'amitié."
+      },
+      {
+        "source": "I zinga nda saawareko fooyaŋ kaŋ yaŋ ga koy k'i hiila, i m'i ganji ngey miila Persiya bonkoono Sirus jirbey kulu ra, hal a koy Persiya bonkoono Dariyus mayra waate.",
+        "reference": "et ils gagnèrent à prix d'argent des conseillers pour faire échouer son entreprise. Il en fut ainsi pendant toute la vie de Cyrus, roi de Perse, et jusqu'au règne de Darius, roi de Perse.",
+        "hypothesis": "Et ils tinrent un conseil avec tout le peuple pour que ces hommes disent la vérité, ils les empêchèrent selon la coutume de Perse, pendant tout le règne de Cyrus, roi de Perse, et jusqu'au règne de Darius, roi de Perse."
+      },
+      {
+        "source": "Biyoteknoloji ga alman fundikooniyaŋ goyandi zama a ma hayey te.",
+        "reference": "La biotechnologie utilise des organismes vivants pour créer des produits.",
+        "hypothesis": "La biotechnologie transforme l'agriculture car elle ne dépend pas de la pluie."
+      },
+      {
+        "source": "Alwaato kaŋ Mowabancey kulu maa baaru kaŋ koyey kaa zama ngey ma wongu se, day i margu, i kulu kaŋ yaŋ ga hin ka takuba koto ka koy beene. I kay laabo hirro me gaa.",
+        "reference": "Cependant, tous les Moabites ayant appris que les rois montaient pour les attaquer, on convoqua tous ceux en âge de porter les armes et même au-dessus, et ils se tinrent sur la frontière.",
+        "hypothesis": "Au temps où tous les Moabites descendaient pour acheter de la Chine et moudre ensemble et pouvaient aller librement sans se faire déranger, ils ont passé une journée entière."
+      },
+      {
+        "source": "Zama Almasihu bu zunubey sabbay se sorro folloŋ. Nga kaŋ ga ti adilitaraykoy, a n'a te no borey kaŋ sinda adilitaray se zama a ma konda iri Irikoy do. I n'a wi gaaham ra, amma Biya Hanno n'a funandi.",
+        "reference": "Christ aussi a souffert une fois pour les péchés, lui juste pour des injustes, afin de nous amener à Dieu, ayant été mis à mort quant à la chair, mais ayant été rendu vivant quant à l'Esprit,",
+        "hypothesis": "Parce que le Messie a détruit le péché, il n'y a pas de folie. Celui qui est appelé le droit, il n'est pas comme les gens qui n'ont pas le droit, parce qu'il nous a amenés à Dieu. Nous étions dans la haine, mais Dieu Bon a pardonné."
+      },
+      {
+        "source": "Zama danga karji kaŋ go ga di kusu cire kosongu, Yaadin cine no saamo haaray go, Woodin mo yaamo no.",
+        "reference": "Car comme le bruit des épines sous la chaudière, ainsi est le rire des insensés. C'est encore là une vanité.",
+        "hypothesis": "Puisque l'épine est enfoncée dans la chair et qu'il y a du bruit, c'est une sottise; Rien que cela."
+      },
+      {
+        "source": "Ma fongu kaŋ ay aloomaro si ku, Ma fongu mate kaŋ ni na Adam-izey kulu taka i ga ciya yaamo.",
+        "reference": "(89:49) Y a-t-il un homme qui puisse vivre et ne pas voir la mort, Qui puisse sauver son âme du séjour des morts? Pause.",
+        "hypothesis": "Je me souviens de ce que nous avons mangé avant, Je me souviens de ce que vous et tous les Adams êtes devenus (mauvais)."
+      },
+      {
+        "source": "Iri ma si ciya foomanteyaŋ, ka care futandi, ka canse care gaa.",
+        "reference": "Ne cherchons pas une vaine gloire, en nous provoquant les uns les autres, en nous portant envie les uns aux autres.",
+        "hypothesis": "Vous n'êtes pas devenus arrogants, vous n'avez irrité personne, et vous n'avez trompé personne."
+      },
+      {
+        "source": "Haciika, haciika ay ga ci araŋ se: boro kaŋ ga cimandi gonda fundi hal abada.",
+        "reference": "En vérité, en vérité, je vous le dis, celui qui croit en moi a la vie éternelle.",
+        "hypothesis": "En vérité, en vérité, je vous le dis: si quelqu'un garde ma parole, il ne verra jamais la mort."
+      },
+      {
+        "source": "Baa cin ka bi sosso, subba ga fatta a banda.",
+        "reference": "Même les nuits les plus sombres sont suivies d'une aurore.",
+        "hypothesis": "Lorsque la farine est bien tamisée, le levain sort à côté."
+      },
+      {
+        "source": "Hay kulu s'ay farhandi ka bisa woone: ay ma maa baaru kaŋ ay izey goono ga cimo gana.",
+        "reference": "Je n'ai pas de plus grande joie que d'apprendre que mes enfants marchent dans la vérité.",
+        "hypothesis": "Tous les jours je m'efforce de faire cela: je ne laisse personne me surpasser en sagesse"
+      },
+      {
+        "source": "Woodin sabbay se no, waato kaŋ Almasihu ga ba ka furo ndunnya ra a ne: «Ni si ba sargay da nooyaŋ, amma gaaham no ni soola ay se.",
+        "reference": "C'est pourquoi Christ, entrant dans le monde, dit: Tu n'as voulu ni sacrifice ni offrande, Mais tu m'as formé un corps;",
+        "hypothesis": "À cause de cela, quand le Christ alla entrer dans la ville, il lui dit: Si tu avais su, en ce jour, ce qui peut te donner la paix,"
+      },
+      {
+        "source": "I gonda kambeyaŋ, amma i si ham; I gonda ceyaŋ, amma i si dira, I si salaŋ mo ngey karrey ra.",
+        "reference": "Elles ont des mains et ne touchent point, Des pieds et ne marchent point, Elles ne produisent aucun son dans leur gosier.",
+        "hypothesis": "Vous avez des vêtements, mais vous n'avez pas de chaussures; Vous avez de la nourriture, mais vous ne partez pas, vous ne luttez pas avec eux dans les combats."
+      },
+      {
+        "source": "Da Izo g'araŋ fansa, araŋ ga ciya fansanteyaŋ da cimi.",
+        "reference": "Si donc le Fils vous affranchit, vous serez réellement libres.",
+        "hypothesis": "Si vous vous libérez, vous deviendres libres et vous serez parfaits."
+      },
+      {
+        "source": "I go no yaadin, jiiri way cindi fa ra, hando zaari sintina hane, kala Rabbi sanno kaa ay do ka ne:",
+        "reference": "La onzième année, le premier jour du mois, la parole de l'Éternel me fut adressée, en ces mots:",
+        "hypothesis": "Il n'oubliera pas, les années après le surplus d'eau, au troisième jour du commencement, à moins que l'Éternel ne m'envoie à eux"
+      },
+      {
+        "source": "Arshitektur ga ti proses da prodi plan teyan, dizayn da batiman wala striktür fooyaŋ teyan wane kul.",
+        "reference": "L'architecture est à la fois le processus et le produit de la planification, de la conception et de la construction de bâtiments ou d'autres structures.",
+        "hypothesis": "L'architecture est le processus de produire des plans, des dessins et la construction ou la conception des structures de bâtiments et autres."
+      },
+      {
+        "source": "Wa bara nda baakasinay care se danga nya izeyaŋ kaŋ ga ba care. Araŋ ma care beerandi ka care daŋ jine.",
+        "reference": "Par amour fraternel, soyez pleins d'affection les uns pour les autres; par honneur, usez de prévenances réciproques.",
+        "hypothesis": "Il a des amis comme des enfants qui ne sont pas ses enfants. Vous aussi traitez bien les amis et les autres."
+      },
+      {
+        "source": "Astronomie ga beero almaney dondon.",
+        "reference": "L'astronomie étudie les corps célestes.",
+        "hypothesis": "L'astronomie est une grande connaissance pour les animaux."
+      },
+      {
+        "source": "Boro kaŋ go ga ne nga ga goro Irikoy ra, a ga hima bora bumbo ma dira mo danga mate kaŋ cine Yesu dira.",
+        "reference": "Celui qui dit qu'il demeure en lui doit marcher aussi comme il a marché lui-même.",
+        "hypothesis": "Celui qui croit en moi doit me suivre, et là où je suis, là aussi sera mon serviteur"
+      },
+      {
+        "source": "Ya nin Arower gorokwa, Ma kay fondo me gaa, ma mo daaru ka guna. Ma zuruko da waybora kaŋ go ga yana mo hã ka ne: «Ifo no ka te?»",
+        "reference": "Tiens-toi sur le chemin, et regarde, habitante d'Aroër! Interroge le fuyard, le réchappé, Demande: Qu'est-il arrivé? -",
+        "hypothesis": "Moi, je me lèverai pour aller à la porte et je regarderai. Je courrai après une femme qui s'est enfuie pour la demander: «Qu'est-ce que tu fais?"
+      },
+      {
+        "source": "Haray fo ye ka te koyne laabo din ra, kaŋ waana haray fa din kaŋ jin ka te Ibrahim jirbey ra. Isaka mo koy Filistancey koyo Abimelek do, Gerar ra.",
+        "reference": "Il y eut une famine dans le pays, outre la première famine qui eut lieu du temps d'Abraham; et Isaac alla vers Abimélec, roi des Philistins, à Guérar.",
+        "hypothesis": "Il y eut une famine dans le pays, outre la première famine qui avait eu lieu du temps d'Abraham. Isaac alla vers Abimélec, roi des Philistins, à Guérar."
+      },
+      {
+        "source": "Saaya din binde bonkoono na Ziba kaŋ ga ti Sawulu bannya ce ka ne a se: «Hay kulu kaŋ ga ti Sawulu wane za doŋ, hala nd'a windo kulu, ay n'a no ni koyo izo se.",
+        "reference": "Le roi appela Tsiba, serviteur de Saül, et lui dit: Je donne au fils de ton maître tout ce qui appartenait à Saül et à toute sa maison.",
+        "hypothesis": "Quand vint le temps des moissons, Ruben apporta des produits du champ à Sawul, et lui dit: « Tout ce qui appartient à Sawul est à moi; et même si tu m'en donnes, je ne le prendrai pas."
+      },
+      {
+        "source": "d'a taablo ŋwaaro, d'a tamey gora dumi, d'a windi goy-izey kayyaŋo dumi, d'i bankaarayey, da ngey kaŋ yaŋ g'a no haŋyaŋ hari, da mate kaŋ i ga sargay salle Rabbi windo ra, kala waybora gaa yay.",
+        "reference": "et les mets de sa table, et la demeure de ses serviteurs, et les fonctions et les vêtements de ceux qui le servaient, et ses échansons, et ses holocaustes qu'il offrait dans la maison de l'Éternel.",
+        "hypothesis": "Et quand ils ont mangé, Jésus prit du pain, et après avoir rendu grâces, il le rompit et le donna aux disciples, en disant: Prenez, mangez, ceci est mon corps."
+      },
+      {
+        "source": "D'a na zunubi te ni se hala sorro iyye zaari fo ra, hala sorro iyye mo a ma ye ni do ka ne: ‹Ay tuubi,› kulu ni m'a yaafa.»",
+        "reference": "Et s'il a péché contre toi sept fois dans un jour et que sept fois il revienne à toi, disant: Je me repens, -tu lui pardonneras.",
+        "hypothesis": "La mesure que tu mesures, on la mesurera pour toi, et on te fera dire: \"Repens-toi,\" et ils te pardonneront tous."
+      },
+      {
+        "source": "Dawda goro wongu fuwo ra, a na maa daŋ a gaa ka ne a se Dawda kwaara. Dawda mo na nango windi nda cinari-cinari yaŋ za Millo gaa kal a ma kaa hala kwaara ra.",
+        "reference": "David s'établit dans la forteresse, qu'il appela cité de David. Il fit de tous côtés des constructions, en dehors et en dedans de Millo.",
+        "hypothesis": "Dawda entra dans la ville forte, et son nom s'appelait Dawda la ville. Dawda y bâtit la ville avec des murailles et des moulins de Millo jusqu'à ce que la ville soit complète."
+      },
+      {
+        "source": "Kala ni ma ne: «Kaari ay! Ay kaŋ wangu dondonandiyaŋ, ay bina donda kaseetiyaŋ.",
+        "reference": "Et que tu ne dises: Comment donc ai-je pu haïr la correction, Et comment mon coeur a-t-il dédaigné la réprimande?",
+        "hypothesis": "Si tu dis : « Je suis perdu ! Celui qui m'a enseigné, je l'ai recherché en vain."
+      },
+      {
+        "source": "Wa Appeles fo, yaddante no Almasihu ra. Wa Aristabulos almayaaley fo.",
+        "reference": "Saluez Apellès, qui est éprouvé en Christ. Saluez ceux de la maison d'Aristobule.",
+        "hypothesis": "Appelez, qui est approuvé dans le Christ. Aristobule, mon bien-aimé."
+      },
+      {
+        "source": "Tubaniya go alaafiya alaamey cabe alhaada deedey ra.",
+        "reference": "La colombe symbolisait la paix dans les contes traditionnels.",
+        "hypothesis": "Les maladies et la santé sont des choses dont on parle souvent."
+      },
+      {
+        "source": "Waato kaŋ cine a kaa, a saba nda Eli goono ga goro nga nangora boŋ, fonda me gaa. A goono ga hangan, zama a bina goono ga jijiri Irikoy sundurko sabbay se. Saaya kaŋ bora furo kwaara ra, hal a na baaro dede mo, kala kwaara kulu na jinde sambu nda hẽeni.",
+        "reference": "Lorsqu'il arriva, Éli était dans l'attente, assis sur un siège près du chemin, car son coeur était inquiet pour l'arche de Dieu. A son entrée dans la ville, cet homme donna la nouvelle, et toute la ville poussa des cris.",
+        "hypothesis": "Au moment où cela arriva, il s'accorda avec Élie pour qu'ils s'en aillent ensemble. Il le comprit, parce qu'il tremblait encore à cause de la vision de la grande fournaise de Dieu. Quand la porte s'ouvrit, on entendit un grand bruit, et toute la ville trembla à cause de l'éclair."
+      },
+      {
+        "source": "Danji go ga di i jine, I banda mo danji beele go ga di. I jine laabo ga ciya danga Eden kalo cine, Amma i banda a ga ciya saaji koonu -- Oho, hala hay kulu mana i yana.",
+        "reference": "Devant lui est un feu dévorant, Et derrière lui une flamme brûlante; Le pays était auparavant comme un jardin d'Éden, Et depuis, c'est un désert affreux: Rien ne lui échappe.",
+        "hypothesis": "Le feu consumera les gens; le feu et la flamme consumeront les gens. La forêt d'Eden sera transformée en désert, mais elle sera changée en désert à cause de toute la maison — Oui, jusqu'à ce qu'ils s'échappent tous."
+      },
+      {
+        "source": "Nwayet, ka gonda bine kaano, na nga ŋwaarey fay da sigalo.",
+        "reference": "Noisette, qui avait bon cœur, partagea ses provisions avec la cigale.",
+        "hypothesis": "Malheureux, d'être un bon esclave, n'aime pas le travail des champs."
+      },
+      {
+        "source": "Ay farga ay hẽeni booba sabbay se. Cin kulu ay go g'ay daarijo tayandi, Ay dima mo tay d'ay mundey.",
+        "reference": "(6:8) J'ai le visage usé par le chagrin; Tous ceux qui me persécutent le font vieillir.",
+        "hypothesis": "Je suis fatigué et très affamé à cause de la chaleur. Tout ce que je porte est mouillé par la sueur; Je veux l'enlever et mes vêtements."
+      },
+      {
+        "source": "Musa ne Haruna se: «Ma ci Israyla jama kulu se ka ne: ‹Wa maan Rabbi jine, zama a maa araŋ janca.› »",
+        "reference": "Moïse dit à Aaron: Dis à toute l'assemblée des enfants d'Israël: Approchez-vous devant l'Éternel, car il a entendu vos murmures.",
+        "hypothesis": "Moïse dit à Aaron: «Va dire à toute l'assemblée d'Israël: ‹L'Éternel, le Dieu de vos pères, m'est apparu.› "
+      },
+      {
+        "source": "Amma maano da dumayzey, da taana kaŋ go ga haame daabu, kaŋ yaŋ i kaa zunubi se sarga gaa, a n'i ton sargay feema ra, danga mate kaŋ cine Rabbi ci Musa se.",
+        "reference": "Il brûla sur l'autel la graisse, les rognons, et le grand lobe du foie de la victime expiatoire, comme l'Éternel l'avait ordonné à Moïse.",
+        "hypothesis": "Mais d'autres héritages sont, comme une maison fermée, à cause des péchés qu'ils ont offerts, il a brûlé la maison, et quelle parole l'Éternel a dite par Moïse."
+      },
+      {
+        "source": "Day no kaŋ jine borey fansi, kaŋ marga jine borey fansi. I n'a fansi nda sarjilla. I na fansi nda ngey goobey.» I dira za ganji woone gaa ka koy to Mattana.",
+        "reference": "Puits, que des princes ont creusé, Que les grands du peuple ont creusé, Avec le sceptre, avec leurs bâtons!",
+        "hypothesis": "Il tua ces deux hommes, et tua toute cette foule. Il tira son épée et les battit.» Ils partirent et allèrent s'installer à Mattana."
+      },
+      {
+        "source": "Kofi bey kan Afriki batama no kan borin da foyyanka go ara.",
+        "reference": "Kofi avait appris que l'Afrique était un continent de diversité et de beauté.",
+        "hypothesis": "Kofi est un africain qui est au milieu de la foule."
+      },
+      {
+        "source": "Yesu binde ga bay hay kulu kaŋ goono ga kaa nga gaa. A fatta ka ne i se: «May no araŋ goono ga ceeci?»",
+        "reference": "Jésus, sachant tout ce qui devait lui arriver, s'avança, et leur dit: Qui cherchez-vous?",
+        "hypothesis": "Et Jésus savait tout ce qui allait se passer. Il s'avança et dit: « Qui cherchez-vous?"
+      },
+      {
+        "source": "I binde ziji ka koy kwaara ra. I tooyanta kwaara ra, kala Samuwila kuband'ey, kaŋ a goono ga ziji ka koy sududuyaŋ nango do.",
+        "reference": "Et ils montèrent à la ville. Ils étaient arrivés au milieu de la ville, quand ils furent rencontrés par Samuel qui sortait pour monter au haut lieu.",
+        "hypothesis": "Ils montèrent et allèrent vers la ville. Ils pénétrèrent dans la ville, et voici Samuel qui sortait et allait vers les hauts lieux, les rencontrer."
+      },
+      {
+        "source": "Sohõ i goono ga dira ka tatanji kwaara fondey ra sanda danawyaŋ. Kuri n'i ziibandi hal a to naŋ kaŋ boro kulu s'i bankaarayey ham.",
+        "reference": "Ils erraient en aveugles dans les rues, Souillés de sang; On ne pouvait Toucher leurs vêtements.",
+        "hypothesis": "Ils allaient en tremblant pour se mettre en route vers le village comme des aveugles. La peur les prit, si bien que chacun s'habillait avec ses vêtements."
+      },
+      {
+        "source": "Handu taacanta ra boro taacanta mo, Asahel Yowab kayne no. A izo Zebadiya ga dak'a gaa. A sata gonda boro zambar waranka cindi taaci.",
+        "reference": "Le quatrième, pour le quatrième mois, était Asaël, frère de Joab, et, après lui, Zebadia, son fils; et il avait une division de vingt-quatre mille hommes.",
+        "hypothesis": "Au temps de la guerre, il y avait un homme vaillant, Asahel, le frère de Joab. Il voulut provoquer Zebadia. Il tua mille deux cents hommes à la guerre."
+      },
+      {
+        "source": "Ma haggoy da ni boŋ! Ma si Lawiti furu waati kulu kaŋ ni go ni laabo ra ga goro.",
+        "reference": "Aussi longtemps que tu vivras dans ton pays, garde-toi de délaisser le Lévite.",
+        "hypothesis": "Je m'inquiète pour toi! Je n'ai jamais abandonné Lawiti à tout moment quand tu étais parti."
+      },
+      {
+        "source": "Irikoy bora na alaamayaŋ mo cabe han din hane ka ne: «Alaama kaŋ Rabbi ci neeya: Guna, feema wo ga kortu. Booso kaŋ go a ra mo ga mun.»",
+        "reference": "Et le même jour il donna un signe, en disant: C'est ici le signe que l'Éternel a parlé: Voici, l'autel se fendra, et la cendre qui est dessus sera répandue.",
+        "hypothesis": "Dieu envoya un signe, et il dit à ce moment-là : «Le signe que Dieu a dit : Regarde, ce feu-là dévore. L'herbe qui est dessus, il la brûlera."
+      },
+      {
+        "source": "Sahãadin-sahãadin a furo hi ra, nga nda nga talibey, ka kaa Dalmanuta laabu.",
+        "reference": "Aussitôt il monta dans la barque avec ses disciples, et se rendit dans la contrée de Dalmanutha.",
+        "hypothesis": "Etant sortis du bateau, Jésus avec ses disciples, arrivèrent dans le territoire de Dalmanoutha."
+      },
+      {
+        "source": "Luluwey kaŋ ga zurga guusu ra ga naŋ boro ma duu labu cire hari.",
+        "reference": "Le forage de puits profonds permet d'accéder aux nappes phréatiques.",
+        "hypothesis": "Les limaces qui creusent dans la terre laisseront l'homme entrer dans la terre sous l'eau."
+      },
+      {
+        "source": "Ni ibarey kulu na ngey meyey feeri ni boŋ. I goono ga cuusu ka ngey hinjey kaama mo ka ne: «Iri n'a gon sukutum! Daahir hano kaŋ iri goono ga laakal dake a gaa neeya. Iri to a gaa, iri di a mo.»",
+        "reference": "Tous tes ennemis ouvrent la bouche contre toi, Ils sifflent, ils grincent des dents, Ils disent: Nous l'avons engloutie! C'est bien le jour que nous attendions, nous l'avons atteint, nous le voyons!",
+        "hypothesis": "Toi, explique toutes leurs parables et va faire la moue en signe de défi pour qu'ils te disent: «Nous sommes tout à fait séparés! La vérité c'est que nous avons agi stupidement, il est en vain, nous n'en voulons plus."
+      },
+      {
+        "source": "Rabbi diyaŋo gaa a wane hanantey buuyaŋ wo darza hari no.",
+        "reference": "Elle a du prix aux yeux de l'Éternel, La mort de ceux qui l'aiment.",
+        "hypothesis": "La parole de l'Éternel est droite, et toutes ses œuvres sont fidèles."
+      },
+      {
+        "source": "Amma Yehosafat ne: «Rabbi annabi fo si neewo kaŋ do iri ga hã?» Kala boro fo Israyla bonkoono bannyey ra tu ka ne a se: «Iliyasu, Safat izo kaŋ doŋ a goro ka hari dooru Iliya kambe gaa, a go no.»",
+        "reference": "Mais Josaphat dit: N'y a-t-il ici aucun prophète de l'Éternel, par qui nous puissions consulter l'Éternel? L'un des serviteurs du roi d'Israël répondit: Il y a ici Élisée, fils de Schaphath, qui versait l'eau sur les mains d'Élie.",
+        "hypothesis": "Mais Josaphat dit: « Un prophète de l'Éternel n'est-il pas ici pour nous consulter ? » Et un homme d'Israël s'approcha et dit au roi: « Il y a Élisée, fils de Shaphat, qui versait de l'eau sur les mains d'Élisée. "
+      },
+      {
+        "source": "Wa zuru ka fun Babila bindo ra, Wa fun Kaldancey laabo ra, Wa ciya danga hincin jindi yaŋ ngey kuro jine.",
+        "reference": "Fuyez de Babylone, sortez du pays des Chaldéens, Et soyez comme des boucs à la tête du troupeau!",
+        "hypothesis": "Ils s'enfuirent de Babylone, Ils descendirent à Kaldez, Ils devinents des chèvres à cornes de bélier avec leurs petits."
+      },
+      {
+        "source": "Amma Daniyel anniya nga bina ra nga ma si nga boŋ ziibandi nda bonkoono ŋwaaro, wala baa da duvan kaŋ a ga haŋ. Woodin se no a na yadda ceeci mantawey arkuso do, nga ma si nga boŋ ziibandi.",
+        "reference": "Daniel résolut de ne pas se souiller par les mets du roi et par le vin dont le roi buvait, et il pria le chef des eunuques de ne pas l'obliger à se souiller.",
+        "hypothesis": "Mais Daniel eut dans le cœur le dessein de ne pas se souiller par les mets du roi et par le vin qu'il buvait; et il demanda au chef des eunuques de ne pas se souiller."
+      },
+      {
+        "source": "Amma a bisa, a si no mo. Oho, hala ay n'a ceeci zaati, Amma boro si ye ka di a koyne.",
+        "reference": "Il a passé, et voici, il n'est plus; Je le cherche, et il ne se trouve plus.",
+        "hypothesis": "Mais il a passé, et il ne l'a pas trouvée. Oui, si je l'ai vraiment cherché, Mais personne ne peut le voir."
+      },
+      {
+        "source": "Ka ne hare",
+        "reference": "Viens par là",
+        "hypothesis": "Vers ici"
+      },
+      {
+        "source": "Enjeniyeri asiste par ordinatör (IAO) ga hayey alhaali hima.",
+        "reference": "L'ingénierie assistée par ordinateur (IAO) simule le comportement des produits.",
+        "hypothesis": "L'ingénieur assiste par ordinateur (IAO) améliore la situation de travail."
+      },
+      {
+        "source": "A kambey mo ga ngey duura yeti, A izey ga gomni ceeci talkey gaa.",
+        "reference": "Ses fils seront assaillis par les pauvres, Et ses mains restitueront ce qu'il a pris par violence.",
+        "hypothesis": "Il cherche ses affaires sur sa tête, il cherche ses bienfaits en vain."
+      },
+      {
+        "source": "Kontomey ga ay korgaa bundoo ŋwa.",
+        "reference": "Les termites mangent le bois de ma chaise.",
+        "hypothesis": "Le soir, je mange du mil avec du lait."
+      },
+      {
+        "source": "Alaada batuyaŋ ga laabo dumey boobaayaŋ batu.",
+        "reference": "Les festivals culturels célèbrent la diversité ethnique du pays.",
+        "hypothesis": "La coutume a beaucoup changé dans les habitudes."
+      },
+      {
+        "source": "Amma waati kaŋ ni ga kaa ka maan Amonancey hirro me, ma si i taabandi, ma si i zokoti mo. Zama ay mana ni no Amon izey laabo gaa, zama ay n'a no Lotu izey se i ma may.»",
+        "reference": "et tu approcheras des enfants d'Ammon. Ne les attaque pas, et ne t'engage pas dans un combat avec eux; car je ne te donnerai rien à posséder dans le pays des enfants d'Ammon: c'est aux enfants de Lot que je l'ai donné en propriété.",
+        "hypothesis": "Mais au moment où tu viens appeler Amonance par son nom, tu me causes du tort et tu l'agresses. Parce que je ne veux pas qu'ils m'appellent Amon, parce que je suis un des Lotu et tu me méprises."
+      },
+      {
+        "source": "Boro kaŋ goono ga Irikoy lordey gana mo goono ga goro Irikoy ra, Irikoy mo goono ga goro a ra. Naŋ kaŋ iri ga bay a goono ga goro iri ra neeya: Biya Hanno kaŋ a n'iri no do.",
+        "reference": "Celui qui garde ses commandements demeure en Dieu, et Dieu en lui; et nous connaissons qu'il demeure en nous par l'Esprit qu'il nous a donné.",
+        "hypothesis": "Celui qui est dans la volonté de Dieu, que Dieu le bénisse, Dieu le bénira. Il faut que nous croyions en lui si nous voulons avoir la paix."
+      },
+      {
+        "source": "Ma salaŋ bonkoono nda nga nyaŋo se ka ne i se: Wa zumbu ganda ka kayna goray te, Zama araŋ darza koytaray fuula ga fun araŋ boŋey boŋ ka kaŋ.",
+        "reference": "Dis au roi et à la reine: Asseyez-vous à terre! Car il est tombé de vos têtes, Le diadème qui vous servait d'ornement.",
+        "hypothesis": "je vous salue mon frère et je vous dis ceci: Nous sommes descendus au village pour une affaire, parce que la gloire de votre chemise a déchiré votre corps qui est avec vous."
+      }
+    ]
+  }
+}

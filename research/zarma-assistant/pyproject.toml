@@ -1,0 +1,29 @@
+[project]
+name = "zarma-assistant-research"
+version = "0.1.0"
+description = "Phase 0 — benchmarks de faisabilité pour un assistant conversationnel vocal en zarma."
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.40",
+    "sacrebleu>=2.4",
+    "python-dotenv>=1.0",
+    "tqdm>=4.66",
+    "huggingface-hub>=0.24",
+    "pydub>=0.25",
+    # pydub dépend du module stdlib `audioop`, retiré en Python 3.13+ ; ce
+    # backport n'est publié que pour 3.13+, d'où le marqueur (sur 3.11/3.12,
+    # le vrai module stdlib `audioop` suffit).
+    "audioop-lts>=0.2; python_version >= '3.13'",
+]
+# torch/transformers/peft/sentencepiece/accelerate/datasets ont été retirés :
+# ils ne servaient qu'à l'entraînement local de M2M100 (abandonné, trop lent
+# sur ce Mac — voir README § Fine-tuning M2M100). L'entraînement se fait
+# maintenant sur GPU cloud (Colab/Kaggle/SageMaker), via
+# scripts/train_m2m100_cloud_gpu.py, à coller directement dans un notebook —
+# ce script n'a donc pas besoin d'un venv local. scripts/train_m2m100_lora.py
+# et scripts/_m2m100_zarma.py restent dans le dépôt pour référence (ils
+# documentent le contournement nécessaire pour ajouter le zarma comme langue
+# à M2M100) mais ne sont plus exécutables ici sans réinstaller ces paquets.
+
+[tool.uv]
+package = false
