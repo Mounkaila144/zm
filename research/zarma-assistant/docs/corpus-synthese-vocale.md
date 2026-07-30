@@ -32,6 +32,35 @@ souffle et le ronflement de la pièce en même temps que la voix.
 
 ---
 
+## ⚠️ Le rapport signal/bruit, mesuré sur la campagne précédente
+
+```
+campagne de collecte actuelle : 24 dB de médiane (min 13, max 100)
+bruit de fond : −49 dBFS
+
+repères pour une synthèse :  > 40 dB excellent · 30-40 dB correct · < 25 dB insuffisant
+```
+
+**Tes conditions habituelles ne suffisent pas.** Elles convenaient parfaitement
+à l'ASR — qui apprend même à travers le bruit, au point qu'on lui en ajoute
+volontairement. Un modèle de synthèse fait l'inverse : il **reproduit** ce qu'il
+entend, souffle compris.
+
+Le bruit de fond (−49 dBFS) n'est pas le problème principal : c'est le **niveau
+de la voix** qui est trop bas. Le pic médian des clips est à 0,27 sur 1,0, il
+reste donc beaucoup de marge avant saturation.
+
+**Correction : parler plus près du micro, ou plus fort.** Doubler le niveau fait
+gagner 6 dB, le tripler environ 10 — soit 30 à 34 dB sans aucun risque de
+saturation. Ajouter une pièce plus calme, ou une heure plus tranquille, amène
+aux 35-40 dB visés.
+
+**Contrôle à ajouter dans l'application de collecte** : un seuil sur le rapport
+signal/bruit, et pas seulement sur le niveau moyen et la crête. C'est le
+critère qui décide de la qualité finale, et rien d'autre ne le remplace.
+
+---
+
 ## Protocole
 
 **Une seule voix**, du début à la fin. Un modèle de synthèse produit un timbre ;
@@ -127,10 +156,61 @@ qu'il est seul à pouvoir faire.
 
 ---
 
+## Traitement du corpus avant l'entraînement
+
+Deux opérations, et elles ne se valent pas du tout.
+
+### Élaguer les silences de bord — OUI
+
+Un modèle de synthèse reproduit ce qu'il entend, y compris ce qu'il n'entend
+pas. Si chaque exemple commence par 0,4 s de silence, la voix synthétisée
+commencera par 0,4 s de silence — à chaque énoncé, pour toujours.
+
+Il faut donc ramener tous les clips à une **marge constante et courte**, de
+l'ordre de 50 à 100 ms de part et d'autre. Constante est le mot important : ce
+n'est pas la brièveté qui compte, c'est l'uniformité.
+
+Ne pas élaguer agressivement. Rogner le début ou la fin d'un mot est bien pire
+qu'un peu de silence, et c'est déjà la principale cause d'erreur du corpus ASR
+(`gou` final, `dala`).
+
+`services/asr/app/vad.py` fait exactement cela — détection par niveau, élagage
+des bords seulement, avec marge paramétrable. À réutiliser plutôt qu'à
+réécrire.
+
+**Au moment de l'enregistrement, enregistre large.** L'élagage se fait après, en
+traitement, où l'on voit ce qu'on coupe. Couper à la prise, c'est couper à
+l'aveugle.
+
+### Réduire le bruit de fond — NON
+
+C'est contre-intuitif, et c'est pourtant la règle établie en synthèse vocale :
+**enregistrer propre, ne pas nettoyer après**.
+
+Un réducteur de bruit ne supprime pas le bruit, il le remplace par des
+artefacts — bruit musical, trous spectraux, déformation de phase. Ces artefacts
+sont **corrélés à la parole** : ils apparaissent exactement là où la voix se
+trouve. Le modèle les apprend comme faisant partie de la voix, et il les
+reproduira dans chaque énoncé synthétisé. Un bruit de fond constant et faible
+est bien moins nuisible qu'un débruitage, parce qu'il est décorrélé du signal
+utile — le modèle peut l'ignorer.
+
+Le contraste avec l'ASR est frappant, et vaut d'être retenu : pour la
+reconnaissance, on **ajoute** du bruit à l'entraînement — le corpus contient
+neuf fonds sonores réels prévus pour cela — parce que le bruit enseigne la
+robustesse. Pour la synthèse, le bruit est un poison. Même projet, traitement
+opposé.
+
+**Donc : une pièce calme, une heure calme, un micro plus près.** Aucun logiciel
+ne rattrapera ce qui n'a pas été capté proprement.
+
+---
+
 ## Après l'enregistrement
 
 **Valider avant d'entraîner.** Écouter un échantillon, vérifier la fréquence,
-le niveau, l'absence de saturation. Un corpus défectueux découvert après
+le niveau, l'absence de saturation, et **mesurer le rapport signal/bruit** —
+c'est lui qui plafonne la qualité finale. Un corpus défectueux découvert après
 l'entraînement coûte les deux.
 
 **Puis vérifier le modèle presque exhaustivement** — c'est le luxe d'un domaine
