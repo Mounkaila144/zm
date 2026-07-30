@@ -53,6 +53,7 @@ class RecognizedExpression {
     required this.operator,
     required this.right,
     required this.zarmaText,
+    this.spokenText = '',
     this.result,
     this.remainder = 0,
     this.resultZarmaText = '',
@@ -64,6 +65,7 @@ class RecognizedExpression {
     final Object? operator = json['operator'];
     final Object? right = json['right'];
     final Object? zarmaText = json['zarma_text'];
+    final Object? spokenText = json['spoken_text'];
     final Object? result = json['result'];
     final Object? remainder = json['remainder'];
     final Object? resultZarmaText = json['result_zarma_text'];
@@ -74,6 +76,7 @@ class RecognizedExpression {
         operator is! String ||
         !_operators.contains(operator) ||
         zarmaText is! String ||
+        (spokenText != null && spokenText is! String) ||
         (result != null && result is! num) ||
         (remainder != null && remainder is! num) ||
         (resultZarmaText != null && resultZarmaText is! String) ||
@@ -91,6 +94,7 @@ class RecognizedExpression {
       operator: operator,
       right: right.toInt(),
       zarmaText: zarmaText,
+      spokenText: spokenText as String? ?? '',
       result: (result as num?)?.toInt(),
       remainder: (remainder as num?)?.toInt() ?? 0,
       resultZarmaText: resultZarmaText as String? ?? '',
@@ -105,6 +109,7 @@ class RecognizedExpression {
       operator: json['operator'] as String? ?? '+',
       right: (json['right'] as num?)?.toInt() ?? 0,
       zarmaText: json['zarma_text'] as String? ?? '',
+      spokenText: json['spoken_text'] as String? ?? '',
       result: (json['result'] as num?)?.toInt(),
       remainder: (json['remainder'] as num?)?.toInt() ?? 0,
       resultZarmaText: json['result_zarma_text'] as String? ?? '',
@@ -118,6 +123,14 @@ class RecognizedExpression {
   final String operator;
   final int right;
   final String zarmaText;
+
+  /// Forme à **prononcer**, vide si elle coïncide avec [zarmaText].
+  ///
+  /// Les opérateurs se disent en forme longue (« kanga itonton ») mais gardent
+  /// la forme courte comme identité : [zarmaText] est ce que le système pense,
+  /// celle-ci ce qu'il dit. Le mobile ne choisit pas entre les deux — c'est la
+  /// banque vocale qui tranche, selon ce qu'elle sait prononcer.
+  final String spokenText;
   final int? result;
   final int remainder;
   final String resultZarmaText;

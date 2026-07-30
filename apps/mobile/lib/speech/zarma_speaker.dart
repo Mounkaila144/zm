@@ -49,6 +49,12 @@ class ZarmaSpeaker {
   List<VoiceSegment> missing(List<VoiceSegment> utterance) =>
       _bank.missing(utterance);
 
+  /// Segments d'un énoncé, en préférant la forme prononcée si la banque la
+  /// connaît. Voir [preferredUtterance] — l'arbitrage appartient à la banque,
+  /// pas à l'écran appelant, qui n'a pas à savoir ce qui est enregistré.
+  List<VoiceSegment> preferred(String canonicalText, String spokenText) =>
+      preferredUtterance(canonicalText, spokenText, _bank);
+
   /// Assemble puis joue [utterance].
   ///
   /// **Fail-closed (FR21)** : si un seul segment manque, rien n'est joué et le

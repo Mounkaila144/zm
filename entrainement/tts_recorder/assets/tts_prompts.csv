@@ -1,0 +1,401 @@
+id,texte_zarma,affichage
+tts_1,afo,1
+tts_8,ahakou,8
+tts_6,iddou,6
+tts_5,igou,5
+tts_2,ihinka,2
+tts_3,ihinza,3
+tts_4,itaci,4
+tts_10,iwey,10
+tts_9,iyega,9
+tts_7,iyye,7
+tts_1000000,million,1000000
+tts_20,waranka,20
+tts_30,waranza,30
+tts_50,waygou,50
+tts_80,wayhakkou,80
+tts_60,wayiddu,60
+tts_70,wayiyye,70
+tts_40,waytaci,40
+tts_90,wayyegga,90
+tts_0,yaamo,0
+tts_100,zangou,100
+tts_5000000,million gou,5000000
+tts_2000000,million hinka,2000000
+tts_3000000,million hinza,3000000
+tts_4000000,million taci,4000000
+tts_1000,zambar fo,1000
+tts_100000,zambar zangou,100000
+tts_200,zangou hinka,200
+tts_900,zangou yega,900
+tts_1/5,afo inafaysor igou,1/5
+tts_1/10,afo inafaysor iwey,1/10
+tts_1/9,afo inafaysor iyega,1/9
+tts_1/7,afo inafaysor iyye,1/7
+tts_1*6,afo ingaybor iddou,1*6
+tts_1*5,afo ingaybor igou,1*5
+tts_1*10,afo ingaybor iwey,1*10
+tts_1*7,afo ingaybor iyye,1*7
+tts_1+5,afo tonton igou,1+5
+tts_1+10,afo tonton iwey,1+10
+tts_1+9,afo tonton iyega,1+9
+tts_1+7,afo tonton iyye,1+7
+tts_1-0,afo zabou yaamo,1-0
+tts_8/2,ahakou inafaysor ihinka,8/2
+tts_8/3,ahakou inafaysor ihinza,8/3
+tts_8/20,ahakou inafaysor waranka,8/20
+tts_8/30,ahakou inafaysor waranza,8/30
+tts_8*2,ahakou ingaybor ihinka,8*2
+tts_8*3,ahakou ingaybor ihinza,8*3
+tts_8*4,ahakou ingaybor itaci,8*4
+tts_8*100,ahakou ingaybor zangou,8*100
+tts_8+2,ahakou tonton ihinka,8+2
+tts_8+3,ahakou tonton ihinza,8+3
+tts_8+50,ahakou tonton waygou,8+50
+tts_8+100,ahakou tonton zangou,8+100
+tts_8-6,ahakou zabou iddou,8-6
+tts_8-5,ahakou zabou igou,8-5
+tts_8-3,ahakou zabou ihinza,8-3
+tts_8-7,ahakou zabou iyye,8-7
+tts_6/5,iddou inafaysor igou,6/5
+tts_6/4,iddou inafaysor itaci,6/4
+tts_6/9,iddou inafaysor iyega,6/9
+tts_6/50,iddou inafaysor waygou,6/50
+tts_6*3,iddou ingaybor ihinza,6*3
+tts_6*4,iddou ingaybor itaci,6*4
+tts_6*9,iddou ingaybor iyega,6*9
+tts_6*0,iddou ingaybor yaamo,6*0
+tts_6+5,iddou tonton igou,6+5
+tts_6+4,iddou tonton itaci,6+4
+tts_6+9,iddou tonton iyega,6+9
+tts_6+0,iddou tonton yaamo,6+0
+tts_6-5,iddou zabou igou,6-5
+tts_6-2,iddou zabou ihinka,6-2
+tts_6-4,iddou zabou itaci,6-4
+tts_6-0,iddou zabou yaamo,6-0
+tts_5/1,igou inafaysor afo,5/1
+tts_5/10,igou inafaysor iwey,5/10
+tts_5/9,igou inafaysor iyega,5/9
+tts_5/7,igou inafaysor iyye,5/7
+tts_5*1,igou ingaybor afo,5*1
+tts_5*6,igou ingaybor iddou,5*6
+tts_5*10,igou ingaybor iwey,5*10
+tts_5*7,igou ingaybor iyye,5*7
+tts_5+1,igou tonton afo,5+1
+tts_5+10,igou tonton iwey,5+10
+tts_5+7,igou tonton iyye,5+7
+tts_5+0,igou tonton yaamo,5+0
+tts_5-1,igou zabou afo,5-1
+tts_5-2,igou zabou ihinka,5-2
+tts_5-3,igou zabou ihinza,5-3
+tts_5-4,igou zabou itaci,5-4
+tts_2/8,ihinka inafaysor ahakou,2/8
+tts_2/3,ihinka inafaysor ihinza,2/3
+tts_2/30,ihinka inafaysor waranza,2/30
+tts_2/100,ihinka inafaysor zangou,2/100
+tts_2*8,ihinka ingaybor ahakou,2*8
+tts_2*3,ihinka ingaybor ihinza,2*3
+tts_2*50,ihinka ingaybor waygou,2*50
+tts_2*100,ihinka ingaybor zangou,2*100
+tts_2+8,ihinka tonton ahakou,2+8
+tts_2+30,ihinka tonton waranza,2+30
+tts_2+40,ihinka tonton waytaci,2+40
+tts_2+100,ihinka tonton zangou,2+100
+tts_3/8,ihinza inafaysor ahakou,3/8
+tts_3/50,ihinza inafaysor waygou,3/50
+tts_3/100,ihinza inafaysor zangou,3/100
+tts_3*8,ihinza ingaybor ahakou,3*8
+tts_3*2,ihinza ingaybor ihinka,3*2
+tts_3*50,ihinza ingaybor waygou,3*50
+tts_3*100,ihinza ingaybor zangou,3*100
+tts_3+8,ihinza tonton ahakou,3+8
+tts_3+6,ihinza tonton iddou,3+6
+tts_3+2,ihinza tonton ihinka,3+2
+tts_3+50,ihinza tonton waygou,3+50
+tts_3-2,ihinza zabou ihinka,3-2
+tts_4/6,itaci inafaysor iddou,4/6
+tts_4/2,itaci inafaysor ihinka,4/2
+tts_4/50,itaci inafaysor waygou,4/50
+tts_4/100,itaci inafaysor zangou,4/100
+tts_4*1,itaci ingaybor afo,4*1
+tts_4*10,itaci ingaybor iwey,4*10
+tts_4*9,itaci ingaybor iyega,4*9
+tts_4*0,itaci ingaybor yaamo,4*0
+tts_4+1,itaci tonton afo,4+1
+tts_4+6,itaci tonton iddou,4+6
+tts_4+9,itaci tonton iyega,4+9
+tts_4+0,itaci tonton yaamo,4+0
+tts_4-3,itaci zabou ihinza,4-3
+tts_10/1,iwey inafaysor afo,10/1
+tts_10/5,iwey inafaysor igou,10/5
+tts_10/9,iwey inafaysor iyega,10/9
+tts_10/7,iwey inafaysor iyye,10/7
+tts_10*1,iwey ingaybor afo,10*1
+tts_10*5,iwey ingaybor igou,10*5
+tts_10*9,iwey ingaybor iyega,10*9
+tts_10*7,iwey ingaybor iyye,10*7
+tts_10+1,iwey tonton afo,10+1
+tts_10+5,iwey tonton igou,10+5
+tts_10+4,iwey tonton itaci,10+4
+tts_10+7,iwey tonton iyye,10+7
+tts_10-1,iwey zabou afo,10-1
+tts_10-5,iwey zabou igou,10-5
+tts_10-0,iwey zabou yaamo,10-0
+tts_9/1,iyega inafaysor afo,9/1
+tts_9/6,iyega inafaysor iddou,9/6
+tts_9/4,iyega inafaysor itaci,9/4
+tts_9/7,iyega inafaysor iyye,9/7
+tts_9*6,iyega ingaybor iddou,9*6
+tts_9*4,iyega ingaybor itaci,9*4
+tts_9*7,iyega ingaybor iyye,9*7
+tts_9*0,iyega ingaybor yaamo,9*0
+tts_9+6,iyega tonton iddou,9+6
+tts_9+4,iyega tonton itaci,9+4
+tts_9+10,iyega tonton iwey,9+10
+tts_9+7,iyega tonton iyye,9+7
+tts_9-1,iyega zabou afo,9-1
+tts_9-8,iyega zabou ahakou,9-8
+tts_9-6,iyega zabou iddou,9-6
+tts_9-2,iyega zabou ihinka,9-2
+tts_7/1,iyye inafaysor afo,7/1
+tts_7/6,iyye inafaysor iddou,7/6
+tts_7/5,iyye inafaysor igou,7/5
+tts_7/10,iyye inafaysor iwey,7/10
+tts_7*1,iyye ingaybor afo,7*1
+tts_7*5,iyye ingaybor igou,7*5
+tts_7*10,iyye ingaybor iwey,7*10
+tts_7*0,iyye ingaybor yaamo,7*0
+tts_7+1,iyye tonton afo,7+1
+tts_7+5,iyye tonton igou,7+5
+tts_7+10,iyye tonton iwey,7+10
+tts_7+0,iyye tonton yaamo,7+0
+tts_7-1,iyye zabou afo,7-1
+tts_7-5,iyye zabou igou,7-5
+tts_7-4,iyye zabou itaci,7-4
+tts_7-0,iyye zabou yaamo,7-0
+tts_1000000/20,million inafaysor waranka,1000000/20
+tts_1000000/70,million inafaysor wayiyye,1000000/70
+tts_1000000/40,million inafaysor waytaci,1000000/40
+tts_1000000/90,million inafaysor wayyegga,1000000/90
+tts_1000000*20,million ingaybor waranka,1000000*20
+tts_1000000*30,million ingaybor waranza,1000000*30
+tts_1000000*50,million ingaybor waygou,1000000*50
+tts_1000000*40,million ingaybor waytaci,1000000*40
+tts_1000000+20,million tonton waranka,1000000+20
+tts_1000000+30,million tonton waranza,1000000+30
+tts_1000000+60,million tonton wayiddu,1000000+60
+tts_1000000+70,million tonton wayiyye,1000000+70
+tts_1000000-9,million zabou iyega,1000000-9
+tts_1000000-7,million zabou iyye,1000000-7
+tts_1000000-50,million zabou waygou,1000000-50
+tts_1000000-100,million zabou zangou,1000000-100
+tts_20/30,waranka inafaysor waranza,20/30
+tts_20/60,waranka inafaysor wayiddu,20/60
+tts_20/70,waranka inafaysor wayiyye,20/70
+tts_20/40,waranka inafaysor waytaci,20/40
+tts_20*1000000,waranka ingaybor million,20*1000000
+tts_20*30,waranka ingaybor waranza,20*30
+tts_20*60,waranka ingaybor wayiddu,20*60
+tts_20*70,waranka ingaybor wayiyye,20*70
+tts_20+1000000,waranka tonton million,20+1000000
+tts_20+60,waranka tonton wayiddu,20+60
+tts_20+70,waranka tonton wayiyye,20+70
+tts_20+40,waranka tonton waytaci,20+40
+tts_20-8,waranka zabou ahakou,20-8
+tts_20-10,waranka zabou iwey,20-10
+tts_30/1000000,waranza inafaysor million,30/1000000
+tts_30/20,waranza inafaysor waranka,30/20
+tts_30/60,waranza inafaysor wayiddu,30/60
+tts_30/70,waranza inafaysor wayiyye,30/70
+tts_30*1000000,waranza ingaybor million,30*1000000
+tts_30*60,waranza ingaybor wayiddu,30*60
+tts_30*70,waranza ingaybor wayiyye,30*70
+tts_30*40,waranza ingaybor waytaci,30*40
+tts_30+1000000,waranza tonton million,30+1000000
+tts_30+70,waranza tonton wayiyye,30+70
+tts_30+40,waranza tonton waytaci,30+40
+tts_30+90,waranza tonton wayyegga,30+90
+tts_30-10,waranza zabou iwey,30-10
+tts_30-9,waranza zabou iyega,30-9
+tts_30-7,waranza zabou iyye,30-7
+tts_30-20,waranza zabou waranka,30-20
+tts_50/8,waygou inafaysor ahakou,50/8
+tts_50/2,waygou inafaysor ihinka,50/2
+tts_50/3,waygou inafaysor ihinza,50/3
+tts_50/100,waygou inafaysor zangou,50/100
+tts_50*8,waygou ingaybor ahakou,50*8
+tts_50*2,waygou ingaybor ihinka,50*2
+tts_50*3,waygou ingaybor ihinza,50*3
+tts_50*100,waygou ingaybor zangou,50*100
+tts_50+2,waygou tonton ihinka,50+2
+tts_50+3,waygou tonton ihinza,50+3
+tts_50+9,waygou tonton iyega,50+9
+tts_50+100,waygou tonton zangou,50+100
+tts_50-8,waygou zabou ahakou,50-8
+tts_50-6,waygou zabou iddou,50-6
+tts_50-3,waygou zabou ihinza,50-3
+tts_80+90,wayhakkou tonton wayyegga,80+90
+tts_80-30,wayhakkou zabou waranza,80-30
+tts_80-50,wayhakkou zabou waygou,80-50
+tts_80-70,wayhakkou zabou wayiyye,80-70
+tts_80-40,wayhakkou zabou waytaci,80-40
+tts_60/1000000,wayiddu inafaysor million,60/1000000
+tts_60/70,wayiddu inafaysor wayiyye,60/70
+tts_60/40,wayiddu inafaysor waytaci,60/40
+tts_60/90,wayiddu inafaysor wayyegga,60/90
+tts_60*1000000,wayiddu ingaybor million,60*1000000
+tts_60*20,wayiddu ingaybor waranka,60*20
+tts_60*30,wayiddu ingaybor waranza,60*30
+tts_60*70,wayiddu ingaybor wayiyye,60*70
+tts_60+3,wayiddu tonton ihinza,60+3
+tts_60+1000000,wayiddu tonton million,60+1000000
+tts_60+30,wayiddu tonton waranza,60+30
+tts_60+70,wayiddu tonton wayiyye,60+70
+tts_60-9,wayiddu zabou iyega,60-9
+tts_60-20,wayiddu zabou waranka,60-20
+tts_60-30,wayiddu zabou waranza,60-30
+tts_60-40,wayiddu zabou waytaci,60-40
+tts_70/1000000,wayiyye inafaysor million,70/1000000
+tts_70/30,wayiyye inafaysor waranza,70/30
+tts_70/60,wayiyye inafaysor wayiddu,70/60
+tts_70/40,wayiyye inafaysor waytaci,70/40
+tts_70*1000000,wayiyye ingaybor million,70*1000000
+tts_70*20,wayiyye ingaybor waranka,70*20
+tts_70*30,wayiyye ingaybor waranza,70*30
+tts_70*40,wayiyye ingaybor waytaci,70*40
+tts_70+20,wayiyye tonton waranka,70+20
+tts_70+60,wayiyye tonton wayiddu,70+60
+tts_70+40,wayiyye tonton waytaci,70+40
+tts_70+90,wayiyye tonton wayyegga,70+90
+tts_70-20,wayiyye zabou waranka,70-20
+tts_70-30,wayiyye zabou waranza,70-30
+tts_70-50,wayiyye zabou waygou,70-50
+tts_70-60,wayiyye zabou wayiddu,70-60
+tts_40/1000000,waytaci inafaysor million,40/1000000
+tts_40/20,waytaci inafaysor waranka,40/20
+tts_40/60,waytaci inafaysor wayiddu,40/60
+tts_40/90,waytaci inafaysor wayyegga,40/90
+tts_40*20,waytaci ingaybor waranka,40*20
+tts_40*60,waytaci ingaybor wayiddu,40*60
+tts_40*70,waytaci ingaybor wayiyye,40*70
+tts_40*90,waytaci ingaybor wayyegga,40*90
+tts_40+2,waytaci tonton ihinka,40+2
+tts_40+1000000,waytaci tonton million,40+1000000
+tts_40+30,waytaci tonton waranza,40+30
+tts_40+60,waytaci tonton wayiddu,40+60
+tts_40-8,waytaci zabou ahakou,40-8
+tts_40-4,waytaci zabou itaci,40-4
+tts_40-20,waytaci zabou waranka,40-20
+tts_40-30,waytaci zabou waranza,40-30
+tts_90*80,wayyegga ingaybor wayhakkou,90*80
+tts_90*60,wayyegga ingaybor wayiddu,90*60
+tts_90+20,wayyegga tonton waranka,90+20
+tts_90+80,wayyegga tonton wayhakkou,90+80
+tts_90-80,wayyegga zabou wayhakkou,90-80
+tts_90-60,wayyegga zabou wayiddu,90-60
+tts_90-70,wayyegga zabou wayiyye,90-70
+tts_90-40,wayyegga zabou waytaci,90-40
+tts_0/8,yaamo inafaysor ahakou,0/8
+tts_0/6,yaamo inafaysor iddou,0/6
+tts_0/4,yaamo inafaysor itaci,0/4
+tts_0/10,yaamo inafaysor iwey,0/10
+tts_0*6,yaamo ingaybor iddou,0*6
+tts_0*5,yaamo ingaybor igou,0*5
+tts_0*4,yaamo ingaybor itaci,0*4
+tts_0*9,yaamo ingaybor iyega,0*9
+tts_0+8,yaamo tonton ahakou,0+8
+tts_0+4,yaamo tonton itaci,0+4
+tts_0+50,yaamo tonton waygou,0+50
+tts_0+100,yaamo tonton zangou,0+100
+tts_100/2,zangou inafaysor ihinka,100/2
+tts_100/3,zangou inafaysor ihinza,100/3
+tts_100/4,zangou inafaysor itaci,100/4
+tts_100/50,zangou inafaysor waygou,100/50
+tts_100*8,zangou ingaybor ahakou,100*8
+tts_100*2,zangou ingaybor ihinka,100*2
+tts_100*50,zangou ingaybor waygou,100*50
+tts_100*40,zangou ingaybor waytaci,100*40
+tts_100+8,zangou tonton ahakou,100+8
+tts_100+6,zangou tonton iddou,100+6
+tts_100+3,zangou tonton ihinza,100+3
+tts_100+50,zangou tonton waygou,100+50
+tts_100-6,zangou zabou iddou,100-6
+tts_100-10,zangou zabou iwey,100-10
+tts_100-9,zangou zabou iyega,100-9
+tts_100-7,zangou zabou iyye,100-7
+tts_3/1000,ihinza inafaysor zambar fo,3/1000
+tts_80+5000,wayhakkou tonton zambar gou,80+5000
+tts_80+2000,wayhakkou tonton zambar hinka,80+2000
+tts_90*1000,wayyegga ingaybor zambar fo,90*1000
+tts_90+1000,wayyegga tonton zambar fo,90+1000
+tts_1000*90,zambar fo ingaybor wayyegga,1000*90
+tts_1000+80,zambar fo tonton wayhakkou,1000+80
+tts_1000+90,zambar fo tonton wayyegga,1000+90
+tts_1000-50,zambar fo zabou waygou,1000-50
+tts_1000-40,zambar fo zabou waytaci,1000-40
+tts_1000-90,zambar fo zabou wayyegga,1000-90
+tts_1000-100,zambar fo zabou zangou,1000-100
+tts_5000+80,zambar gou tonton wayhakkou,5000+80
+tts_5000-80,zambar gou zabou wayhakkou,5000-80
+tts_5000-60,zambar gou zabou wayiddu,5000-60
+tts_5000-90,zambar gou zabou wayyegga,5000-90
+tts_2000-80,zambar hinka zabou wayhakkou,2000-80
+tts_90050,zambar wayyegga da waygou,90050
+tts_500-60,zangou gou zabou wayiddu,500-60
+tts_600-70,zangou iddu zabou wayiyye,600-70
+tts_600-90,zangou iddu zabou wayyegga,600-90
+tts_400-80,zangou taci zabou wayhakkou,400-80
+tts_400-70,zangou taci zabou wayiyye,400-70
+tts_400-90,zangou taci zabou wayyegga,400-90
+tts_2000-800,zambar hinka zabou zangou hakou,2000-800
+tts_10000-1000,zambar iwey zabou zambar fo,10000-1000
+tts_21002,zambar waranka cindi fo di hinka,21002
+tts_31003,zambar waranza cindi fo di hinza,31003
+tts_41004,zambar waytaci cindi fo di taci,41004
+tts_12+27,iwey cindi hinka tonton waranka cindi iyye,12+27
+tts_7302,zambar iyye da zangou hinza di hinka,7302
+tts_150-12,zangou da waygou zabou iwey cindi hinka,150-12
+tts_2000-115,zambar hinka zabou zangou di wey cindi gou,2000-115
+tts_19084,zambar iwey cindi yega da wayhakkou cindi taci,19084
+tts_115+10000,zangou di wey cindi gou tonton zambar iwey,115+10000
+tts_2070107,million hinka da zambar wayiyye da zangou da iyye,2070107
+tts_6057006,million iddu da zambar waygou cindi iyye da iddu,6057006
+tts_32510,zambar waranza cindi hinka da zangou gou di wey,32510
+tts_58403,zambar waygou cindi hakou da zangou taci di hinza,58403
+tts_54704,zambar waygou cindi taci da zangou iyye di taci,54704
+tts_59910,zambar waygou cindi yega da zangou yega di wey,59910
+tts_68404,zambar wayiddu cindi hakou da zangou taci di taci,68404
+tts_3508005,million hinza da zambar zangou gou da hakou di gou,3508005
+tts_1500550,million da zambar zangou gou da dala zangou gou da waygou,1500550
+tts_18399,zambar iwey cindi hakou da zangou hinza da wayyegga cindi yega,18399
+tts_1640605,million da zambar zangou iddu da waytaci da zangou iddu di gou,1640605
+tts_5048610,million gou da zambar waytaci cindi hakou da zangou iddu di wey,5048610
+tts_3078503,million hinza da zambar wayiyye cindi hakou da zangou gou di hinza,3078503
+tts_6309105,million iddu da zambar zangou hinza da yega da zangou di gou,6309105
+tts_6916010,million iddu da zambar zangou yega di wey cindi iddu di wey,6916010
+tts_7065402,million iyye da zambar wayiddu cindi gou da zangou taci di hinka,7065402
+tts_4040214,million taci da zambar waytaci da zangou hinka di wey cindi taci,4040214
+tts_9035509,million yega da zambar waranza cindi gou da zangou gou da yega,9035509
+tts_9110205,million yega da zambar zangou di wey da zangou hinka di gou,9110205
+tts_8680703,million hakou da zambar zangou iddu da wayhakkou da zangou iyye di hinza,8680703
+tts_7420208,million iyye da zambar zangou taci da waranka da zangou hinka da hakou,7420208
+tts_9100868,million yega da zambar zangou da dala zangou hakou da wayiddu cindi hakou,9100868
+tts_7700318,million iyye da zambar zangou iyye da dala zangou hinza di wey cindi hakou,7700318
+tts_4600434,million taci da zambar zangou iddu da dala zangou taci da waranza cindi taci,4600434
+tts_893645,zambar zangou hakou da wayyegga cindi hinza da zangou iddu da waytaci cindi gou,893645
+tts_1267125,million da zambar zangou hinka da wayiddu cindi iyye da zangou da waranka cindi gou,1267125
+tts_8204516,million hakou da zambar zangou hinka di taci da zangou gou di wey cindi iddu,8204516
+tts_2602316,million hinka da zambar zangou iddu di hinka da zangou hinza di wey cindi iddu,2602316
+tts_1771323,million da zambar zangou iyye da wayiyye cindi fo da zangou hinza da waranka cindi hinza,1771323
+tts_5674189,million gou da zambar zangou iddu da wayiyye cindi taci da zangou da wayhakkou cindi yega,5674189
+tts_8185842,million hakou da zambar zangou da wayhakkou cindi gou da zangou hakou da waytaci cindi hinka,8185842
+tts_5412753,million gou da zambar zangou taci di wey cindi hinka da zangou iyye da waygou cindi hinza,5412753
+tts_8951476,million hakou da zambar zangou yega da waygou cindi fo da zangou taci da wayiyye cindi iddu,8951476
+tts_2536957,million hinka da zambar zangou gou da waranza cindi iddu da zangou yega da waygou cindi iyye,2536957
+tts_3246569,million hinza da zambar zangou hinka da waytaci cindi iddu da zangou gou da wayiddu cindi yega,3246569
+tts_6841314,million iddu da zambar zangou hakou da waytaci cindi fo da zangou hinza di wey cindi taci,6841314
+tts_7578937,million iyye da zambar zangou gou da wayiyye cindi hakou da zangou yega da waranza cindi iyye,7578937
+tts_4684467,million taci da zambar zangou iddu da wayhakkou cindi taci da zangou taci da wayiddu cindi iyye,4684467
+tts_4721815,million taci da zambar zangou iyye da waranka cindi fo da zangou hakou di wey cindi gou,4721815
+tts_4796511,million taci da zambar zangou iyye da wayyegga cindi iddu da zangou gou di wey cindi fo,4796511
+tts_9334293,million yega da zambar zangou hinza da waranza cindi taci da zangou hinka da wayyegga cindi hinza,9334293

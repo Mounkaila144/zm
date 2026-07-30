@@ -27,6 +27,7 @@ from .expressions import (
     parse_expression,
     parse_expression_detailed,
     render_expression,
+    render_spoken,
     render_result,
     supported_operators,
 )
@@ -80,6 +81,7 @@ __all__ = [
     "evaluate",
     "evaluate_text",
     "render_expression",
+    "render_spoken",
     "render_result",
     "supported_operators",
     "LexiconError",

@@ -59,6 +59,34 @@ List<VoiceSegment> utteranceFromZarma(String zarmaText) {
       .toList(growable: false);
 }
 
+/// Segments d'un énoncé en préférant la forme **prononcée** quand la banque
+/// sait la dire, sinon la forme canonique.
+///
+/// Les opérateurs se disent en forme longue — « kanga itonton » et non
+/// « tonton ». L'application répète à l'utilisateur ce qu'elle a compris, et
+/// celui-ci ne peut vérifier qu'à l'oreille : lui rendre une formulation qu'il
+/// n'emploie jamais le laisserait dans le doute.
+///
+/// Le repli n'est pas une précaution théorique. Tant que `kanga.wav` et
+/// `itonton.wav` ne sont pas enregistrés, demander la forme longue ferait
+/// jouer **rien du tout** — la banque est fail-closed. Ce jour-là l'application
+/// deviendrait muette sur toutes les opérations, sans erreur visible. Avec le
+/// repli, elle continue de dire la forme courte, et bascule d'elle-même le jour
+/// où les enregistrements arrivent.
+List<VoiceSegment> preferredUtterance(
+  String canonicalText,
+  String spokenText,
+  VoiceBank bank,
+) {
+  if (spokenText.isNotEmpty && spokenText != canonicalText) {
+    final List<VoiceSegment> spoken = utteranceFromZarma(spokenText);
+    if (bank.canSay(spoken)) {
+      return spoken;
+    }
+  }
+  return utteranceFromZarma(canonicalText);
+}
+
 /// Consigne de confirmation suivie de l'énoncé à confirmer.
 ///
 /// C'est le point que la story identifie comme bloquant : la confirmation

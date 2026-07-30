@@ -69,6 +69,15 @@ class RecognizedExpression(BaseModel):
     left: int
     operator: Literal["+", "-", "*", "/"]
     right: int
+    #: Forme à **prononcer**, quand elle diffère de ``zarma_text``.
+    #:
+    #: Les opérateurs se disent en forme longue (« kanga itonton ») mais gardent
+    #: la forme courte comme identité canonique : ``zarma_text`` est ce que le
+    #: système *pense*, ce champ est ce qu'il *dit*. Vide quand les deux
+    #: coïncident, donc toujours vide pour un nombre seul.
+    #:
+    #: Additif : un client qui l'ignore prononce la forme courte, comme avant.
+    spoken_text: str = ""
     #: Forme zarma canonique de l'opération entendue (relisible à voix haute).
     zarma_text: str
     result: int | None = None
@@ -149,6 +158,7 @@ async def _run_pipeline(
             operator=outcome.expression.symbol,
             right=outcome.expression.right,
             zarma_text=outcome.zarma_text,
+            spoken_text=outcome.spoken_text,
             result=result.value if result is not None else None,
             remainder=result.remainder if result is not None else 0,
             result_zarma_text=outcome.result_zarma_text,

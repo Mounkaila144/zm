@@ -58,6 +58,13 @@ class RecognitionOutcome:
     result_zarma_text: str = ""
     #: Code de refus arithmétique (``NEGATIVE_RESULT``…) — jamais un résultat approché.
     refusal_code: str | None = None
+    #: Forme zarma **à prononcer**, quand elle diffère de ``zarma_text``.
+    #:
+    #: Les opérateurs se disent en forme longue (``kanga itonton``) mais gardent
+    #: la forme courte comme identité canonique. ``zarma_text`` reste ce que le
+    #: système *pense*, ce champ est ce qu'il *dit*. Vide quand les deux
+    #: coïncident, c'est-à-dire pour tous les nombres.
+    spoken_text: str = ""
 
 
 def _recognize_expression(
@@ -113,8 +120,14 @@ def run_recognition_pipeline(asr_result: AsrResult, settings: Settings) -> Recog
         expression_recognized=expression_recognized,
     )
     zarma_text = zarma_numbers.generate(number) if number is not None else ""
+    spoken_text = ""
     if expression is not None:
         zarma_text = zarma_numbers.render_expression(expression)
+        parle = zarma_numbers.render_spoken(expression)
+        # Renseigné seulement s'il apporte quelque chose : un champ toujours
+        # présent inviterait à s'en servir partout, y compris là où c'est
+        # l'identité qui compte.
+        spoken_text = parle if parle != zarma_text else ""
     result_zarma_text = (
         zarma_numbers.render_result(expression_result) if expression_result is not None else ""
     )
@@ -130,6 +143,7 @@ def run_recognition_pipeline(asr_result: AsrResult, settings: Settings) -> Recog
         expression_result=expression_result,
         result_zarma_text=result_zarma_text,
         refusal_code=refusal_code,
+        spoken_text=spoken_text,
     )
 
 

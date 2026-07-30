@@ -77,6 +77,15 @@ class _OperatorTable:
     by_tokens: dict[tuple[str, ...], str]
     #: Symbole -> tokens de la forme canonique (celle que produit le rendu).
     canonical_tokens: dict[str, tuple[str, ...]]
+    #: Symbole -> tokens de la forme **prononcée**, celle que les locuteurs
+    #: emploient réellement (``kanga itonton`` et non ``tonton``).
+    #:
+    #: Elle diffère de la canonique par nécessité historique : la forme courte a
+    #: été retenue comme canonique pour ne pas invalider la banque vocale, qui
+    #: ne contenait que ces enregistrements-là. La forme canonique reste
+    #: l'**identité** de l'opérateur — analyse, comparaison, stockage — et la
+    #: forme prononcée n'est utilisée qu'au moment de parler.
+    spoken_tokens: dict[str, tuple[str, ...]]
     #: Symbole -> nom lexical (``add``, ``subtract``…), pour les rapports.
     names: dict[str, str]
     #: Marqueur du reste de division, en tokens (``("ga", "cindi")``).
@@ -86,6 +95,7 @@ class _OperatorTable:
 def _build_operator_table(lex: Lexicon) -> _OperatorTable:
     by_tokens: dict[tuple[str, ...], str] = {}
     canonical_tokens: dict[str, tuple[str, ...]] = {}
+    spoken_tokens: dict[str, tuple[str, ...]] = {}
     names: dict[str, str] = {}
     for name, operator in sorted(lex.operators.items()):
         if operator.canonical is None:
@@ -95,6 +105,13 @@ def _build_operator_table(lex: Lexicon) -> _OperatorTable:
         names[operator.symbol] = name
         for form in (operator.canonical, *operator.variants):
             by_tokens[tuple(form.split())] = operator.symbol
+        # Forme prononcée : la variante composée de plusieurs mots, ou à défaut
+        # la variante non canonique la plus longue (`kalangaybor` tient en un
+        # seul mot). Déduite du lexique, jamais écrite ici.
+        composees = [v for v in operator.variants if " " in v]
+        autres = [v for v in operator.variants if v != operator.canonical]
+        parlee = composees[0] if composees else (max(autres, key=len) if autres else None)
+        spoken_tokens[operator.symbol] = tuple(parlee.split()) if parlee else tokens
 
     marker = lex.connectors.get("division_remainder")
     tens_unit = lex.connectors.get("tens_unit")
@@ -105,6 +122,7 @@ def _build_operator_table(lex: Lexicon) -> _OperatorTable:
     return _OperatorTable(
         by_tokens=by_tokens,
         canonical_tokens=canonical_tokens,
+        spoken_tokens=spoken_tokens,
         names=names,
         remainder_marker=remainder_marker,
     )
@@ -337,6 +355,32 @@ def render_expression(expression: Expression) -> str:
         refuser vaut mieux qu'inventer un mot zarma.
     """
     tokens = _table().canonical_tokens.get(expression.symbol)
+    if tokens is None:
+        raise DomainError(
+            f"Opérateur {expression.symbol!r} sans forme zarma validée dans le lexique.",
+            code="UNRESOLVED_OPERATOR",
+        )
+    return f"{generate(expression.left)} {' '.join(tokens)} {generate(expression.right)}"
+
+
+def render_spoken(expression: Expression) -> str:
+    """Forme zarma **à prononcer** — comme ``render_expression``, mais avec la
+    forme longue de l'opérateur.
+
+    L'application répète à l'utilisateur ce qu'elle a compris, et celui-ci ne
+    peut vérifier qu'à l'oreille : lui rendre « ihinka tonton ihinza » quand il
+    a dit « ihinka kanga itonton ihinza » lui fait entendre une formulation
+    qu'il n'emploie jamais.
+
+    Distinction volontaire avec ``render_expression`` : la forme canonique reste
+    l'**identité** de l'expression — c'est elle qu'on analyse, compare et
+    stocke —, celle-ci n'est qu'une **présentation**. Les confondre reviendrait
+    à changer l'identité des expressions dans toute la pile pour un besoin qui
+    n'existe qu'au moment de parler.
+
+    :raises DomainError: si l'opérateur n'a pas de forme résolue au lexique.
+    """
+    tokens = _table().spoken_tokens.get(expression.symbol)
     if tokens is None:
         raise DomainError(
             f"Opérateur {expression.symbol!r} sans forme zarma validée dans le lexique.",

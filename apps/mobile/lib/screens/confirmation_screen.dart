@@ -55,7 +55,7 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
     int version,
   ) async {
     final List<VoiceSegment> utterance = confirmationUtterance(
-      utteranceFromZarma(expression.zarmaText),
+      speaker.preferred(expression.zarmaText, expression.spokenText),
     );
     while (mounted && version == _speechLoopVersion) {
       final SpeechOutcome outcome = await speaker.speak(utterance);
