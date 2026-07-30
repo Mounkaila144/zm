@@ -1,7 +1,111 @@
-Première version Android de Zarma IA.
+CONTEXTE DU PROJET
 
-• Enregistrement vocal simplifié des nombres et calculs en zarma
-• Confirmation vocale automatique
-• Lecture automatique du résultat
-• Consentement versionné et contrôle du retrait des données vocales
-• Mise à jour obligatoire pilotée par le serveur
+  Je développe "Zarma IA", une application mobile Flutter (Android) destinée à des locuteurs
+  zarma au Niger, dont une large partie sont analphabètes. Une première version est déjà en
+  production : elle reconnaît des nombres prononcés en zarma (vocabulaire fermé, grammaire
+  contrainte) et fait des calculs, avec une sortie vocale par concaténation de mots
+  pré-enregistrés (pas de synthèse vocale libre). Elle fonctionne hors-ligne.
+
+  NOUVEL OBJECTIF
+
+  Je veux étendre le concept à un assistant conversationnel vocal en zarma : l'utilisateur
+  parle librement en zarma, l'application comprend, va chercher une réponse pertinente
+  (via un LLM type ChatGPT/Claude), et répond à voix haute en zarma. Contrairement à
+  l'application actuelle, une dépendance à Internet est acceptable pour cette nouvelle
+  fonctionnalité (appels API cloud autorisés).
+
+  PIPELINE ENVISAGÉ (à valider ou contester)
+
+  1. Voix zarma de l'utilisateur → texte zarma (ASR)
+  2. Texte zarma → texte français (traduction automatique)
+  3. Texte français → réponse en français (LLM généraliste)
+  4. Réponse en français → texte zarma (traduction automatique retour)
+  5. Texte zarma → voix zarma (TTS)
+RESSOURCES DISPONIBLES (vérifiées)
+
+  1. Traduction fr↔zarma — dataset "Feriji" (Keïta, Ibrahim, Alfari, Homan — ACL 2024
+     Student Research Workshop, https://aclanthology.org/2024.acl-srw.1/):
+     - Corpus parallèle : 61 085 phrases zarma / 42 789 phrases françaises (847 362 mots
+       zarma, 794 709 mots français), split 80/10/10, ~70 Mo, sources : textes religieux,
+       matériel Peace Corps, histoires générées par ChatGPT puis traduites et vérifiées par
+       des locuteurs natifs zarma.
+     - Glossaire : 4 062 paires de mots fr/zarma.
+     - Modèles déjà testés par les auteurs (fine-tuning fr→zarma uniquement) :
+       M2M100 → BLEU 30,06 (meilleur, aussi préféré en évaluation humaine : fluidité 4,2/5,
+       compréhension 4,1/5, lisibilité 4,0/5) ; NLLB-200-distilled → BLEU 29,68
+       (fluidité 3,5, compréhension 3,6, lisibilité 3,4) ; MT5-small → BLEU 6,10 (faible).
+     - Direction zarma→français NON évaluée dans le papier (seule fr→zarma est rapportée).
+     - Les auteurs notent eux-mêmes deux limites : (a) les traductions ne sont pas toujours
+       fluides et le corpus mériterait d'être élargi/diversifié ; (b) des retours communautaires
+       soulignent que l'absence de synthèse vocale exclut les locuteurs analphabètes — les
+       auteurs identifient la TTS comme un besoin futur non résolu par Feriji.
+     - Pas de licence explicite indiquée dans le papier pour la réutilisation/commercialisation
+       — à vérifier directement sur le dépôt GitHub avant usage.
+     - Aucun corpus monolingue zarma séparé n'est documenté dans le papier (à re-vérifier sur
+       le dépôt, une mention en avait été faite ailleurs mais non confirmée dans le texte du papier).
+
+  2. Dictionnaires complémentaires : dictionnaire Peace Corps Niger (Zarma/Djerma,
+     niveau basique à intermédiaire), projet DiLAF (dictionnaires XML pour langues d'Afrique
+     de l'Ouest, partenaires Burkina Faso/France/Mali/Niger) — utile pour enrichir le
+     glossaire Feriji.
+ 3. Reconnaissance vocale (ASR) — Meta MMS (Massively Multilingual Speech,
+     https://ai.meta.com/blog/multilingual-model-speech-recognition/,
+     arXiv:2305.13516) :
+     - Le zarma (code ISO 639-3 "dje") est officiellement listé comme supporté pour la
+       tâche ASR dans le tableau de couverture MMS
+       (https://dl.fbaipublicfiles.com/mms/misc/language_coverage_mms.html).
+     - En revanche, "dje" N'EST PAS listé pour la tâche TTS ni pour la tâche LID
+       (identification de langue) dans ce même tableau — à re-vérifier avant de s'engager,
+       l'information peut avoir évolué.
+     - MMS a été pré-entraîné notamment sur des enregistrements du Nouveau Testament dans
+       plus de 1 100 langues (~32h par langue en moyenne), ce qui explique la couverture du
+       zarma pour l'ASR malgré le peu de données disponibles par ailleurs.
+
+  4. Synthèse vocale (TTS) — aucune solution prête à l'emploi trouvée pour le zarma :
+     ni dans MMS-TTS, ni dans les principaux frameworks TTS open-source généralistes
+     (Coqui TTS, Bark, Fish Speech, etc. — aucun ne mentionne le zarma/Songhay). Il n'existe
+     pas non plus de confirmation que Mozilla Common Voice contienne des données zarma.
+     Il faudra très probablement entraîner un modèle from scratch ou par transfer learning
+     (potentiellement en partant d'un checkpoint MMS proche linguistiquement, ou d'une
+     architecture légère type VITS), à partir d'enregistrements de locuteurs natifs.
+ 5. Données audio déjà en ma possession : uniquement une petite banque de mots
+     zarma pré-enregistrés en studio, couvrant le vocabulaire des nombres (utilisée pour la
+     sortie vocale de l'application actuelle) — insuffisante en volume et en diversité
+     phonétique pour entraîner un TTS à vocabulaire libre.
+
+  6. Aucune donnée d'entraînement ASR spécifique au zarma (audio + transcription alignée)
+     n'est en ma possession à ce jour.
+
+  CONTRAINTES ET OBJECTIFS
+
+  - Utilisateurs cibles majoritairement analphabètes : l'interface doit reposer sur la voix
+    et des icônes, pas sur du texte à lire.
+  - Le zarma est une langue à très faibles ressources numériques (Nilo-Saharienne, famille
+    Songhay, ~5 millions de locuteurs, Niger).
+  - Connexion Internet acceptable pour cette fonctionnalité (contrairement au calculateur
+    existant qui doit rester utilisable hors-ligne).
+  - Budget/équipe : projet indépendant, pas un laboratoire de recherche — je cherche des
+    solutions réalistes à mettre en œuvre progressivement, pas uniquement l'état de l'art
+    académique.
+
+  CE QUE J'ATTENDS DE TOI
+   1. Confirme ou corrige mon architecture en 5 étapes ci-dessus — y a-t-il une meilleure
+       approche (par exemple contourner l'étape de traduction en entraînant un modèle
+       compréhension/génération directement en zarma, ou utiliser un LLM capable de raisonner
+       nativement en zarma) ?
+    2. Pour chaque brique (ASR zarma, traduction fr↔zarma, TTS zarma), propose les meilleures
+       options concrètes disponibles aujourd'hui (modèles précis, méthode — fine-tuning vs
+       API cloud vs from-scratch), avec les compromis coût/qualité/délai.
+    3. Propose une stratégie de collecte de données réaliste pour combler les manques (surtout
+       audio TTS et ASR), en tenant compte du fait que je n'ai pas d'équipe de recherche.
+    4. Découpe le projet en phases concrètes (quick win / moyen terme / long terme), avec pour
+       chaque phase un livrable testable.
+    5. Signale les risques ou pièges que tu identifies (qualité de traduction, biais du corpus
+       Feriji généré partiellement par ChatGPT, couverture du vocabulaire commercial/quotidien
+       absent de Feriji, latence d'un pipeline en 5 étapes pour une conversation fluide, etc.).
+    6. Donne-moi ton verdict final : est-ce faisable avec les ressources listées, et si oui,
+       quelle est la voie la plus efficace pour y arriver ?
+
+    Note sur les faits marqués "à re-vérifier" : je les ai identifiés comme non confirmés à 100% par mes recherches (ex. licence Feriji, disponibilité d'un corpus monolingue
+    zarma séparé, statut TTS de MMS qui évolue avec le temps) — je les ai laissés dans le prompt tels quels pour que Fable 5 les traite avec la prudence appropriée plutôt que
+    de vous donner une fausse certitude.

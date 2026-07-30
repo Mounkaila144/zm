@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - record_darwin (1.0.0):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - record_darwin (from `.symlinks/plugins/record_darwin/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  record_darwin:
+    :path: ".symlinks/plugins/record_darwin/ios"
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  record_darwin: fb1f375f1d9603714f55b8708a903bbb91ffdb0a
+
+PODFILE CHECKSUM: cb1dab001264bbe72f2e38b8f941688707652fe6
+
+COCOAPODS: 1.17.0

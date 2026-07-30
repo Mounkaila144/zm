@@ -9,9 +9,13 @@
 /// comment l'audio est assemblé.
 library;
 
+import 'dart:async';
+import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:zarma_mobile/speech/voice_bank.dart';
 import 'package:zarma_mobile/speech/wav.dart';
 
@@ -78,14 +82,60 @@ final voiceBankProvider = FutureProvider<VoiceBank>((ref) {
 });
 
 /// Lecteur audio réel — remplacé par un faux dans les tests.
+///
+/// L'énoncé passe par un **fichier temporaire**, pas par `BytesSource` :
+/// `audioplayers` ne l'implémente pas sur iOS/macOS (`setSourceBytes is not
+/// currently implemented on iOS`), et l'échec y était muet — l'écran s'affichait
+/// sans qu'aucun son ne sorte. `DeviceFileSource` est le seul chemin commun à
+/// toutes les plateformes cibles.
 final wavPlayerProvider = Provider<WavPlayer>((ref) {
   final AudioPlayer player = AudioPlayer();
-  ref.onDispose(player.dispose);
+  int utteranceCount = 0;
+  File? previous;
+
+  Future<void> discard(File? file) async {
+    if (file == null) return;
+    try {
+      await file.delete();
+    } catch (_) {
+      // Un temporaire qui survit ne casse rien : le système le nettoiera.
+    }
+  }
+
+  ref.onDispose(() {
+    player.dispose();
+    unawaited(discard(previous));
+  });
+
   return (Uint8List wav) async {
     await player.stop();
+
+    if (Platform.isIOS) {
+      // `record` bascule la session iOS en `playAndRecord` et ne la restaure
+      // pas ; `audioplayers` n'applique sa catégorie qu'au démarrage du plugin.
+      // Sans ce rappel, tout ce qui suit un enregistrement sortirait par
+      // l'écouteur au lieu du haut-parleur — inaudible sur un marché.
+      await player.setAudioContext(
+        AudioContext(iOS: AudioContextIOS()),
+      );
+    }
+
+    // Nom unique par énoncé : AVPlayer garde en cache le contenu d'une URL déjà
+    // vue, réécrire le même chemin rejouerait l'énoncé précédent.
+    final Directory dir = await getTemporaryDirectory();
+    final File file = File('${dir.path}/zarma_utterance_${utteranceCount++}.wav');
+    await file.writeAsBytes(wav, flush: true);
+
     final Future<void> completed = player.onPlayerComplete.first;
-    await player.play(BytesSource(wav));
-    await completed;
+    try {
+      await player.play(DeviceFileSource(file.path));
+      await completed;
+    } finally {
+      // On ne supprime qu'au tour suivant : le lecteur peut encore tenir le
+      // descripteur juste après `onPlayerComplete`.
+      await discard(previous);
+      previous = file;
+    }
   };
 });
 

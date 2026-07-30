@@ -1,0 +1,115 @@
+CONTEXTE
+
+Je développe une calculatrice vocale en zarma (langue du Niger) pour des
+utilisateurs en grande partie analphabètes. L'application est en Flutter sur
+Android, souvent des téléphones d'entrée de gamme, et doit fonctionner
+ENTIÈREMENT HORS LIGNE — pas de serveur, pas de réseau.
+
+L'utilisateur prononce un nombre ou une opération arithmétique simple en zarma
+(« zambar zangou da dala gou » = 100 005). L'application le reconnaît et calcule.
+
+
+PROBLÈME À RÉSOUDRE
+
+Mon modèle de reconnaissance vocale fait 94 Mo une fois quantifié en int8.
+C'est trop lourd à embarquer : coût de téléchargement pour des utilisateurs qui
+paient leurs données au mégaoctet, et pic mémoire estimé à 150-250 Mo sur des
+appareils à 1-2 Go de RAM.
+
+OBJECTIF : descendre à 3-10 Mo en conservant la précision actuelle.
+
+
+CE QUE J'AI DÉJÀ, ET QUI MARCHE
+
+Modèle : wav2vec2-base (facebook/wav2vec2-base) affiné en CTC.
+  - 94,4 M paramètres = 378 Mo en float32, ~94 Mo en int8
+  - répartition : 4,2 M convolutions (gelées à l'entraînement),
+    5,1 M projection+position, 85,05 M pour les 12 couches transformer
+    (soit 90 % du modèle), 0,02 M pour la tête CTC
+  - CTC au niveau CARACTÈRE, vocabulaire de 30 symboles seulement.
+    Les lettres doublées (aa, dd, gg, kk, ll, yy) sont des symboles uniques,
+    sinon le décodage CTC fusionne les répétitions et 42 % du corpus devient
+    impossible à produire.
+  - blank CTC = id 0 (imposé par mon décodeur)
+
+Réglages d'entraînement qui ont fonctionné (après 3 échecs) :
+  - lr encodeur 5e-5, lr tête CTC 1e-3, encodeur GELÉ pendant les 400 premiers
+    pas (sinon la tête aléatoire détruit les représentations pré-entraînées :
+    la perte se fige à log(30) = sortie uniforme)
+  - mask_time_prob = 0.05 (à 0.3 le CTC ne sort jamais de l'effondrement sur
+    le blanc)
+  - 50 époques, lot de 8, encodeur convolutif gelé
+  - augmentation : bruit ambiant réel (SNR 5-25 dB), vitesse ±10 %, gain
+
+
+ATOUT MAJEUR — LE DÉCODEUR CONTRAINT
+
+Ce n'est pas un ASR général. La sortie est contrainte par un automate fini de
+la grammaire des nombres zarma : 33 états, 35 mots. Une recherche en faisceau
+CTC (prefix beam search) restreinte aux transitions de l'automate garantit que
+la sortie est un nombre valide PAR CONSTRUCTION.
+
+Le modèle acoustique n'a donc pas besoin d'être bon dans l'absolu : il doit
+seulement départager des candidats déjà tous grammaticalement valides.
+C'est ce qui rend l'objectif crédible — mais je ne sais pas jusqu'où on peut
+rétrécir le modèle avant que le décodeur ne suffise plus à rattraper.
+
+
+DONNÉES — LA VRAIE CONTRAINTE
+
+  - 545 clips, 11,9 MINUTES d'audio au total, 16 kHz mono
+  - 8 locuteurs seulement
+  - vocabulaire fermé de 39 mots, 94 valeurs numériques distinctes
+  - c'est très peu : un modèle entraîné de zéro sur 12 minutes surapprend
+    massivement. Le pré-entraînement de wav2vec2 (960 h d'anglais) est ce qui
+    rend l'apprentissage possible.
+
+RÉSULTATS ACTUELS (protocole leave-one-voice-out sur les 8 personnes,
+la voix testée n'est jamais vue à l'entraînement, découpage par PERSONNE et
+non par fichier) :
+
+  - 95,1 % de nombres exacts en moyenne (min 89,6 %, max 100 %)
+  - CER 2,0 %
+  - pour comparaison, sur le même corpus et le même décodeur, le modèle
+    Omnilingual de Meta (300 M paramètres, ~1,2 Go, non affiné sur le zarma)
+    n'atteint que 66,2 %
+
+
+CE QUE JE VEUX SAVOIR
+
+1. Quelles techniques permettent de passer de 94 Mo à 3-10 Mo en conservant
+   ~95 % de précision, dans CE cas précis : vocabulaire fermé de 39 mots,
+   sortie contrainte par une grammaire, très peu de données d'entraînement ?
+
+2. Faut-il compresser le modèle existant (distillation, élagage, quantification
+   plus agressive, troncature de couches) ou entraîner une architecture
+   différente et bien plus petite (CNN+GRU/LSTM sur MFCC, petit conformer,
+   architectures de keyword spotting) ? Sachant que 12 minutes de données
+   rendent l'entraînement de zéro risqué.
+
+3. Quelles publications ou implémentations existantes traitent ce problème ?
+   Je connais de nom DistilHuBERT, FitHuBERT, LightHuBERT — sont-ils
+   pertinents ici, et à quelle taille/précision arrivent-ils ? Y a-t-il mieux ?
+   Existe-t-il des travaux sur l'ASR embarqué à vocabulaire fermé pour langues
+   peu dotées ?
+
+4. Pour chaque piste : taille attendue, perte de précision attendue, quantité
+   de données nécessaire, et difficulté de mise en œuvre.
+
+5. Dans quel ordre mener les expériences ? Je dispose de Colab gratuit (GPU
+   T4), et un entraînement complet en leave-one-voice-out prend environ 1 heure.
+
+
+CONTRAINTES À RESPECTER
+
+  - la sortie doit rester des logits CTC sur un vocabulaire de tokens, avec
+    blank = 0, pour rester compatible avec mon décodeur contraint existant
+    (que je ne veux pas réécrire)
+  - déploiement final : TFLite ou ONNX Runtime dans une application Flutter
+    Android, hors ligne
+  - entrée : audio 16 kHz mono, énoncés de 0,4 à 6,5 secondes
+  - je ne peux pas collecter beaucoup plus de données rapidement (les
+    locuteurs sont peu nombreux et difficiles à mobiliser)
+
+Réponds en français. Sois concret et chiffré : je préfère trois pistes
+précises avec leurs compromis qu'un panorama exhaustif.
