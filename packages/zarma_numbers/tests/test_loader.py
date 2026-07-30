@@ -57,13 +57,13 @@ def test_remainder_marker_dala_loaded(lexicon):
 
 
 def test_grammar_version_is_exposed(lexicon):
-    assert lexicon.grammar_version == "1.4.0"
+    assert lexicon.grammar_version == "1.5.0"
 
 
 def test_grammar_version_accessible_from_package():
     import zarma_numbers
 
-    assert zarma_numbers.load_lexicon().grammar_version == "1.4.0"
+    assert zarma_numbers.load_lexicon().grammar_version == "1.5.0"
 
 
 # --- AC4 : variantes linguistiques et corrections ASR séparées ---

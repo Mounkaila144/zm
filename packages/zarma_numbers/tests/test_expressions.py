@@ -71,7 +71,7 @@ def _lexicon_without(tmp_path: Path, names: Sequence[str], filename: str = "stri
     """
     text = _lexicon_source()
     for name in names:
-        pattern = rf'(?m)^(  {name}: \{{ symbol: "[^"]+", canonical: )[^,]+'
+        pattern = rf'(?m)^(  {name}:\n    symbol: "[^"]+"\n    canonical: )\S+'
         updated = re.sub(pattern, r"\1null", text)
         assert updated != text, f"opérateur '{name}' introuvable dans le lexique"
         text = updated
@@ -120,12 +120,22 @@ def test_an_unresolved_operator_is_absent_never_invented(tmp_path):
     assert "/" not in {op.symbol for op in lexicon.resolved_operators().values()}
 
     grammar = build_expression_grammar(lexicon)
-    assert grammar.operator_tokens == {"tonton", "zabou", "ingaybor"}
+    assert grammar.operator_tokens == {
+        "tonton",
+        "itonton",
+        "kanga",
+        "zabou",
+        "izabou",
+        "ingaybor",
+        "kalangaybor",
+    }
     assert "inafaysor" not in grammar.tokens
+    assert "ifaysor" not in grammar.tokens
+    assert "kan" not in grammar.tokens
 
 
 def test_grammar_version_carries_the_operators():
-    assert load_lexicon().grammar_version == "1.4.0"
+    assert load_lexicon().grammar_version == "1.5.0"
 
 
 # --------------------------------------------------------------------------- #
@@ -237,6 +247,69 @@ def test_pronunciation_variants_converge_on_the_canonical_operator(grammar):
             assert grammar.canonical_form(spoken) == render_expression(
                 Expression(23, operator.symbol, 15)
             )
+
+
+# --------------------------------------------------------------------------- #
+# Formes longues des opérateurs (lexique 1.5.0) — entrée longue, sortie courte
+# --------------------------------------------------------------------------- #
+
+#: Formes réellement prononcées, confirmées par le locuteur natif et par la
+#: mesure sur le corpus (clips d'opérateur : 1,40 s de médiane). La forme
+#: courte reste celle de la SORTIE — seule prononçable avec la banque vocale.
+LONG_FORMS = {
+    "+": "kanga itonton",
+    "-": "kanga izabou",
+    "*": "kalangaybor",
+    "/": "kan ifaysor",
+}
+
+
+def test_long_operator_forms_are_accepted_and_parse_like_the_short_ones(grammar):
+    for symbol, long_form in LONG_FORMS.items():
+        spoken = f"{generate(23)} {long_form} {generate(15)}"
+        assert grammar.accepts(spoken)
+        assert parse_expression(spoken) == Expression(23, symbol, 15)
+
+
+def test_long_forms_converge_on_the_short_output_form(grammar):
+    """La convergence entrée → sortie : ce que l'ASR entend (forme longue) se
+    ramène à la forme canonique courte, la seule que ``render_expression`` émet
+    et que la banque vocale sait prononcer."""
+    for symbol, long_form in LONG_FORMS.items():
+        spoken = f"{generate(23)} {long_form} {generate(15)}"
+        assert grammar.canonical_form(spoken) == render_expression(
+            Expression(23, symbol, 15)
+        )
+
+
+def test_story_success_criteria(grammar):
+    """Les énoncés exacts du critère de réussite, verrouillés tels quels."""
+    assert grammar.accepts("ihinka kanga itonton ihinza")
+    assert grammar.accepts("zangou gou kalangaybor igou")
+    assert grammar.accepts("iwey kan ifaysor ihinka")
+    assert grammar.accepts("ihinka tonton ihinza")
+    assert grammar.canonical_form("ihinka kanga itonton ihinza") == "ihinka tonton ihinza"
+
+
+def test_a_long_form_is_one_operator_occurrence_not_two(grammar):
+    """``itonton`` est contenu dans « kanga itonton » : c'est la même occurrence,
+    entendue en plus court — jamais un refus MULTIPLE_OPERATORS."""
+    detailed = parse_expression_detailed("ihinka kanga itonton ihinza")
+    assert detailed.accepted
+    assert detailed.expression == Expression(2, "+", 3)
+
+
+def test_a_dangling_long_form_prefix_is_not_an_expression(grammar):
+    assert grammar.accepts("ihinka kanga ihinza") is False
+    assert grammar.accepts("ihinka kan ihinza") is False
+    assert parse_expression("ihinka kanga ihinza") is None
+
+
+def test_evaluate_text_understands_the_long_forms():
+    expression, result = evaluate_text("ihinka kanga itonton ihinza")
+    assert expression == Expression(2, "+", 3)
+    assert result.value == 5
+    assert render_result(result) == generate(5)
 
 
 # --------------------------------------------------------------------------- #

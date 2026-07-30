@@ -9,7 +9,7 @@
 #             `asr_confusions` = corrections d'ERREURS ACOUSTIQUES de l'ASR.
 #             Ces deux structures sont SÉPARÉES et ne doivent JAMAIS être fusionnées.
 
-version: "1.4.0" # = grammar_version (source unique) — 1.4.0 : × et ÷ résolus, variante zongou
+version: "1.5.0" # = grammar_version (source unique) — 1.5.0 : formes longues des opérateurs (kanga itonton…)
 language: dje_Latn
 status: draft
 
@@ -85,15 +85,40 @@ scales:
 # en session initiale, `ingaybor` / `inafaysor` le 2026-07-25 (mots isolés, tirés
 # des phrases `kali ngay boor` et `kaŋ i fa i sɔrɔ`).
 #
+# Les formes LONGUES (« kanga itonton », « kanga izabou », « kalangaybor »,
+# « kan ifaysor ») sont celles réellement PRONONCÉES — confirmées par le locuteur
+# natif du projet et par la mesure sur le corpus (clips d'opérateur : 1,40 s de
+# médiane, contre 0,80 s pour un mot isolé). Elles sont déclarées en `variants` :
+# acceptées en ENTRÉE (grammaire des expressions, analyse), tandis que la forme
+# courte reste `canonical` — c'est elle que produisent `render_expression()` et
+# `canonical_form()`, car la banque vocale (TTS par concaténation) ne contient
+# que les mots courts (tonton.wav, zabou.wav, ingaybor.wav, inafaysor.wav).
+#
 # `symbol` est l'opérateur mathématique (clé de l'évaluateur) ; `variants` sont
 # des variantes LINGUISTIQUES, jamais des corrections d'erreurs ASR. Une forme
 # `canonical: null` resterait **absente** de la grammaire plutôt que devinée —
 # c'est le mécanisme qui a tenu × et ÷ hors du système jusqu'ici.
 operators:
-  add: { symbol: "+", canonical: tonton, variants: [tonton, itonton], status: unresolved }
-  subtract: { symbol: "-", canonical: zabou, variants: [zabou, izabou], status: unresolved }
-  multiply: { symbol: "*", canonical: ingaybor, variants: [ingaybor], status: unresolved }
-  divide: { symbol: "/", canonical: inafaysor, variants: [inafaysor], status: unresolved }
+  add:
+    symbol: "+"
+    canonical: tonton
+    variants: [tonton, itonton, kanga itonton]
+    status: validé
+  subtract:
+    symbol: "-"
+    canonical: zabou
+    variants: [zabou, izabou, kanga izabou]
+    status: validé
+  multiply:
+    symbol: "*"
+    canonical: ingaybor
+    variants: [ingaybor, kalangaybor]
+    status: validé
+  divide:
+    symbol: "/"
+    canonical: inafaysor
+    variants: [inafaysor, kan ifaysor]
+    status: validé
 
 # STRUCTURE DISTINCTE — corrections d'erreurs acoustiques, JAMAIS mélangée aux variants linguistiques.
 # clé = forme erronée produite par l'ASR, valeur = forme canonique correcte.

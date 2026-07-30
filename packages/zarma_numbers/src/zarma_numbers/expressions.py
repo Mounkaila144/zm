@@ -190,13 +190,26 @@ def _split_on_operator(
     disjoints de ceux des nombres (vérifié à la construction de la grammaire),
     une expression valide en contient exactement une occurrence : la découpe est
     donc unique. Zéro occurrence ou plusieurs → refus, jamais un choix arbitraire.
+
+    Une surface peut être **contenue** dans une autre (``itonton`` dans
+    ``kanga itonton``) : seule la correspondance **maximale** compte — une
+    correspondance dont la plage est strictement incluse dans une autre n'est
+    pas une seconde occurrence, c'est la même, entendue en plus court.
     """
-    found: list[tuple[int, int, str]] = []
+    matches: list[tuple[int, int, str]] = []
     for start in range(len(tokens)):
         for surface, symbol in table.by_tokens.items():
             end = start + len(surface)
             if tuple(tokens[start:end]) == surface:
-                found.append((start, end, symbol))
+                matches.append((start, end, symbol))
+
+    def contained(start: int, end: int) -> bool:
+        return any(
+            other_start <= start and end <= other_end and (other_start, other_end) != (start, end)
+            for other_start, other_end, _ in matches
+        )
+
+    found = [(start, end, symbol) for start, end, symbol in matches if not contained(start, end)]
 
     if not found:
         raise ExpressionParseError("Aucun opérateur reconnu.", code="MISSING_OPERATOR")

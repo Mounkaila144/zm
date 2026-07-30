@@ -165,3 +165,17 @@ def test_normalize_output_is_not_meant_for_the_grammar_automaton():
     canonical = generate(110)
     assert grammar.accepts(canonical)
     assert not grammar.accepts(normalize(canonical))
+
+
+def test_operator_forms_are_never_rewritten():
+    """Les opérateurs convergent dans la grammaire des expressions, jamais ici.
+
+    Une variante d'opérateur peut être multi-tokens (« kanga itonton ») et
+    contenir un token qui est lui-même une variante (``itonton``) : un
+    remplacement token-à-token la corromprait (« kanga tonton » n'est plus
+    rien). Le normaliseur laisse donc toutes les formes d'opérateur intactes.
+    """
+    assert normalize("ihinka kanga itonton ihinza") == "ihinka kanga itonton ihinza"
+    assert normalize("ihinka itonton ihinza") == "ihinka itonton ihinza"
+    assert normalize("zangou gou kalangaybor igou") == "zangou gou kalangaybor igou"
+    assert normalize("iwey kan ifaysor ihinka") == "iwey kan ifaysor ihinka"

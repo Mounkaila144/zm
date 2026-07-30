@@ -993,14 +993,15 @@ def _build_nfa(derived: _Derived) -> tuple[_Nfa, int]:
 
 
 def _build_expression_nfa(
-    derived: _Derived, operators: Sequence[tuple[str, tuple[str, ...]]]
+    derived: _Derived, operators: Sequence[tuple[str, ...]]
 ) -> tuple[_Nfa, int]:
     """NFA de ``EXPRESSION := NOMBRE OPÉRATEUR NOMBRE`` (story 6.1, task 2).
 
     La grammaire des nombres n'est **pas réécrite** : elle est greffée deux fois
-    à l'identique, reliée par les mots d'opérateur. Seuls les états de fin du
-    **second** opérande sont acceptants — un nombre seul, ou un nombre suivi d'un
-    opérateur, ne termine pas un énoncé valide.
+    à l'identique, reliée par les mots d'opérateur — une chaîne par **surface**
+    (canonique ou variante, cf. ``_operator_surfaces``). Seuls les états de fin
+    du **second** opérande sont acceptants — un nombre seul, ou un nombre suivi
+    d'un opérateur, ne termine pas un énoncé valide.
     """
     nfa = _Nfa()
     start = nfa.new_state()
@@ -1009,7 +1010,7 @@ def _build_expression_nfa(
     right_root = nfa.new_state()
     right_complete = _graft_number_language(nfa, right_root, derived)
 
-    for _name, tokens in operators:
+    for tokens in operators:
         # Chaîne de l'opérateur construite à rebours depuis l'opérande droit :
         # elle est partagée par tous les états de fin de l'opérande gauche.
         node = right_root
@@ -1205,6 +1206,14 @@ class NumberGrammar:
     kind: str = "numbers"
     #: Mots d'opérateur présents dans l'automate (vide pour ``"numbers"``).
     operator_tokens: frozenset[str] = frozenset()
+    #: Surface d'opérateur variante -> surface **canonique** (celle que la
+    #: banque vocale sait prononcer). C'est le pendant, au niveau des
+    #: **séquences**, de la table ``pronunciations`` token-à-token : une
+    #: variante multi-tokens (« kanga itonton ») ne peut pas converger token
+    #: par token, elle converge ici, dans ``canonical_form()``.
+    _operator_rewrites: Mapping[tuple[str, ...], tuple[str, ...]] = field(
+        default_factory=lambda: MappingProxyType({})
+    )
 
     # --- structure ---
 
@@ -1274,14 +1283,41 @@ class NumberGrammar:
         """Forme canonique de la séquence, ou ``None`` si elle n'est pas valide.
 
         C'est ici que les prononciations alternatives convergent : toutes celles
-        d'un même token produisent la **même** chaîne canonique.
+        d'un même token produisent la **même** chaîne canonique. Les surfaces
+        d'opérateur variantes (y compris multi-tokens, « kanga itonton »)
+        convergent de même vers leur surface canonique (``tonton``) — la seule
+        que la banque vocale sait prononcer.
         """
         state, canonical = self.walk(
             _as_tokens(text_or_tokens), allow_pronunciations=allow_pronunciations
         )
         if state is None or not self.is_accepting(state):
             return None
-        return " ".join(canonical)
+        return " ".join(self._rewrite_operator_surface(canonical))
+
+    def _rewrite_operator_surface(self, tokens: list[str]) -> list[str]:
+        """Ramène la plage d'opérateur de ``tokens`` à sa surface canonique.
+
+        Les mots d'opérateur étant disjoints de ceux des nombres, une séquence
+        acceptée en contient au plus une plage contiguë, et cette plage est
+        exactement l'une des surfaces déclarées : la réécriture est univoque.
+        Sans opérateur (grammaire des nombres) ou sur une surface déjà
+        canonique, la séquence est retournée telle quelle.
+        """
+        if not self._operator_rewrites:
+            return tokens
+        start = 0
+        while start < len(tokens) and tokens[start] not in self.operator_tokens:
+            start += 1
+        end = start
+        while end < len(tokens) and tokens[end] in self.operator_tokens:
+            end += 1
+        if start == end:
+            return tokens
+        canonical = self._operator_rewrites.get(tuple(tokens[start:end]))
+        if canonical is None:
+            return tokens
+        return tokens[:start] + list(canonical) + tokens[end:]
 
 
 def _as_tokens(text_or_tokens: str | Iterable[str]) -> tuple[str, ...]:
@@ -1297,6 +1333,7 @@ def _finalize(
     *,
     kind: str,
     operator_tokens: frozenset[str] = frozenset(),
+    operator_rewrites: Mapping[tuple[str, ...], tuple[str, ...]] | None = None,
 ) -> NumberGrammar:
     """Déterminise, minimise, construit la table de prononciations et emballe le DFA."""
     transitions, accepting, dfa_start = _determinize(nfa, start)
@@ -1320,6 +1357,7 @@ def _finalize(
         _canonical_by_spelling=MappingProxyType(canonical_by_spelling),
         kind=kind,
         operator_tokens=operator_tokens,
+        _operator_rewrites=MappingProxyType(dict(operator_rewrites or {})),
     )
 
 
@@ -1331,8 +1369,18 @@ def build_grammar(lexicon: Lexicon | None = None) -> NumberGrammar:
     return _finalize(lex, nfa, start, kind="numbers")
 
 
-def _operator_surfaces(lex: Lexicon, number_alphabet: frozenset[str]) -> list[tuple[str, ...]]:
-    """Mots d'opérateur **résolus**, après contrôle de non-ambiguïté.
+def _operator_surfaces(
+    lex: Lexicon, number_alphabet: frozenset[str]
+) -> list[tuple[tuple[str, ...], tuple[str, ...]]]:
+    """Surfaces d'opérateur **résolues** — paires ``(surface, surface canonique)``.
+
+    Chaque opérateur contribue sa forme canonique **et ses variantes**
+    (``variants`` du lexique) : les variantes multi-tokens (« kanga itonton »)
+    ne peuvent pas passer par la table de prononciations token-à-token, elles
+    sont donc des chemins à part entière de l'automate. La convergence
+    entrée → sortie est portée par la paire : toute surface acceptée se ramène
+    à sa surface **canonique** dans ``canonical_form()`` — c'est elle que la
+    banque vocale sait prononcer.
 
     C'est ici que se joue le risque identifié par la story : la composition des
     nombres utilise déjà des connecteurs (``da`` / ``di`` / ``cindi``). Si un mot
@@ -1340,35 +1388,46 @@ def _operator_surfaces(lex: Lexicon, number_alphabet: frozenset[str]) -> list[tu
     et *une opération*, et le décodage contraint n'aurait plus de chemin unique.
 
     Le contrôle n'est pas une supposition, c'est une **vérification mécanique**
-    à chaque construction : l'alphabet des opérateurs doit être disjoint de celui
-    des nombres, sinon ``GrammarDerivationError``. La disjonction suffit à établir
-    la non-ambiguïté de la langue des expressions :
+    à chaque construction : l'alphabet des opérateurs — surfaces canoniques
+    **et** variantes — doit être disjoint de celui des nombres, sinon
+    ``GrammarDerivationError``. La disjonction suffit à établir la non-ambiguïté
+    de la langue des expressions :
 
     1. un mot d'opérateur ne peut apparaître dans aucun nombre, donc toute
-       expression acceptée contient **exactement une** occurrence d'un mot
-       d'opérateur — la découpe ``gauche | opérateur | droite`` est unique ;
+       expression acceptée contient **exactement une** plage contiguë de mots
+       d'opérateur — la découpe ``gauche | opérateur | droite`` est unique, et
+       la plage est exactement l'une des surfaces déclarées (le lexique refuse
+       qu'une même forme serve deux opérateurs) ;
     2. chaque côté est un nombre, et la langue des nombres est elle-même
        univoque sur la plage résolue (invariant ``parse(generate(n)) == n``).
 
     Une expression acceptée a donc une seule lecture. La déterminisation, elle,
     ne fait que rendre le parcours efficace : elle n'apporte pas cette propriété.
     """
-    surfaces: list[tuple[str, ...]] = []
+    surfaces: list[tuple[tuple[str, ...], tuple[str, ...]]] = []
     for name in sorted(lex.operators):
         operator = lex.operators[name]
         if operator.canonical is None:
             continue  # forme non validée par un locuteur : absente, jamais devinée
-        tokens = tuple(operator.canonical.split())
-        if not tokens:
+        canonical = tuple(operator.canonical.split())
+        if not canonical:
             raise GrammarDerivationError(f"Opérateur '{name}' : forme canonique vide.")
-        collisions = sorted(set(tokens) & number_alphabet)
-        if collisions:
-            raise GrammarDerivationError(
-                f"Opérateur '{name}' ambigu : {collisions} appartient déjà à la "
-                "grammaire des nombres. Une même suite de mots serait lisible "
-                "comme un nombre et comme une opération."
-            )
-        surfaces.append(tokens)
+        seen: set[tuple[str, ...]] = set()
+        for form in (operator.canonical, *operator.variants):
+            tokens = tuple(form.split())
+            if not tokens:
+                raise GrammarDerivationError(f"Opérateur '{name}' : forme vide.")
+            if tokens in seen:
+                continue
+            seen.add(tokens)
+            collisions = sorted(set(tokens) & number_alphabet)
+            if collisions:
+                raise GrammarDerivationError(
+                    f"Opérateur '{name}' ambigu : {collisions} appartient déjà à la "
+                    "grammaire des nombres. Une même suite de mots serait lisible "
+                    "comme un nombre et comme une opération."
+                )
+            surfaces.append((tokens, canonical))
     return surfaces
 
 
@@ -1398,10 +1457,19 @@ def build_expression_grammar(lexicon: Lexicon | None = None) -> NumberGrammar:
         )
     del number_nfa, number_start  # n'a servi qu'à observer l'alphabet des nombres
 
-    named = [(" ".join(tokens), tokens) for tokens in surfaces]
-    nfa, start = _build_expression_nfa(derived, named)
-    operator_tokens = frozenset(token for tokens in surfaces for token in tokens)
-    return _finalize(lex, nfa, start, kind="expressions", operator_tokens=operator_tokens)
+    nfa, start = _build_expression_nfa(derived, [surface for surface, _ in surfaces])
+    operator_tokens = frozenset(token for surface, _ in surfaces for token in surface)
+    operator_rewrites = {
+        surface: canonical for surface, canonical in surfaces if surface != canonical
+    }
+    return _finalize(
+        lex,
+        nfa,
+        start,
+        kind="expressions",
+        operator_tokens=operator_tokens,
+        operator_rewrites=operator_rewrites,
+    )
 
 
 @lru_cache(maxsize=1)
