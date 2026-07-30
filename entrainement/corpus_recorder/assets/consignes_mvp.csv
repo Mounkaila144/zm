@@ -1,0 +1,33 @@
+id,texte_zarma,affichage
+mot+,kanga itonton,+ (plus)
+mot-,kanga izabou,− (moins)
+mot*,kalangaybor,× (fois)
+mot/,kan ifaysor,÷ (divisé par)
+court+,tonton,+ (forme courte)
+court-,zabou,− (forme courte)
+court*,ingaybor,× (forme courte)
+court/,inafaysor,÷ (forme courte)
+2+3,ihinka kanga itonton ihinza,2 + 3
+5+10,igou kanga itonton iwey,5 + 10
+20+5,waranka kanga itonton igou,20 + 5
+50+50,waygou kanga itonton waygou,50 + 50
+100+200,zangou kanga itonton zangou hinka,100 + 200
+1000+500,zambar fo kanga itonton zangou gou,1000 + 500
+5-2,igou kanga izabou ihinka,5 − 2
+10-3,iwey kanga izabou ihinza,10 − 3
+50-20,waygou kanga izabou waranka,50 − 20
+100-50,zangou kanga izabou waygou,100 − 50
+500-100,zangou gou kanga izabou zangou,500 − 100
+1000-200,zambar fo kanga izabou zangou hinka,1000 − 200
+2*3,ihinka kalangaybor ihinza,2 × 3
+4*5,itaci kalangaybor igou,4 × 5
+10*3,iwey kalangaybor ihinza,10 × 3
+20*5,waranka kalangaybor igou,20 × 5
+100*2,zangou kalangaybor ihinka,100 × 2
+1000*3,zambar fo kalangaybor ihinza,1000 × 3
+10/2,iwey kan ifaysor ihinka,10 ÷ 2
+20/4,waranka kan ifaysor itaci,20 ÷ 4
+50/10,waygou kan ifaysor iwey,50 ÷ 10
+100/5,zangou kan ifaysor igou,100 ÷ 5
+500/5,zangou gou kan ifaysor igou,500 ÷ 5
+1000/2,zambar fo kan ifaysor ihinka,1000 ÷ 2

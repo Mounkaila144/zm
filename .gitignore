@@ -50,3 +50,10 @@ dataset/benchmark/**/*.jsonl
 
 # --- Stockage runtime ---
 storage/
+
+# --- Outil de collecte de corpus (entrainement/) ---
+# L'APK est un artefact de compilation : 52 Mo qui alourdiraient le dépôt
+# définitivement, et que GitHub signale au-delà de 50 Mo. Il se reconstruit
+# avec `flutter build apk` et se distribue hors dépôt.
+entrainement/**/*.apk
+entrainement/*.apk
