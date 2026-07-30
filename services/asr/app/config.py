@@ -22,7 +22,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 #: Langues contraintes disponibles : les nombres seuls (epics 1–5) ou les
 #: expressions arithmétiques (story 6.1). Même automate, même décodeur — c'est
 #: la **langue** qui change, pas l'algorithme.
-GrammarKind = Literal["numbers", "expressions"]
+GrammarKind = Literal["numbers", "expressions", "calculator"]
 
 
 class AsrSettings(BaseSettings):
@@ -83,10 +83,13 @@ class AsrSettings(BaseSettings):
         calculatrice vocale ne demande qu'une variable d'environnement.
         """
         from zarma_numbers.grammar import (  # noqa: PLC0415 - construction coûteuse
+            load_calculator_grammar,
             load_expression_grammar,
             load_grammar,
         )
 
+        if self.DECODE_GRAMMAR == "calculator":
+            return load_calculator_grammar()
         if self.DECODE_GRAMMAR == "expressions":
             return load_expression_grammar()
         return load_grammar()

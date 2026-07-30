@@ -286,9 +286,18 @@ class LocalAsr:
         if blank_id != config.blank_id:
             config = replace(config, blank_id=blank_id)
 
-        from zarma_numbers.grammar import load_expression_grammar, load_grammar
+        from zarma_numbers.grammar import (
+            load_calculator_grammar,
+            load_expression_grammar,
+            load_grammar,
+        )
 
-        grammar = load_expression_grammar() if grammar_kind == "expressions" else load_grammar()
+        if grammar_kind == "calculator":
+            grammar = load_calculator_grammar()
+        elif grammar_kind == "expressions":
+            grammar = load_expression_grammar()
+        else:
+            grammar = load_grammar()
         encode = self._backend.encode
 
         separator = self._detect_separator(encode)
@@ -341,39 +350,6 @@ class LocalAsr:
         """Logits CTC ``(T, V)`` — ils ne quittent jamais ce processus."""
         return self._backend.logits(samples, sample_rate)
 
-
-def _omnilingual_logits(backend, samples: np.ndarray, sample_rate: int) -> np.ndarray:
-    """Logits d'Omnilingual, obtenus via les membres privés du pipeline.
-
-    Isolé dans une fonction plutôt que dans la méthode du backend : c'est le
-    seul endroit du projet qui dépende de l'API interne de `omnilingual_asr`,
-    et donc le seul à revoir si le paquet change.
-    """
-    import torch
-    from fairseq2.data.data_pipeline import DataPipeline, read_sequence
-    from fairseq2.nn.batch_layout import BatchLayout
-
-    pipeline = backend._pipeline  # noqa: SLF001
-    builder = DataPipeline.zip(
-        [
-            pipeline._build_audio_wavform_pipeline(  # noqa: SLF001
-                [{"waveform": samples, "sample_rate": sample_rate}]
-            ).and_return(),
-            read_sequence([None]).and_return(),
-        ]
-    )
-    batch = next(
-        iter(builder.bucket(1).map(pipeline._create_batch_simple).and_return())  # noqa: SLF001
-    )
-    # L'entrée doit suivre le modèle : la convertir aussi, sinon PyTorch refuse
-    # le mélange de types (et, laissée en bfloat16, elle ramènerait toute
-    # l'inférence au chemin émulé qu'on cherche justement à éviter).
-    seqs = batch.source_seqs.to(device=backend._device, dtype=backend._dtype)  # noqa: SLF001
-    layout = BatchLayout(seqs.shape, seq_lens=batch.source_seq_lens, device=seqs.device)
-    with torch.inference_mode():
-        logits, out_layout = pipeline.model(seqs, layout)
-    length = int(list(out_layout.seq_lens)[0])
-    return logits[0, :length].detach().float().cpu().numpy()
 
     def transcribe(self, wav_bytes: bytes) -> dict[str, object]:
         started = time.perf_counter()
@@ -434,6 +410,40 @@ def _omnilingual_logits(backend, samples: np.ndarray, sample_rate: int) -> np.nd
             flush=True,
         )
         return payload
+
+
+def _omnilingual_logits(backend, samples: np.ndarray, sample_rate: int) -> np.ndarray:
+    """Logits d'Omnilingual, obtenus via les membres privés du pipeline.
+
+    Isolé dans une fonction plutôt que dans la méthode du backend : c'est le
+    seul endroit du projet qui dépende de l'API interne de `omnilingual_asr`,
+    et donc le seul à revoir si le paquet change.
+    """
+    import torch
+    from fairseq2.data.data_pipeline import DataPipeline, read_sequence
+    from fairseq2.nn.batch_layout import BatchLayout
+
+    pipeline = backend._pipeline  # noqa: SLF001
+    builder = DataPipeline.zip(
+        [
+            pipeline._build_audio_wavform_pipeline(  # noqa: SLF001
+                [{"waveform": samples, "sample_rate": sample_rate}]
+            ).and_return(),
+            read_sequence([None]).and_return(),
+        ]
+    )
+    batch = next(
+        iter(builder.bucket(1).map(pipeline._create_batch_simple).and_return())  # noqa: SLF001
+    )
+    # L'entrée doit suivre le modèle : la convertir aussi, sinon PyTorch refuse
+    # le mélange de types (et, laissée en bfloat16, elle ramènerait toute
+    # l'inférence au chemin émulé qu'on cherche justement à éviter).
+    seqs = batch.source_seqs.to(device=backend._device, dtype=backend._dtype)  # noqa: SLF001
+    layout = BatchLayout(seqs.shape, seq_lens=batch.source_seq_lens, device=seqs.device)
+    with torch.inference_mode():
+        logits, out_layout = pipeline.model(seqs, layout)
+    length = int(list(out_layout.seq_lens)[0])
+    return logits[0, :length].detach().float().cpu().numpy()
 
 
 def _make_handler(
@@ -518,9 +528,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--port", type=int, default=8001)
     parser.add_argument(
         "--grammar",
-        choices=("numbers", "expressions"),
-        default="expressions",
-        help="Langue contrainte (défaut : expressions, pour la calculatrice vocale).",
+        choices=("numbers", "expressions", "calculator"),
+        default="calculator",
+        help=(
+            "Langue contrainte. `calculator` (défaut) accepte un nombre seul OU "
+            "une opération — c'est ce que dicte réellement un utilisateur."
+        ),
     )
     parser.add_argument(
         "--model-dir",

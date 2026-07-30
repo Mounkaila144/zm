@@ -1,121 +1,73 @@
-Tu travailles dans le monorepo /Users/pc/project/zarma.
+  Le service ASR sert aujourd'hui le modèle Meta « omniASR_CTC_300M_v2 »
+  (300 M de paramètres, ~1,2 Go). Il est remplacé par un modèle maison
+  entraîné sur le corpus zarma : wav2vec2-base affiné, 94 M de paramètres,
+  CTC caractère sur 30 symboles.
 
-CONTEXTE
+  Mesuré sur les 529 nombres du corpus, à décodeur contraint identique et
+  sans qu'aucun des deux n'ait entendu la voix testée : 95,1 % de nombres
+  exacts pour le modèle maison contre 66,2 % pour Omnilingual, sur les
+  12 voix sans exception.
 
-Un modèle ASR zarma vient d'être entraîné (864 énoncés, 12 locuteurs). Il
-reconnaît les opérations arithmétiques, mais la grammaire les REFUSE, donc le
-décodeur contraint ne peut rien en faire.
+  Le code nécessaire vient d'être poussé sur la branche
+  feat/epics-2-5-api-mobile-benchmark.
 
-La cause : les opérateurs zarma sont des formes LONGUES, confirmées par le
-locuteur natif du projet et prouvées par la mesure (les 16 clips d'opérateur
-durent 1,40 s de médiane, contre 0,80 s pour un mot isolé) :
+  À FAIRE
 
-    +  ->  kanga itonton     (2 tokens)
-    -  ->  kanga izabou      (2 tokens)
-    *  ->  kalangaybor       (1 token)
-    /  ->  kan ifaysor       (2 tokens)
+  1. `git pull` de la branche feat/epics-2-5-api-mobile-benchmark.
 
-Or packages/zarma_numbers/src/zarma_numbers/lexicon.yaml porte encore les
-formes courtes, avec status: unresolved :
+  2. Installer le modèle. L'archive est déjà déposée dans
+     /root/modele-20260730T124015Z-1-001.zip et contient un dossier
+     `modele/` avec 4 fichiers : model.safetensors, config.json,
+     tokenizer.json, entrainement.json.
 
-    add:      { symbol: "+", canonical: tonton,    variants: [tonton, itonton],  status: unresolved }
-    subtract: { symbol: "-", canonical: zabou,     variants: [zabou, izabou],    status: unresolved }
-    multiply: { symbol: "*", canonical: ingaybor,  variants: [ingaybor],         status: unresolved }
-    divide:   { symbol: "/", canonical: inafaysor, variants: [inafaysor],        status: unresolved }
+     Décompresse-la vers un emplacement stable, par exemple
+     /srv/zarma/modele, et vérifie que les 4 fichiers y sont.
+ `tokenizer.json` est aussi indispensable que les poids : la tête CTC
+     produit 30 colonnes dont l'ordre n'est défini que par ce fichier.
+     Sans lui le modèle sort du charabia, sans aucun message d'erreur.
 
-Etat verifie aujourd'hui :
+  3. Installer `transformers` dans l'environnement Python du service ASR.
+     Le modèle n'utilise que l'API publique de ce paquet.
 
-    « ihinka kanga itonton ihinza »   ->  REFUSE   (ce que le modele produit)
-    « ihinka itonton ihinza »         ->  REFUSE
-    « ihinka tonton ihinza »          ->  ACCEPTE  (ce que personne ne dit)
+  4. Configurer le service ASR pour charger le modèle maison, via
+     l'option `--model-dir /srv/zarma/modele` ou la variable
+     d'environnement ASR_MODEL_DIR. Sans l'une des deux, le serveur
+     recharge Omnilingual : c'est le repli voulu, mais ce n'est pas ce
+     qu'on veut ici.
 
+     Vérifie aussi que DECODE_GRAMMAR vaut `expressions` — la grammaire
+     accepte désormais les formes longues des opérateurs.
 
-OBJECTIF
+     Règle --threads à 2 : sur ce processeur, l'efficacité parallèle
+     s'effondre au-delà (mesuré, cf. docstring de local_server.py).
 
-Que la grammaire des expressions accepte les formes longues, sans casser la
-grammaire des nombres ni la banque vocale de l'application.
+  5. TEST DE FUMÉE AVANT DE BASCULER LE TRAFIC. Redémarre le service ASR
+     et envoie quelques audios de nombres zarma à POST /transcribe.
+  Attendu :
+     - GET /health renvoie un `model` commençant par `zarma_w2v2`
+     - les réponses ont un `text` non vide et un `model_version` cohérent
+     - latence entre 250 et 350 ms sur un énoncé court
 
+     Si le texte est vide ou incohérent, N'AVANCE PAS et rapporte : ce
+     serait un problème de chemin de modèle, de tokenizer ou de
+     dépendance, pas un problème de qualité.
 
-RACINE DU PROBLEME, deja identifiee
+  6. Une fois le test de fumée concluant SEULEMENT, désinstaller
+     `omnilingual-asr` et supprimer les poids du modèle Meta (cache
+     fairseq2 / HuggingFace). Cela libérera environ 1,2 Go.
 
-Dans packages/zarma_numbers/src/zarma_numbers/grammar.py, la fonction
-_operator_surfaces() n'utilise QUE operator.canonical :
+     Le code du repli reste en place et fonctionnera de nouveau si le
+     paquet est réinstallé — ne supprime aucun fichier source.
 
-    tokens = tuple(operator.canonical.split())
+  7. Vérifier que l'API principale répond toujours correctement de bout
+     en bout, et rapporter : espace disque libéré, latence avant/après,
+     et le retour de /health.
 
-Elle ignore completement operator.variants. Le mecanisme de convergence des
-variantes, qui existe pour les nombres via `pronunciations`, n'a jamais ete
-branche pour les operateurs. C'est la qu'il faut agir.
+  NE PAS FAIRE
+  - Ne touche pas à REQUIRE_TRAINING_CONSENT ni à RATE_LIMIT_RECOGNIZE :
+      ils ont été remis en configuration de production et doivent y rester.
+    - Ne supprime rien d'Omnilingual avant que le test de fumée soit passé.
 
-Note : canonical.split() montre que les formes MULTI-TOKENS sont deja prevues
-par la structure. Ce n'est donc pas un obstacle.
-
-
-CONTRAINTE IMPORTANTE — la banque vocale
-
-L'application PARLE ses reponses en concatenant des mots pre-enregistres. La
-banque (dossier « pour le tts » du corpus) ne contient que les formes COURTES :
-tonton.wav, zabou.wav, ingaybor.wav, inafaysor.wav. Il n'existe aucun
-enregistrement de « kanga itonton ».
-
-Solution a privilegier : les formes longues sont acceptees en ENTREE (variantes
-reconnues), la forme courte reste celle produite en SORTIE par
-render_expression() et canonical_form(). Le decodeur ferait alors converger
-« ihinka kanga itonton ihinza » vers la forme canonique « ihinka tonton ihinza »,
-qui reste parseable et prononcable avec la banque existante.
-
-Si cette separation entree/sortie n'est pas realisable proprement, signale-le
-plutot que de forcer : il faudra alors enregistrer de nouveaux fichiers audio,
-et c'est une decision qui appartient a l'utilisateur.
-
-
-VERIFICATION DEJA FAITE
-
-_operator_surfaces() refuse tout operateur dont un token appartient a
-l'alphabet des nombres, pour eviter qu'une suite de mots soit lisible a la fois
-comme un nombre et comme une operation. J'ai verifie : `kanga`, `itonton`,
-`izabou`, `kalangaybor`, `kan`, `ifaysor` n'entrent en collision avec AUCUN des
-35 tokens de la grammaire des nombres. Le controle passera.
-
-
-A FAIRE
-
-1. lexicon.yaml : ajouter les formes longues et passer status a resolved.
-
-2. grammar.py : faire deriver les surfaces d'operateur de canonical ET des
-   variantes, en gardant la verification de disjonction sur toutes les formes.
-
-3. Mettre a jour les tests. Environ 11 assertions concernees dans
-   packages/zarma_numbers/tests/test_expressions.py et test_loader.py, plus la
-   fixture services/asr/tests/fixtures/expression-token-lexicon.json.
-
-4. Ajouter des tests qui verrouillent le nouveau comportement : chaque forme
-   longue doit etre acceptee, et se ramener a la meme expression que sa forme
-   courte.
-
-
-NE PAS CASSER
-
-- La grammaire des NOMBRES doit rester identique, a l'octet pres. Tous les
-  tests existants qui la concernent doivent passer sans modification.
-
-- render_result() (« <quotient> ga cindi <reste> ») ne doit pas changer.
-
-- Le domaine arithmetique et les refus (resultat negatif, division par zero,
-  depassement) ne doivent pas changer.
-
-
-CRITERE DE REUSSITE
-
-    from zarma_numbers import load_expression_grammar
-    g = load_expression_grammar()
-
-    # doit etre accepte :
-    g.accepts("ihinka kanga itonton ihinza")
-    g.accepts("zangou gou kalangaybor igou")
-    g.accepts("iwey kan ifaysor ihinka")
-
-    # doit rester accepte :
-    g.accepts("ihinka tonton ihinza")
-
-et la suite de tests complete du paquet zarma_numbers au vert.
+    Un point sur lequel j'insiste dans ce prompt : ne rien supprimer avant le test de fumée. Le risque réel n'est pas que le nouveau modèle soit un peu moins bon — il est
+    trois fois meilleur — mais qu'un chemin erroné ou un tokenizer.json mal placé le fasse produire du vide. Tant qu'Omnilingual est encore installé, revenir en arrière ne
+    coûte qu'une variable d'environnement.

@@ -33,8 +33,10 @@ from .expressions import (
 from .generator import MAX_VALUE, MIN_VALUE, generate, generate_combined
 from .grammar import (
     NumberGrammar,
+    build_calculator_grammar,
     build_expression_grammar,
     build_grammar,
+    load_calculator_grammar,
     load_expression_grammar,
     load_grammar,
 )
@@ -66,6 +68,8 @@ __all__ = [
     "NumberGrammar",
     "build_grammar",
     "build_expression_grammar",
+    "build_calculator_grammar",
+    "load_calculator_grammar",
     "load_grammar",
     "load_expression_grammar",
     "Expression",

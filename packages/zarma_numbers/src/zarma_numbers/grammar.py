@@ -993,7 +993,10 @@ def _build_nfa(derived: _Derived) -> tuple[_Nfa, int]:
 
 
 def _build_expression_nfa(
-    derived: _Derived, operators: Sequence[tuple[str, ...]]
+    derived: _Derived,
+    operators: Sequence[tuple[str, ...]],
+    *,
+    accept_bare_number: bool = False,
 ) -> tuple[_Nfa, int]:
     """NFA de ``EXPRESSION := NOMBRE OPÉRATEUR NOMBRE`` (story 6.1, task 2).
 
@@ -1021,7 +1024,14 @@ def _build_expression_nfa(
         for state in left_complete:
             nfa.add_edge(state, tokens[0], node)
 
-    nfa.accepting = right_complete
+    # ``accept_bare_number`` ajoute les états de fin du **premier** opérande aux
+    # états acceptants : la langue devient « un nombre seul OU une opération ».
+    # C'est ce dont la calculatrice a besoin — l'utilisateur dicte tantôt un
+    # montant, tantôt un calcul, et le décodeur ne charge qu'une langue à la
+    # fois. Aucune ambiguïté n'en découle : l'alphabet des opérateurs est
+    # disjoint de celui des nombres (vérifié par `_operator_surfaces`), donc
+    # aucune suite de mots n'est lisible des deux façons.
+    nfa.accepting = (right_complete | left_complete) if accept_bare_number else right_complete
     return nfa, start
 
 
@@ -1431,7 +1441,25 @@ def _operator_surfaces(
     return surfaces
 
 
-def build_expression_grammar(lexicon: Lexicon | None = None) -> NumberGrammar:
+def build_calculator_grammar(lexicon: Lexicon | None = None) -> NumberGrammar:
+    """Automate de ``NOMBRE | NOMBRE OPÉRATEUR NOMBRE`` — la langue réellement
+    parlée à la calculatrice.
+
+    Le décodeur contraint ne charge qu'une grammaire à la fois. Avec
+    ``expressions``, un utilisateur qui dicte simplement « zangou » obtient un
+    rejet ; avec ``numbers``, aucun calcul n'est reconnu. Or l'application
+    attend les deux — un montant *ou* une opération —, et c'est cette union
+    qu'il lui faut.
+
+    Constatée en production : le service tournait en ``expressions`` et ne
+    reconnaissait donc aucun nombre isolé.
+    """
+    return build_expression_grammar(lexicon, accept_bare_number=True)
+
+
+def build_expression_grammar(
+    lexicon: Lexicon | None = None, *, accept_bare_number: bool = False
+) -> NumberGrammar:
     """Automate de ``NOMBRE OPÉRATEUR NOMBRE`` (story 6.1, task 2).
 
     Même type, même interface que ``build_grammar`` — le décodeur contraint de
@@ -1457,7 +1485,11 @@ def build_expression_grammar(lexicon: Lexicon | None = None) -> NumberGrammar:
         )
     del number_nfa, number_start  # n'a servi qu'à observer l'alphabet des nombres
 
-    nfa, start = _build_expression_nfa(derived, [surface for surface, _ in surfaces])
+    nfa, start = _build_expression_nfa(
+        derived,
+        [surface for surface, _ in surfaces],
+        accept_bare_number=accept_bare_number,
+    )
     operator_tokens = frozenset(token for surface, _ in surfaces for token in surface)
     operator_rewrites = {
         surface: canonical for surface, canonical in surfaces if surface != canonical
@@ -1466,7 +1498,7 @@ def build_expression_grammar(lexicon: Lexicon | None = None) -> NumberGrammar:
         lex,
         nfa,
         start,
-        kind="expressions",
+        kind="calculator" if accept_bare_number else "expressions",
         operator_tokens=operator_tokens,
         operator_rewrites=operator_rewrites,
     )
@@ -1484,10 +1516,18 @@ def load_expression_grammar() -> NumberGrammar:
     return build_expression_grammar()
 
 
+@lru_cache(maxsize=1)
+def load_calculator_grammar() -> NumberGrammar:
+    """Union « nombre seul OU opération » — la langue de la calculatrice."""
+    return build_calculator_grammar()
+
+
 __all__ = [
     "NumberGrammar",
     "build_grammar",
     "build_expression_grammar",
+    "build_calculator_grammar",
     "load_grammar",
     "load_expression_grammar",
+    "load_calculator_grammar",
 ]
