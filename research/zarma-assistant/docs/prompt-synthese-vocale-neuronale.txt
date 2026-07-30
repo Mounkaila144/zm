@@ -1,0 +1,170 @@
+Tu travailles dans le monorepo /Users/pc/project/zarma.
+
+OBJECTIF
+
+Construire une synthèse vocale (TTS) neuronale en zarma, entraînée sur la
+voix d'un seul locuteur : l'utilisateur de ce projet, locuteur natif, qui
+est disponible pour enregistrer autant qu'il le faut.
+
+Pourquoi neuronale plutôt que par concaténation : l'application doit à
+terme prononcer des NOMS DE BÉNÉFICIAIRES enregistrés par chaque
+utilisateur. C'est le seul endroit du projet où le vocabulaire cesse
+d'être fermé, donc le seul où l'assemblage de mots pré-enregistrés
+atteint sa limite.
+
+
+CONTEXTE DU PROJET
+
+Application vocale zarma pour des utilisateurs largement analphabètes au
+Niger (PTR Niger) : une calculatrice vocale en production, et un
+assistant de transfert d'argent en préparation.
+
+L'utilisateur est locuteur natif zarma. Ses jugements de qualité font
+autorité — ne pas chercher un tiers pour valider une prononciation, et
+lui soumettre les choix linguistiques plutôt que de les trancher seul.
+
+Le zarma n'a PAS d'orthographe standardisée : on l'écrit « au son ».
+C'est une difficulté pour la cohérence des transcriptions, mais un
+avantage réel pour la synthèse — la correspondance lettre/son est
+régulière, ce qui simplifie beaucoup le passage texte → phonèmes.
+
+
+CE QUI EXISTE DÉJÀ
+
+1. Synthèse par concaténation, EN PRODUCTION et fonctionnelle :
+   apps/mobile/assets/voice/ — 40 mots isolés + 3 phrases entières,
+   37 secondes au total, 16 kHz mono. C'est elle qui parle aujourd'hui.
+   Elle doit continuer de fonctionner : la synthèse neuronale s'ajoute,
+   elle ne remplace pas. Prévoir un repli, comme cela a été fait côté ASR
+   avec les deux backends de services/asr/local_server.py.
+
+2. Corpus ASR : research/zarma-assistant/data/asr_corpus — 864 clips,
+   27,7 min, 12 voix. **INUTILISABLE pour la synthèse** et il faut le
+   savoir d'emblée : données réparties sur 12 personnes (2 à 4 min
+   chacune) là où un TTS veut UNE voix ; 45 mots distincts seulement ;
+   uniquement des énoncés isolés dictés, donc aucune prosodie de phrase ;
+   conditions d'enregistrement variables. Il peut servir de référence
+   phonétique, pas de corpus d'entraînement.
+
+3. Application Android de collecte : entrainement/corpus_recorder
+   (Flutter). Elle affiche une consigne, enregistre au relâchement d'un
+   bouton, nomme le fichier d'après l'identifiant, produit un manifest
+   CSV et exporte un ZIP par locuteur. Elle est réutilisable pour cette
+   campagne, mais DOIT être modifiée (voir contraintes).
+
+4. packages/zarma_numbers : grammaire, générateur et lexique du zarma
+   numérique, validés par le locuteur natif. Source de vérité pour toute
+   forme numérique — ne jamais écrire une forme zarma à la main.
+
+
+CONTRAINTE TECHNIQUE LA PLUS IMPORTANTE
+
+**Tout le projet enregistre aujourd'hui en 16 kHz** — l'application de
+collecte comme la banque vocale existante. C'est la fréquence dont l'ASR
+a besoin, et c'est un PLAFOND DÉFINITIF pour la synthèse : les modèles
+TTS travaillent en 22,05 ou 24 kHz, et un corpus à 16 kHz donne une voix
+sourde et sans brillance, quel que soit le modèle et quelle que soit la
+quantité enregistrée.
+
+Avant la moindre séance d'enregistrement, modifier
+entrainement/corpus_recorder pour enregistrer en **24 kHz mono, 16 bits
+minimum** (vérifier ce que le matériel du téléphone permet réellement, et
+le mesurer sur un fichier produit — ne pas se fier au réglage demandé).
+
+Réenregistrer 60 minutes parce qu'on s'en est aperçu trop tard serait
+l'échec le plus coûteux possible de ce projet.
+
+
+LES AUTRES CONTRAINTES DE LA CAMPAGNE
+
+- **Une seule voix**, celle de l'utilisateur. Un TTS produit un timbre :
+  mélanger des locuteurs le rend impossible à apprendre.
+- **Conditions constantes** : même pièce, même micro, même distance. Une
+  voix change entre le matin et le soir ; un changement de timbre au
+  milieu du corpus s'entend plus qu'une erreur de modèle.
+- **Débit naturel, jamais sur-articulé.** C'est le réflexe qui gâche le
+  plus de corpus de synthèse : le modèle apprendrait à parler comme
+  quelqu'un qui dicte.
+- **Contrôle qualité plus strict que pour l'ASR** : aucune saturation,
+  bruit de fond faible, pas de souffle ni de plosives. Les seuils actuels
+  de l'application de collecte ont été calibrés pour l'ASR, qui tolère
+  beaucoup plus. Les revoir.
+- Volume visé : **30 à 60 minutes de parole effective**, soit environ 400
+  à 800 phrases de 4 à 5 secondes, réparties sur plusieurs séances.
+
+
+CE QU'IL FAUT PRODUIRE, DANS CET ORDRE
+
+1. **Choisir le modèle de base, et le VÉRIFIER.**
+   Options à évaluer : VITS / Piper (léger, embarquable), XTTS-v2
+   (few-shot, multilingue), MMS-TTS (Meta, annoncé pour 1100+ langues).
+
+   ⚠️ Piège déjà payé par ce projet : la documentation de MMS-ASR
+   annonçait le zarma (`dje`) comme supporté, alors que le vocabulaire du
+   checkpoint publié ne le contenait PAS. Vérifier dans les fichiers du
+   modèle, jamais dans la documentation.
+
+   Critère décisif au-delà de la qualité : le modèle final devra tourner
+   sur un téléphone d'entrée de gamme au Niger, ou à défaut sur un VPS à
+   4 vCPU sans GPU. Un modèle superbe mais trop lourd ne sert à rien.
+
+2. **Concevoir le script d'enregistrement.** C'est le livrable qui
+   engage le plus de travail humain, donc celui à ne pas rater.
+
+   Il lui faut une couverture phonétique réelle : tous les sons et
+   structures syllabiques du zarma, des phrases de longueurs variées, des
+   affirmations ET des questions (l'intonation montante ne s'apprend que
+   si elle est dans le corpus).
+
+   Attention : un script fait uniquement de nombres reproduirait le
+   défaut du corpus ASR — couverture phonétique très étroite. Il faut du
+   texte zarma ordinaire. Sources à explorer avec l'utilisateur : phrases
+   du quotidien, proverbes, textes existants en zarma.
+
+   Y inclure aussi le vocabulaire réel de l'application (nombres,
+   opérateurs, commandes de l'assistant, messages système), pour que ces
+   énoncés-là soient particulièrement bien rendus.
+
+   Le script doit être écrit ou validé par l'utilisateur : les phrases
+   doivent être naturelles en zarma, pas des traductions du français.
+
+3. **Adapter l'application de collecte** : fréquence, seuils qualité,
+   affichage de phrases longues, et reprise de séance (une campagne de
+   800 phrases se fait en plusieurs fois).
+
+4. **Le pipeline d'entraînement**, sur Colab (GPU T4 gratuit). Le Mac de
+   l'utilisateur est un M1 8 Go : suffisant pour préparer les données,
+   insuffisant pour entraîner. Prévoir la reprise après coupure de
+   session — les sessions gratuites s'interrompent sans préavis.
+
+5. **L'évaluation.** Objective (mesures) mais surtout SUBJECTIVE :
+   l'utilisateur écoute et juge. Prévoir des comparaisons A/B contre la
+   concaténation actuelle sur les mêmes phrases — c'est le seul étalon
+   qui compte, puisque c'est ce qu'il faut surpasser.
+
+6. **L'intégration**, sans casser l'existant : la concaténation reste le
+   chemin par défaut jusqu'à ce que le neuronal soit meilleur, prouvé.
+
+
+CE QU'IL NE FAUT PAS FAIRE
+
+- Ne pas entraîner sur le corpus ASR : mauvaise forme, mauvais volume,
+  12 voix mélangées.
+- Ne pas écrire de formes zarma à la main : passer par
+  packages/zarma_numbers pour tout ce qui est numérique.
+- Ne pas supprimer ni dégrader la synthèse par concaténation, qui est en
+  production.
+- Ne pas lancer d'enregistrement avant d'avoir vérifié, sur un fichier
+  réellement produit par l'application modifiée, que la fréquence
+  d'échantillonnage est bien celle attendue.
+
+
+PREMIÈRE ÉTAPE ATTENDUE
+
+Ne rien coder d'abord. Établir et faire valider par l'utilisateur :
+le modèle de base retenu et pourquoi (avec la preuve que le zarma est
+réellement faisable avec lui), la fréquence d'échantillonnage cible, et
+la structure du script d'enregistrement.
+
+C'est la campagne d'enregistrement qui coûte cher en temps humain — tout
+ce qui la précède doit être solide avant qu'elle commence.

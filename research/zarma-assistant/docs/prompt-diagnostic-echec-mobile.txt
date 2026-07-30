@@ -1,0 +1,151 @@
+Tu travailles dans le monorepo /Users/pc/project/zarma.
+
+SYMPTÔME
+
+Le modèle ASR maison vient d'être déployé en production. Le serveur passe
+tous ses tests, mais depuis l'application mobile RIEN n'est reconnu :
+l'utilisateur reçoit systématiquement le message « n'a pas pu identifier
+les nombres avec assez de précision » (décision `repeat`).
+
+L'utilisateur a essayé des énoncés qui sont DANS le corpus d'entraînement
+(par exemple 1000*3), avec SA PROPRE VOIX qui fait partie des 12 voix
+d'entraînement. Ça échoue quand même.
+
+CE QUI FONCTIONNE (vérifié sur le serveur)
+
+  zangou        exact   174 ms
+  afo           exact   183 ms
+  waranka       exact   301 ms
+  Expression 1  exacte  387 ms
+  Expression 2  exacte  404 ms
+  Expression 3  exacte  404 ms
+
+  Appel API HTTPS complet : recognized_number 1, decision accept,
+  model_version zarma_w2v2_modele
+
+Donc le modèle, le tokenizer, la grammaire et la chaîne HTTP fonctionnent
+sur des clips du corpus. La divergence est ailleurs.
+
+ARCHITECTURE
+
+  Application Flutter  ->  API ia.ptrniger.com/api/v1/recognize
+                       ->  service ASR /transcribe  ->  modèle wav2vec2
+
+  Modèle : /srv/zarma/modele (94 M paramètres, CTC caractère, 30 symboles)
+  Grammaire : calculator (accepte « nombre seul OU opération »)
+  Corpus : research/zarma-assistant/data/asr_corpus (864 clips, 12 voix)
+  Accès serveur : ssh root@5.189.181.244
+
+CE QUE J'AI DÉJÀ VÉRIFIÉ — ne pas refaire
+
+1. La grammaire `calculator` accepte bien les deux formes :
+   « zangou » OK, « zambar fo kalangaybor ihinza » OK,
+   « ihinka kanga itonton ihinza » OK. Un énoncé tronqué est refusé.
+
+2. L'encodeur du serveur est identique à celui de l'entraînement sur les
+   127 textes distincts du corpus (digrammes aa dd gg kk ll yy compris).
+
+3. Décodage de bout en bout sur logits synthétiques : 5/5 expressions
+   donnent la bonne valeur.
+
+4. DEUX DÉFAUTS RÉELS TROUVÉS, mais qui n'expliquent PAS un `repeat` :
+
+   a) `kanga`, `kan` et `ifaysor` sont absents de la table des variantes
+      linguistiques du lexique. Le signal `variant` de
+      services/api/app/pipeline/confidence.py tombe donc à 0,75 pour
+      « ihinka kanga itonton ihinza » et à 0,50 pour
+      « iwey kan ifaysor ihinka », au lieu de 1,00.
+
+   b) Même avec une reconnaissance PARFAITE (acoustic 0,99), une
+      expression n'atteint jamais le seuil d'acceptation :
+
+        nombre seul               score 0,950 -> ACCEPT
+        expression forme longue   score 0,868 -> CONFIRM
+        expression avec kanga     score 0,843 -> CONFIRM
+        expression kan ifaysor    score 0,818 -> CONFIRM
+
+      Le signal `margin` s'effondre (0,14) parce que les hypothèses du
+      décodeur ont des scores très proches. Les poids et seuils
+      (CONF_WEIGHT_*, POLICY_ACCEPT_THRESHOLD=0.80,
+      POLICY_CONFIRM_THRESHOLD=0.50) ont été calibrés pour Omnilingual,
+      dont la distribution de confiance est tout autre.
+
+   Ces deux défauts produisent CONFIRM, pas REPEAT.
+
+HYPOTHÈSE PRINCIPALE À TESTER EN PREMIER
+
+Un `repeat` exige un score composite sous 0,50. Avec grammatical=1 (0,30)
+et confusion=1 (0,10) déjà acquis, c'est presque impossible — SAUF si
+l'ASR renvoie un texte VIDE. Le décodeur s'abstient alors, `number` reste
+None, `grammatical` tombe à 0 et le score s'effondre à ~0,10.
+
+Donc : le modèle ne reconnaît probablement rien sur l'audio venant du
+téléphone, alors qu'il réussit sur les clips du corpus.
+
+Différences plausibles entre les deux audios, par ordre de suspicion :
+
+  - Traitement appliqué par le téléphone : réduction de bruit, contrôle
+    automatique de gain, annulation d'écho. Le corpus a été enregistré
+    par une autre application, sans ces traitements.
+  - Niveau sonore très différent (le modèle normalise par énoncé, mais un
+    signal saturé ou très faible reste dégradé).
+  - Durée : l'application enregistre tant que l'utilisateur parle, avec
+    du silence avant et après ; les clips du corpus font 1 à 3 s.
+  - Fréquence d'échantillonnage ou nombre de canaux inattendus.
+  - Le VAD du serveur (services/asr/app/vad.py) qui élaguerait trop.
+
+À FAIRE
+
+1. CAPTURER L'AUDIO RÉEL DU TÉLÉPHONE. C'est l'étape décisive : tout le
+   reste est spéculation tant qu'on ne l'a pas. Récupérer un WAV
+   exactement tel que l'application l'envoie (log serveur, interception,
+   ou sauvegarde temporaire côté API).
+
+2. Le comparer à un clip du corpus du MÊME locuteur et du MÊME énoncé :
+   durée, fréquence, canaux, niveau RMS, niveau crête, silence en tête et
+   en queue, spectre.
+
+3. Passer cet audio réel dans le modèle et regarder :
+   - les logits bruts et le décodage GLOUTON (sans contrainte) : le
+     modèle produit-il quelque chose de zarma, ou du vide ?
+   - puis le décodage contraint, et la confiance obtenue.
+   Le décodage glouton sépare « le modèle n'entend rien » de « le
+   décodeur rejette ».
+
+4. Rejouer le même audio après avoir neutralisé une différence à la fois
+   (normalisation du niveau, découpe des silences, rééchantillonnage)
+   pour isoler la cause.
+
+5. ÉVALUER LE MODÈLE SUR TOUT LE CORPUS, hors serveur, pour disposer
+   d'une référence chiffrée :
+
+   research/zarma-assistant/data/asr_corpus contient 864 clips étiquetés
+   (manifest.csv : fichier, voix, locuteur, etiquette, texte_zarma).
+   Le modèle est sur Google Drive et dans /srv/zarma/modele.
+
+   Mesurer le taux de valeur exacte par voix et par type d'énoncé
+   (nombre / expression), et lister les erreurs. Attention : ce modèle a
+   été entraîné sur TOUTES ces voix, donc ce chiffre sera optimiste — il
+   sert à détecter une panne, pas à estimer la qualité.
+
+6. Une fois la cause trouvée, corriger les deux défauts connus :
+   ajouter les formes longues d'opérateur à la table des variantes, et
+   recalibrer les seuils de décision sur la distribution de confiance du
+   NOUVEAU modèle (les valeurs actuelles viennent d'Omnilingual).
+
+CONTRAINTES
+
+- Ne rien modifier sur le serveur sans annoncer ce que tu changes :
+  c'est la production, elle sert de vrais utilisateurs.
+- Le modèle Omnilingual a été DÉSINSTALLÉ, il n'y a plus de repli
+  immédiat. L'archive du modèle maison est dans /root et sur Drive.
+- Ne pas toucher à REQUIRE_TRAINING_CONSENT ni RATE_LIMIT_RECOGNIZE.
+- torch et transformers ne sont pas installés sur le Mac (8 Go de RAM) :
+  toute inférence se fait sur le serveur ou sur Colab.
+
+CE QUE JE VEUX EN RETOUR
+
+La cause racine, démontrée par une mesure et non par un raisonnement.
+Puis la correction minimale qui rend l'application utilisable, en
+distinguant ce qui relève du modèle, du décodeur, de la politique de
+confiance, et de l'application mobile.
