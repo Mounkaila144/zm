@@ -37,10 +37,32 @@ le workspace uv racine :
     export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH
     asrenv/bin/python services/asr/local_server.py --port 8001
 
-⚠️ Le point d'inférence utilise des membres privés du pipeline `omnilingual_asr`
-(`_build_audio_wavform_pipeline`, `_create_batch_simple`) : l'API publique ne
-donne accès qu'au texte, jamais aux logits. C'est le **seul** endroit à adapter
-si le paquet change — exactement comme `main.py` côté Modal.
+Deux modèles interchangeables
+-----------------------------
+
+``--model-dir`` (ou ``ASR_MODEL_DIR``) charge le **modèle maison** : wav2vec2-base
+affiné sur le corpus zarma, 94 M de paramètres, CTC caractère sur 30 symboles.
+Sans cette option, le serveur charge Omnilingual comme auparavant.
+
+    # modèle maison
+    python services/asr/local_server.py --port 8001 --model-dir /srv/zarma/modele
+
+    # Omnilingual (repli)
+    python services/asr/local_server.py --port 8001
+
+Mesuré sur les 529 nombres du corpus, à décodeur contraint identique et sans
+qu'aucun des deux n'ait entendu la voix testée : **95,1 % de nombres exacts pour
+le modèle maison contre 66,2 % pour Omnilingual**, sur les 12 voix sans
+exception. Le modèle maison est aussi 3× plus léger et fonctionne hors-ligne.
+
+Le contrat HTTP ne change pas : seul le champ ``model_version`` des réponses
+indique lequel a répondu.
+
+⚠️ L'extraction des logits d'Omnilingual (`_omnilingual_logits`) utilise des
+membres privés du pipeline `omnilingual_asr` (`_build_audio_wavform_pipeline`,
+`_create_batch_simple`) : l'API publique ne donne accès qu'au texte. C'est le
+seul endroit à adapter si ce paquet change. Le modèle maison, lui, n'utilise que
+l'API publique de `transformers`.
 """
 
 from __future__ import annotations
@@ -55,6 +77,7 @@ import threading
 import time
 import wave
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from dataclasses import replace
 from pathlib import Path
 
 _APP_DIR = Path(__file__).resolve().parent
@@ -120,6 +143,109 @@ def _select_placement(requested: str) -> tuple[str, object]:
     return "cpu", torch.float32
 
 
+class Wav2Vec2Backend:
+    """Modèle **maison** : wav2vec2-base affiné sur le corpus zarma, CTC au
+    niveau caractère sur 30 symboles.
+
+    Il remplace Omnilingual (300 M paramètres, hébergé) par 94 M embarquables :
+    mesuré à 95,1 % de nombres exacts contre 66,2 %, sur les mêmes clips et avec
+    le même décodeur contraint.
+
+    Deux détails conditionnent la justesse et n'ont aucun signe extérieur s'ils
+    sont faux — le modèle produirait simplement du charabia :
+
+    - **L'encodeur doit être identique à celui de l'entraînement.** Les lettres
+      doublées (`aa`, `dd`, `gg`, `kk`, `ll`, `yy`) sont des symboles uniques,
+      pas deux caractères : sans cela le décodage CTC fusionne les répétitions
+      et `yaamo` devient `yamo`. La liste est lue dans `tokenizer.json`, écrit
+      par le script d'entraînement, jamais recopiée ici.
+    - **La normalisation de l'entrée doit être identique** : centrée réduite par
+      énoncé, comme pendant l'entraînement.
+    """
+
+    def __init__(self, model_dir: Path, *, device: str = "auto") -> None:
+        import torch
+        from transformers import Wav2Vec2ForCTC
+
+        meta = json.loads((model_dir / "tokenizer.json").read_text(encoding="utf-8"))
+        self._vocab: dict[str, int] = meta["vocab"]
+        self._digraphs = frozenset(meta["digraphs"])
+        self._space = meta.get("space_token", "|")
+        self.blank_id = int(meta.get("blank_id", 0))
+        self.name = f"zarma_w2v2_{model_dir.name}"
+
+        print(f"Chargement du modèle maison depuis {model_dir}…", flush=True)
+        started = time.perf_counter()
+        self._model = Wav2Vec2ForCTC.from_pretrained(str(model_dir))
+        self._device, self._dtype = _select_placement(device)
+        self._model.to(device=self._device, dtype=self._dtype).eval()
+        self._torch = torch
+        print(
+            f"  modèle prêt en {time.perf_counter() - started:.1f}s · "
+            f"{sum(p.numel() for p in self._model.parameters()) / 1e6:.0f} M paramètres · "
+            f"{len(self._vocab)} symboles · exécution {self._device}",
+            flush=True,
+        )
+
+    def encode(self, text: str) -> list[int]:
+        """Texte -> identifiants, en respectant les digrammes."""
+        text = text.replace(" ", self._space)
+        unknown = self._vocab["<unk>"]
+        out: list[int] = []
+        index = 0
+        while index < len(text):
+            pair = text[index : index + 2]
+            if pair in self._digraphs:
+                out.append(self._vocab.get(pair, unknown))
+                index += 2
+            else:
+                out.append(self._vocab.get(text[index], unknown))
+                index += 1
+        return out
+
+    def logits(self, samples: np.ndarray, sample_rate: int) -> np.ndarray:
+        torch = self._torch
+        audio = torch.from_numpy(np.asarray(samples, dtype="float32"))
+        audio = (audio - audio.mean()) / (audio.std() + 1e-7)
+        with torch.inference_mode():
+            out = self._model(
+                input_values=audio.unsqueeze(0).to(device=self._device, dtype=self._dtype)
+            ).logits
+        return out[0].detach().float().cpu().numpy()
+
+
+class OmnilingualBackend:
+    """Modèle Meta `omniASR_CTC_300M_v2` — le chemin historique, conservé comme
+    repli. L'API publique du paquet ne donne accès qu'au texte : obtenir les
+    logits impose de passer par des membres privés du pipeline."""
+
+    name = CTC_MODEL
+
+    def __init__(self, *, device: str = "auto") -> None:
+        from omnilingual_asr.models.inference.pipeline import ASRInferencePipeline
+
+        print(f"Chargement du modèle {CTC_MODEL}…", flush=True)
+        started = time.perf_counter()
+        self._pipeline = ASRInferencePipeline(model_card=CTC_MODEL)
+        self._device, self._dtype = _select_placement(device)
+        self._pipeline.model.to(device=self._device, dtype=self._dtype)
+        print(
+            f"  modèle prêt en {time.perf_counter() - started:.1f}s "
+            f"· exécution {self._device}/{str(self._dtype).replace('torch.', '')}",
+            flush=True,
+        )
+        encoder = self._pipeline.tokenizer.create_encoder()
+        self._encoder = encoder
+
+    def encode(self, text: str) -> list[int]:
+        ids = self._encoder(text)
+        ids = ids.tolist() if hasattr(ids, "tolist") else list(ids)
+        return [int(i) for i in ids if int(i) > _MIN_REAL_TOKEN_ID]
+
+    def logits(self, samples: np.ndarray, sample_rate: int) -> np.ndarray:
+        return _omnilingual_logits(self, samples, sample_rate)
+
+
 class LocalAsr:
     """Modèle chargé une fois, décodeur compilé une fois."""
 
@@ -128,11 +254,11 @@ class LocalAsr:
         *,
         grammar_kind: str,
         config: DecoderConfig,
+        model_dir: Path | None = None,
         device: str = "auto",
         threads: int | None = None,
     ) -> None:
         import torch
-        from omnilingual_asr.models.inference.pipeline import ASRInferencePipeline
 
         if threads is not None:
             # Réglé dans le processus, et pas seulement via OMP_NUM_THREADS :
@@ -149,27 +275,21 @@ class LocalAsr:
             except RuntimeError:
                 pass  # déjà fixé (appel après la première opération parallèle)
 
-        print(f"Chargement du modèle {CTC_MODEL}…", flush=True)
-        started = time.perf_counter()
-        self._pipeline = ASRInferencePipeline(model_card=CTC_MODEL)
-
-        self._device, self._dtype = _select_placement(device)
-        self._pipeline.model.to(device=self._device, dtype=self._dtype)
-        print(
-            f"  modèle prêt en {time.perf_counter() - started:.1f}s "
-            f"· exécution {self._device}/{str(self._dtype).replace('torch.', '')}",
-            flush=True,
+        self._backend = (
+            Wav2Vec2Backend(model_dir, device=device)
+            if model_dir is not None
+            else OmnilingualBackend(device=device)
         )
+        # Le blank du décodeur suit celui du modèle : une valeur figée ici
+        # rendrait les logits illisibles sans aucun message d'erreur.
+        blank_id = getattr(self._backend, "blank_id", config.blank_id)
+        if blank_id != config.blank_id:
+            config = replace(config, blank_id=blank_id)
 
         from zarma_numbers.grammar import load_expression_grammar, load_grammar
 
         grammar = load_expression_grammar() if grammar_kind == "expressions" else load_grammar()
-        encoder = self._pipeline.tokenizer.create_encoder()
-
-        def encode(text: str) -> list[int]:
-            ids = encoder(text)
-            ids = ids.tolist() if hasattr(ids, "tolist") else list(ids)
-            return [int(i) for i in ids if int(i) > _MIN_REAL_TOKEN_ID]
+        encode = self._backend.encode
 
         separator = self._detect_separator(encode)
         lexicon = build_token_lexicon(
@@ -212,38 +332,48 @@ class LocalAsr:
             return tuple(together[len(left) : len(together) - len(right)])
         return ()
 
+    @property
+    def model_name(self) -> str:
+        """Identifiant du modèle chargé, tel qu'exposé dans les réponses."""
+        return self._backend.name
+
     def _logits(self, samples: np.ndarray, sample_rate: int) -> np.ndarray:
         """Logits CTC ``(T, V)`` — ils ne quittent jamais ce processus."""
-        import torch
-        from fairseq2.data.data_pipeline import DataPipeline, read_sequence
-        from fairseq2.nn.batch_layout import BatchLayout
+        return self._backend.logits(samples, sample_rate)
 
-        builder = DataPipeline.zip(
-            [
-                self._pipeline._build_audio_wavform_pipeline(  # noqa: SLF001
-                    [{"waveform": samples, "sample_rate": sample_rate}]
-                ).and_return(),
-                read_sequence([None]).and_return(),
-            ]
-        )
-        batch = next(
-            iter(
-                builder.bucket(1).map(self._pipeline._create_batch_simple).and_return()
-            )  # noqa: SLF001
-        )
-        # L'entrée doit suivre le modèle : la convertir aussi, sinon PyTorch
-        # refuse le mélange de types (et, laissée en bfloat16, elle ramènerait
-        # toute l'inférence au chemin émulé qu'on cherche justement à éviter).
-        seqs = batch.source_seqs.to(device=self._device, dtype=self._dtype)
-        layout = BatchLayout(
-            seqs.shape,
-            seq_lens=batch.source_seq_lens,
-            device=seqs.device,
-        )
-        with torch.inference_mode():
-            logits, out_layout = self._pipeline.model(seqs, layout)
-        length = int(list(out_layout.seq_lens)[0])
-        return logits[0, :length].detach().float().cpu().numpy()
+
+def _omnilingual_logits(backend, samples: np.ndarray, sample_rate: int) -> np.ndarray:
+    """Logits d'Omnilingual, obtenus via les membres privés du pipeline.
+
+    Isolé dans une fonction plutôt que dans la méthode du backend : c'est le
+    seul endroit du projet qui dépende de l'API interne de `omnilingual_asr`,
+    et donc le seul à revoir si le paquet change.
+    """
+    import torch
+    from fairseq2.data.data_pipeline import DataPipeline, read_sequence
+    from fairseq2.nn.batch_layout import BatchLayout
+
+    pipeline = backend._pipeline  # noqa: SLF001
+    builder = DataPipeline.zip(
+        [
+            pipeline._build_audio_wavform_pipeline(  # noqa: SLF001
+                [{"waveform": samples, "sample_rate": sample_rate}]
+            ).and_return(),
+            read_sequence([None]).and_return(),
+        ]
+    )
+    batch = next(
+        iter(builder.bucket(1).map(pipeline._create_batch_simple).and_return())  # noqa: SLF001
+    )
+    # L'entrée doit suivre le modèle : la convertir aussi, sinon PyTorch refuse
+    # le mélange de types (et, laissée en bfloat16, elle ramènerait toute
+    # l'inférence au chemin émulé qu'on cherche justement à éviter).
+    seqs = batch.source_seqs.to(device=backend._device, dtype=backend._dtype)  # noqa: SLF001
+    layout = BatchLayout(seqs.shape, seq_lens=batch.source_seq_lens, device=seqs.device)
+    with torch.inference_mode():
+        logits, out_layout = pipeline.model(seqs, layout)
+    length = int(list(out_layout.seq_lens)[0])
+    return logits[0, :length].detach().float().cpu().numpy()
 
     def transcribe(self, wav_bytes: bytes) -> dict[str, object]:
         started = time.perf_counter()
@@ -270,7 +400,7 @@ class LocalAsr:
                     latency_ms=0,
                     reject_threshold=self._decoder.config.reject_threshold,
                 ),
-                model_version=CTC_MODEL,
+                model_version=self.model_name,
                 latency_ms=latency_ms,
             )
             print(
@@ -291,7 +421,9 @@ class LocalAsr:
         decode_ms = int((time.perf_counter() - mark) * 1000)
 
         latency_ms = int((time.perf_counter() - started) * 1000)
-        payload = build_transcribe_payload(result, model_version=CTC_MODEL, latency_ms=latency_ms)
+        payload = build_transcribe_payload(
+            result, model_version=self.model_name, latency_ms=latency_ms
+        )
         trimmed_note = (
             f" · élagué {trimmed.trimmed_seconds:.1f}s" if trimmed.trimmed_seconds > 0.05 else ""
         )
@@ -338,7 +470,7 @@ def _make_handler(
 
         def do_GET(self) -> None:  # noqa: N802 - imposé par BaseHTTPRequestHandler
             if self.path.rstrip("/") in ("", "/health"):
-                self._send(200, {"status": "ok", "model": CTC_MODEL})
+                self._send(200, {"status": "ok", "model": asr.model_name})
             else:
                 self._send(404, {"error": "not_found"})
 
@@ -391,6 +523,15 @@ def main(argv: list[str] | None = None) -> int:
         help="Langue contrainte (défaut : expressions, pour la calculatrice vocale).",
     )
     parser.add_argument(
+        "--model-dir",
+        type=Path,
+        default=os.environ.get("ASR_MODEL_DIR") or None,
+        help=(
+            "Dossier du modèle maison (poids HuggingFace + tokenizer.json). "
+            "Sans cette option, le serveur charge Omnilingual comme avant."
+        ),
+    )
+    parser.add_argument(
         "--device",
         choices=("auto", "mps", "cpu"),
         default="auto",
@@ -435,6 +576,7 @@ def main(argv: list[str] | None = None) -> int:
 
     asr = LocalAsr(
         grammar_kind=args.grammar,
+        model_dir=Path(args.model_dir) if args.model_dir else None,
         device=args.device,
         threads=args.threads,
         config=DecoderConfig(
