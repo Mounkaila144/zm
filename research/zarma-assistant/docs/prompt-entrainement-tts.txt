@@ -1,0 +1,206 @@
+Tu travailles dans le monorepo /Users/pc/project/zarma.
+
+OBJECTIF
+
+Entraîner une synthèse vocale (TTS) neuronale en zarma, sur la voix d'un
+locuteur unique, spécialisée dans la prononciation des nombres et des
+opérations arithmétiques.
+
+Elle remplacera — si et seulement si elle fait mieux — la synthèse par
+concaténation actuellement en production.
+
+
+================================================================
+LE CORPUS : IL EST ENREGISTRÉ, MESURÉ, ET PRÊT
+================================================================
+
+  /Users/pc/Music/zarma_tts/miunkaila-n3hh/
+      wavs/           400 fichiers WAV
+      metadata.csv    format LJSpeech : <fichier>|<texte>
+      manifest.csv    métadonnées riches par prise
+
+Intégrité vérifiée, rien à corriger :
+
+  400 consignes prévues, 400 enregistrées, aucune manquante
+  0 texte divergent du plan d'enregistrement
+  0 fichier déclaré absent, 0 fichier orphelin
+  metadata.csv bien formé, 400 lignes, 2 colonnes
+
+Mesures :
+
+  durée totale         22,0 min
+  parole utile         16,3 min   (hors silences de bord)
+  fréquence            24 000 Hz, mono, 16 bits — uniforme
+  clips saturés        0
+  décalage DC          négligeable (max 0,00044)
+  vocabulaire          41 mots distincts
+
+  RMS médian           0,055   (min 0,019 · max 0,084)
+  crête médiane        0,336   (max 0,538 — beaucoup de marge)
+  rapport signal/bruit 26 dB médian  (min 12 · max 33)
+  silence en tête      0,52 s médian (max 1,14)
+  silence en queue     0,39 s médian (max 0,97)
+
+⚠️ Le champ `qualite` du manifest vaut « douteux » sur les 400 prises.
+   C'est un artefact : les seuils de l'application de collecte ont été
+   calibrés pour la reconnaissance vocale, dont les clips sont bien plus
+   courts. Ne pas en tenir compte, se fier aux mesures ci-dessus.
+
+
+================================================================
+CE QU'IL FAUT SAVOIR AVANT DE COMMENCER
+================================================================
+
+1. LE RAPPORT SIGNAL/BRUIT EST DE 26 dB, EN DESSOUS DE L'IDÉAL (35-40).
+
+   Décision prise en connaissance de cause : on entraîne avec ce corpus
+   plutôt que de refaire une séance. Le bruit est faible, constant et
+   décorrélé de la parole — c'est le cas favorable. Conséquence attendue
+   à annoncer honnêtement : un léger fond constant dans la voix
+   synthétisée, probablement imperceptible sur un haut-parleur de
+   téléphone en usage réel.
+
+   Ne pas tenter de compenser par un gain : amplifier monte le bruit
+   d'autant, le rapport ne change pas.
+
+2. NE PAS DÉBRUITER. C'est la règle en synthèse : un débruiteur remplace
+   le bruit par des artefacts CORRÉLÉS à la parole (bruit musical, trous
+   spectraux). Le modèle les apprendrait comme faisant partie de la voix
+   et les reproduirait dans chaque énoncé. Un bruit de fond constant est
+   moins nuisible, parce que le modèle peut l'ignorer.
+
+   Contraste utile avec l'ASR du même projet, où l'on AJOUTE du bruit à
+   l'entraînement : la reconnaissance y gagne en robustesse, la synthèse
+   n'y gagne rien.
+
+3. ÉLAGUER LES SILENCES DE BORD, VERS UNE MARGE CONSTANTE.
+
+   Le modèle reproduit ce qu'il entend, silences compris : si chaque
+   exemple commence par 0,5 s de silence, la voix synthétisée le fera
+   aussi, à chaque énoncé.
+
+   Ramener tous les clips à 50-100 ms de part et d'autre. C'est
+   l'UNIFORMITÉ qui compte, pas la brièveté. Ne pas élaguer
+   agressivement : rogner un début ou une fin de mot est bien pire, et
+   c'est déjà la principale cause d'erreur du corpus ASR de ce projet.
+
+   `services/asr/app/vad.py` fait exactement cela (détection par niveau,
+   bords uniquement, marge paramétrable). À réutiliser plutôt qu'à
+   réécrire.
+
+4. LE VOCABULAIRE EST FERMÉ — 41 MOTS.
+
+   C'est ce qui rend 16 minutes suffisantes là où une synthèse générale
+   en demanderait 30 à 60. Le corpus a été construit pour la COUVERTURE :
+   chaque mot y apparaît au moins 4 fois, dans les quatre positions
+   (seul, début, milieu, fin) et à travers 263 jonctions entre mots
+   différentes. Ce n'est pas un tirage au hasard.
+
+   Corollaire : le modèle ne saura dire QUE ces 41 mots. C'est voulu.
+
+5. LES OPÉRATEURS SONT EN FORME LONGUE.
+
+       +  kanga itonton      *  kalangaybor
+       -  kanga izabou       /  kan ifaysor
+
+   C'est ce que les locuteurs disent réellement, donc ce que
+   l'application doit prononcer quand elle répète ce qu'elle a compris.
+   L'API émet déjà le champ `expression.spoken_text` avec ces formes.
+
+
+================================================================
+CE QUI EST ATTENDU
+================================================================
+
+1. CHOISIR LE MODÈLE DE BASE, ET LE VÉRIFIER.
+
+   Pistes : VITS / Piper (léger, embarquable), XTTS-v2 (few-shot),
+   MMS-TTS (Meta). Sur un vocabulaire fermé de 41 mots et 16 minutes,
+   un entraînement VITS depuis zéro est envisageable ; un affinage
+   depuis un modèle multilingue l'est aussi.
+
+   ⚠️ PIÈGE DÉJÀ PAYÉ PAR CE PROJET : la documentation de MMS-ASR
+   annonçait le zarma (`dje`) comme supporté, alors que le vocabulaire du
+   checkpoint publié ne le contenait PAS. Vérifier dans les fichiers du
+   modèle, jamais dans la documentation.
+
+   Critère au-delà de la qualité : la cible finale est un téléphone
+   d'entrée de gamme au Niger, ou à défaut un VPS à 4 vCPU sans GPU.
+   Un modèle superbe mais trop lourd ne sert à rien.
+
+2. LA CHAÎNE DE PRÉPARATION : élagage des silences, vérification du
+   format, découpe train/validation. Attention au découpage : avec 41
+   mots, une validation tirée au hasard peut priver l'entraînement de la
+   seule occurrence d'une jonction rare. Vérifier la couverture des deux
+   côtés.
+
+3. L'ENTRAÎNEMENT sur Colab (GPU T4 gratuit). Le Mac de l'utilisateur est
+   un M1 8 Go : suffisant pour préparer les données, insuffisant pour
+   entraîner. Prévoir la reprise après coupure — les sessions gratuites
+   s'interrompent sans préavis, ce projet en a déjà perdu plusieurs.
+
+4. L'ÉVALUATION, en deux temps.
+
+   Objective d'abord, et le domaine fermé offre ici un luxe rare :
+   générer quelques centaines de nombres avec `packages/zarma_numbers`,
+   les faire prononcer, et vérifier. Si le modèle reste juste sur des
+   nombres jamais entendus à l'entraînement, il est sûr — garantie
+   impossible à obtenir pour une synthèse générale.
+
+   Subjective ensuite, et c'est elle qui tranche : l'utilisateur est
+   locuteur natif zarma, son jugement fait autorité. Prévoir des
+   comparaisons A/B contre la synthèse par concaténation sur les MÊMES
+   phrases.
+
+5. L'INTÉGRATION, sans casser l'existant.
+
+
+================================================================
+L'EXISTANT À NE PAS CASSER
+================================================================
+
+La synthèse par concaténation est EN PRODUCTION et fonctionne :
+apps/mobile/assets/voice/ — 40 mots isolés + 3 phrases entières.
+
+C'est un adversaire sérieux : ce sont de vrais enregistrements humains,
+parfaitement intelligibles, et incapables par construction de prononcer
+un nombre pour un autre. Sur une application qui manipule de l'argent,
+auprès d'utilisateurs qui ne vérifient qu'à l'oreille, cette garantie
+compte.
+
+Le modèle neuronal ne doit être adopté que s'il fait MIEUX, jugé à
+l'oreille. Prévoir un repli, comme cela a été fait côté ASR avec les deux
+backends de services/asr/local_server.py.
+
+Piste d'architecture : le gain de fluidité est nul sur les résultats d'un
+seul mot (9 % des énoncés), où la concaténation joue un enregistrement
+réel donc parfait. Un système hybride — concaténation pour un mot,
+neuronal au-delà — donnerait le meilleur des deux.
+
+
+================================================================
+CE QU'IL NE FAUT PAS FAIRE
+================================================================
+
+- Aucun débruitage, aucune normalisation agressive, aucun réencodage.
+- Ne pas élaguer les silences intérieurs, seulement les bords.
+- Ne pas écrire de forme zarma à la main : tout passe par
+  packages/zarma_numbers.
+- Ne pas dégrader ni supprimer la synthèse par concaténation.
+- Ne pas entraîner sur le corpus ASR (research/zarma-assistant/data/
+  asr_corpus) : 12 voix mélangées, mauvaise forme pour une synthèse.
+
+
+================================================================
+PREMIÈRE ÉTAPE ATTENDUE
+================================================================
+
+Ne rien lancer d'abord. Établir et faire valider :
+
+  - le modèle de base retenu, avec la preuve que le zarma est réellement
+    faisable avec lui (fichiers du checkpoint, pas documentation) ;
+  - la chaîne de préparation, avec un échantillon avant/après à écouter ;
+  - le protocole d'évaluation, y compris les phrases de l'A/B.
+
+Documentation de référence :
+research/zarma-assistant/docs/corpus-synthese-vocale.md
